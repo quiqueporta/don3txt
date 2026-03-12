@@ -3,9 +3,15 @@ import 'package:provider/provider.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/ui/widgets/task_tile.dart';
 import 'package:don3txt/ui/widgets/add_task_field.dart';
+import 'package:don3txt/ui/widgets/sidebar_drawer.dart';
 
 class TaskListScreen extends StatelessWidget {
   const TaskListScreen({super.key});
+
+  static const _filterTitles = {
+    TaskFilter.inbox: 'Inbox',
+    TaskFilter.today: 'Today',
+  };
 
   void _showAddTaskSheet(BuildContext context) {
     final notifier = context.read<TodoListNotifier>();
@@ -14,8 +20,8 @@ class TaskListScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       builder: (_) => AddTaskField(
-        onSubmit: (text) {
-          notifier.addTask(text);
+        onSubmit: (text, {dueDate}) {
+          notifier.addTask(text, dueDate: dueDate);
           Navigator.of(context).pop();
         },
       ),
@@ -28,8 +34,9 @@ class TaskListScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inbox'),
+        title: Text(_filterTitles[notifier.activeFilter]!),
       ),
+      drawer: const SidebarDrawer(),
       body: _buildBody(notifier),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddTaskSheet(context),
@@ -43,9 +50,9 @@ class TaskListScreen extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final pending = notifier.todoFile!.pendingTasks;
+    final tasks = notifier.filteredTasks;
 
-    if (pending.isEmpty) {
+    if (tasks.isEmpty) {
       return Center(
         child: Text(
           'No pending tasks',
@@ -59,9 +66,9 @@ class TaskListScreen extends StatelessWidget {
 
     return ListView.builder(
       padding: const EdgeInsets.only(top: 8),
-      itemCount: pending.length,
+      itemCount: tasks.length,
       itemBuilder: (context, index) {
-        final item = pending[index];
+        final item = tasks[index];
         final originalIndex = notifier.todoFile!.items.indexOf(item);
 
         return TaskTile(

@@ -9,13 +9,35 @@ class TodoFile {
   List<TodoItem> get pendingTasks =>
       items.where((item) => !item.isCompleted).toList();
 
-  TodoFile addTask(String description) {
+  List<TodoItem> todayTasks(DateTime today) {
+    final todayString =
+        '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+
+    return items
+        .where((item) => !item.isCompleted && item.metadata['due'] == todayString)
+        .toList();
+  }
+
+  TodoFile addTask(String description, {DateTime? dueDate}) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
+    final parsed = parseLine(description);
+    final metadata = Map<String, String>.from(parsed?.metadata ?? {});
+
+    if (dueDate != null) {
+      final y = dueDate.year.toString().padLeft(4, '0');
+      final m = dueDate.month.toString().padLeft(2, '0');
+      final d = dueDate.day.toString().padLeft(2, '0');
+      metadata['due'] = '$y-$m-$d';
+    }
+
     final newItem = TodoItem(
-      description: description,
+      description: parsed?.description ?? description,
       creationDate: today,
+      projects: parsed?.projects ?? [],
+      contexts: parsed?.contexts ?? [],
+      metadata: metadata,
     );
 
     return TodoFile([...items, newItem]);

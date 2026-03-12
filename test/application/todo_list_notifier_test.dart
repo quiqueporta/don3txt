@@ -70,6 +70,16 @@ void main() {
       expect(reloaded.items.length, 1);
     });
 
+    test('addTask with dueDate persists metadata', () async {
+      await notifier.loadTasks();
+      await notifier.addTask('Buy milk', dueDate: DateTime(2026, 3, 20));
+
+      expect(notifier.todoFile!.items[0].metadata['due'], '2026-03-20');
+
+      final reloaded = await repository.load();
+      expect(reloaded.items[0].metadata['due'], '2026-03-20');
+    });
+
     test('addTask does nothing for empty string', () async {
       await notifier.loadTasks();
       await notifier.addTask('');
@@ -118,6 +128,75 @@ void main() {
       await notifier.addTask('Task 1');
 
       expect(notifyCount, greaterThanOrEqualTo(2));
+    });
+
+    group('activeFilter', () {
+      test('defaults to inbox', () {
+        expect(notifier.activeFilter, TaskFilter.inbox);
+      });
+
+      test('can be changed to today', () {
+        notifier.activeFilter = TaskFilter.today;
+
+        expect(notifier.activeFilter, TaskFilter.today);
+      });
+
+      test('notifies listeners when changed', () {
+        var notified = false;
+        notifier.addListener(() => notified = true);
+
+        notifier.activeFilter = TaskFilter.today;
+
+        expect(notified, true);
+      });
+
+      test('does not notify when set to same value', () {
+        var notifyCount = 0;
+        notifier.addListener(() => notifyCount++);
+
+        notifier.activeFilter = TaskFilter.inbox;
+
+        expect(notifyCount, 0);
+      });
+    });
+
+    group('filteredTasks', () {
+      test('returns pendingTasks when filter is inbox', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task 1'),
+            TodoItem(description: 'Task 2', metadata: {'due': '2026-03-12'}),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 2);
+      });
+
+      test('returns todayTasks when filter is today', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'No due'),
+            TodoItem(description: 'Due today', metadata: {'due': '2026-03-12'}),
+            TodoItem(description: 'Due tomorrow', metadata: {'due': '2026-03-13'}),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.today;
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Due today');
+      });
+
+      test('returns empty when no file loaded', () {
+        expect(notifier.filteredTasks, isEmpty);
+      });
     });
   });
 }

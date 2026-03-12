@@ -1,16 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:don3txt/domain/start_of_week.dart';
+import 'package:don3txt/infrastructure/settings_repository.dart';
+import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/ui/widgets/add_task_field.dart';
+
+class InMemorySettingsRepository implements SettingsRepository {
+  StartOfWeek _stored;
+
+  InMemorySettingsRepository([this._stored = StartOfWeek.monday]);
+
+  @override
+  Future<StartOfWeek> loadStartOfWeek() async => _stored;
+
+  @override
+  Future<void> saveStartOfWeek(StartOfWeek value) async {
+    _stored = value;
+  }
+}
+
+Widget buildTestApp({
+  required void Function(String text, {DateTime? dueDate}) onSubmit,
+  SettingsNotifier? settingsNotifier,
+}) {
+  settingsNotifier ??= SettingsNotifier(InMemorySettingsRepository());
+
+  return ChangeNotifierProvider.value(
+    value: settingsNotifier,
+    child: MaterialApp(
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('es'), Locale('en')],
+      home: Scaffold(
+        body: AddTaskField(onSubmit: onSubmit),
+      ),
+    ),
+  );
+}
+
+Future<void> confirmDatePicker(WidgetTester tester) async {
+  final okButton = find.byWidgetPredicate(
+    (widget) => widget is TextButton,
+  );
+  await tester.tap(okButton.last);
+}
 
 void main() {
   group('AddTaskField', () {
     testWidgets('renders text field', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AddTaskField(onSubmit: (_) {}),
-          ),
-        ),
+        buildTestApp(onSubmit: (_, {dueDate}) {}),
       );
 
       expect(find.byType(TextField), findsOneWidget);
@@ -20,11 +64,7 @@ void main() {
       String? submitted;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AddTaskField(onSubmit: (text) => submitted = text),
-          ),
-        ),
+        buildTestApp(onSubmit: (text, {dueDate}) => submitted = text),
       );
 
       await tester.enterText(find.byType(TextField), 'Buy milk');
@@ -36,11 +76,7 @@ void main() {
 
     testWidgets('clears field after submit', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AddTaskField(onSubmit: (_) {}),
-          ),
-        ),
+        buildTestApp(onSubmit: (_, {dueDate}) {}),
       );
 
       await tester.enterText(find.byType(TextField), 'Buy milk');
@@ -49,6 +85,130 @@ void main() {
 
       final textField = tester.widget<TextField>(find.byType(TextField));
       expect(textField.controller!.text, isEmpty);
+    });
+
+    testWidgets('has calendar icon button', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate}) {}),
+      );
+
+      expect(find.byIcon(Icons.calendar_today), findsOneWidget);
+    });
+
+    testWidgets('shows date chip after selecting date', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate}) {}),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.calendar_today));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DatePickerDialog), findsOneWidget);
+
+      await confirmDatePicker(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Chip), findsOneWidget);
+    });
+
+    testWidgets('can clear selected date', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate}) {}),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.calendar_today));
+      await tester.pumpAndSettle();
+      await confirmDatePicker(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Chip), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Chip), findsNothing);
+    });
+
+    testWidgets('onSubmit receives dueDate when date is selected', (tester) async {
+      DateTime? receivedDate;
+
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (text, {dueDate}) => receivedDate = dueDate),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.calendar_today));
+      await tester.pumpAndSettle();
+      await confirmDatePicker(tester);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Buy milk');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(receivedDate, isNotNull);
+    });
+
+    testWidgets('clears date after submit', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate}) {}),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.calendar_today));
+      await tester.pumpAndSettle();
+      await confirmDatePicker(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Chip), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), 'Buy milk');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Chip), findsNothing);
+    });
+
+    testWidgets('DatePicker uses monday locale when startOfWeek is monday', (tester) async {
+      final settings = SettingsNotifier(InMemorySettingsRepository());
+      await settings.load();
+
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate}) {}, settingsNotifier: settings),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.calendar_today));
+      await tester.pumpAndSettle();
+
+      final localizations = MaterialLocalizations.of(
+        tester.element(find.byType(DatePickerDialog)),
+      );
+
+      expect(localizations.firstDayOfWeekIndex, 1);
+    });
+
+    testWidgets('DatePicker uses sunday locale when startOfWeek is sunday', (tester) async {
+      final settings = SettingsNotifier(
+        InMemorySettingsRepository(StartOfWeek.sunday),
+      );
+      await settings.load();
+
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate}) {}, settingsNotifier: settings),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.calendar_today));
+      await tester.pumpAndSettle();
+
+      final localizations = MaterialLocalizations.of(
+        tester.element(find.byType(DatePickerDialog)),
+      );
+
+      expect(localizations.firstDayOfWeekIndex, 0);
     });
   });
 }

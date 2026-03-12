@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
-import 'package:don3txt/application/todo_list_notifier.dart';
+import 'package:don3txt/application/todo_list_notifier.dart' show TodoListNotifier, TaskFilter;
 import 'package:don3txt/ui/screens/task_list_screen.dart';
 
 class InMemoryTodoRepository implements TodoRepository {
@@ -104,6 +104,48 @@ void main() {
       await tester.pump();
 
       expect(find.text('Inbox'), findsOneWidget);
+    });
+
+    testWidgets('shows Today title when filter is today', (tester) async {
+      final notifier = TodoListNotifier(InMemoryTodoRepository());
+      await notifier.loadTasks();
+      notifier.activeFilter = TaskFilter.today;
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.pump();
+
+      expect(find.text('Today'), findsOneWidget);
+    });
+
+    testWidgets('has a drawer', (tester) async {
+      final notifier = TodoListNotifier(InMemoryTodoRepository());
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.pump();
+
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Drawer), findsOneWidget);
+    });
+
+    testWidgets('shows only today tasks when filter is today', (tester) async {
+      final repo = InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'No due'),
+          TodoItem(description: 'Due today', metadata: {'due': '2026-03-12'}),
+        ]),
+      );
+      final notifier = TodoListNotifier(repo);
+      await notifier.loadTasks();
+      notifier.activeFilter = TaskFilter.today;
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.pump();
+
+      expect(find.text('Due today'), findsOneWidget);
+      expect(find.text('No due'), findsNothing);
     });
   });
 }

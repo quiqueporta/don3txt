@@ -47,6 +47,37 @@ void main() {
       expect(updated.items[1].description, 'Task 2');
     });
 
+    test('addTask parses metadata from description', () {
+      final file = TodoFile([]);
+
+      final updated = file.addTask('Entregar informe +Trabajo @oficina due:2026-03-15');
+
+      expect(updated.items[0].description, 'Entregar informe');
+      expect(updated.items[0].projects, ['+Trabajo']);
+      expect(updated.items[0].contexts, ['@oficina']);
+      expect(updated.items[0].metadata['due'], '2026-03-15');
+    });
+
+    test('addTask with dueDate sets due metadata', () {
+      final file = TodoFile([]);
+
+      final updated = file.addTask('Buy milk', dueDate: DateTime(2026, 3, 20));
+
+      expect(updated.items[0].description, 'Buy milk');
+      expect(updated.items[0].metadata['due'], '2026-03-20');
+    });
+
+    test('addTask with dueDate overrides due in description', () {
+      final file = TodoFile([]);
+
+      final updated = file.addTask(
+        'Buy milk due:2026-01-01',
+        dueDate: DateTime(2026, 3, 20),
+      );
+
+      expect(updated.items[0].metadata['due'], '2026-03-20');
+    });
+
     test('completeTask marks item as completed with today date', () {
       final file = TodoFile([
         TodoItem(description: 'Task 1'),
@@ -93,6 +124,51 @@ void main() {
       final file = TodoFile([]);
 
       expect(file.serialize(), '');
+    });
+
+    group('todayTasks', () {
+      final today = DateTime(2026, 3, 12);
+
+      test('returns pending tasks with due date equal to today', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task due today', metadata: {'due': '2026-03-12'}),
+          TodoItem(description: 'Task no due'),
+        ]);
+
+        final result = file.todayTasks(today);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Task due today');
+      });
+
+      test('excludes completed tasks', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Done today',
+            isCompleted: true,
+            metadata: {'due': '2026-03-12'},
+          ),
+        ]);
+
+        expect(file.todayTasks(today), isEmpty);
+      });
+
+      test('excludes tasks without due date', () {
+        final file = TodoFile([
+          TodoItem(description: 'No due'),
+        ]);
+
+        expect(file.todayTasks(today), isEmpty);
+      });
+
+      test('excludes tasks with different due date', () {
+        final file = TodoFile([
+          TodoItem(description: 'Tomorrow', metadata: {'due': '2026-03-13'}),
+          TodoItem(description: 'Yesterday', metadata: {'due': '2026-03-11'}),
+        ]);
+
+        expect(file.todayTasks(today), isEmpty);
+      });
     });
   });
 }
