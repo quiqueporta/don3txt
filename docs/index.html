@@ -12,16 +12,21 @@
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #ffffff;
-      color: #1a1a1a;
+      background: #0d0d0d;
+      color: #e0e0e0;
       line-height: 1.6;
     }
 
     .hero {
       max-width: 640px;
       margin: 0 auto;
-      padding: 80px 24px 60px;
+      padding: 60px 24px 48px;
       text-align: center;
+    }
+
+    .hero .logo {
+      width: 320px;
+      margin-bottom: 24px;
     }
 
     .hero h1 {
@@ -32,12 +37,12 @@
     }
 
     .hero h1 span {
-      color: #007AFF;
+      color: #f5a623;
     }
 
     .hero .tagline {
       font-size: 1.15rem;
-      color: #666;
+      color: #999;
       margin-bottom: 40px;
     }
 
@@ -51,7 +56,7 @@
     }
 
     .feature {
-      background: #f8f9fa;
+      background: #1a1a1a;
       border-radius: 12px;
       padding: 24px;
     }
@@ -60,11 +65,12 @@
       font-size: 0.95rem;
       font-weight: 600;
       margin-bottom: 6px;
+      color: #f5a623;
     }
 
     .feature p {
       font-size: 0.875rem;
-      color: #666;
+      color: #999;
     }
 
     .format-section {
@@ -80,13 +86,13 @@
     }
 
     .format-section pre {
-      background: #f8f9fa;
+      background: #1a1a1a;
       border-radius: 12px;
       padding: 20px 24px;
       font-size: 0.85rem;
       overflow-x: auto;
       line-height: 1.8;
-      color: #333;
+      color: #ccc;
     }
 
     .cta {
@@ -98,8 +104,8 @@
 
     .cta a {
       display: inline-block;
-      background: #007AFF;
-      color: #fff;
+      background: #f5a623;
+      color: #0d0d0d;
       text-decoration: none;
       font-weight: 600;
       font-size: 1rem;
@@ -116,20 +122,22 @@
       padding: 0 24px 40px;
       text-align: center;
       font-size: 0.8rem;
-      color: #aaa;
+      color: #555;
     }
 
-    footer a { color: #007AFF; text-decoration: none; }
+    footer a { color: #f5a623; text-decoration: none; }
 
     @media (max-width: 480px) {
-      .hero { padding: 48px 20px 40px; }
+      .hero { padding: 40px 20px 32px; }
       .hero h1 { font-size: 2rem; }
+      .hero .logo { width: 240px; }
       .features { grid-template-columns: 1fr; padding: 0 20px 40px; }
     }
   </style>
 </head>
 <body>
   <div class="hero">
+    <img src="don3txt_logo.png" alt="don3txt logo" class="logo">
     <h1><span>don3txt</span></h1>
     <p class="tagline">Gestiona tus tareas en formato todo.txt desde tu Android. Texto plano, sin nubes, sin cuentas. Tus datos son tuyos.</p>
   </div>
