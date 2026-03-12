@@ -1,0 +1,98 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:don3txt/domain/todo_item.dart';
+import 'package:don3txt/domain/todo_file.dart';
+
+void main() {
+  group('TodoFile', () {
+    test('creates empty', () {
+      final file = TodoFile([]);
+
+      expect(file.items, isEmpty);
+    });
+
+    test('pendingTasks returns only incomplete items', () {
+      final file = TodoFile([
+        TodoItem(description: 'Task 1'),
+        TodoItem(description: 'Task 2', isCompleted: true),
+        TodoItem(description: 'Task 3'),
+      ]);
+
+      final pending = file.pendingTasks;
+
+      expect(pending.length, 2);
+      expect(pending[0].description, 'Task 1');
+      expect(pending[1].description, 'Task 3');
+    });
+
+    test('addTask creates item with description and today as creation date', () {
+      final file = TodoFile([]);
+
+      final updated = file.addTask('Buy milk');
+      final today = DateTime.now();
+
+      expect(updated.items.length, 1);
+      expect(updated.items[0].description, 'Buy milk');
+      expect(updated.items[0].creationDate!.year, today.year);
+      expect(updated.items[0].creationDate!.month, today.month);
+      expect(updated.items[0].creationDate!.day, today.day);
+      expect(updated.items[0].isCompleted, false);
+    });
+
+    test('addTask appends to existing items', () {
+      final file = TodoFile([TodoItem(description: 'Task 1')]);
+
+      final updated = file.addTask('Task 2');
+
+      expect(updated.items.length, 2);
+      expect(updated.items[1].description, 'Task 2');
+    });
+
+    test('completeTask marks item as completed with today date', () {
+      final file = TodoFile([
+        TodoItem(description: 'Task 1'),
+        TodoItem(description: 'Task 2'),
+      ]);
+      final today = DateTime.now();
+
+      final updated = file.completeTask(0);
+
+      expect(updated.items[0].isCompleted, true);
+      expect(updated.items[0].completionDate!.year, today.year);
+      expect(updated.items[0].completionDate!.month, today.month);
+      expect(updated.items[0].completionDate!.day, today.day);
+      expect(updated.items[1].isCompleted, false);
+    });
+
+    test('completeTask on already completed item uncompletes it', () {
+      final file = TodoFile([
+        TodoItem(
+          description: 'Task 1',
+          isCompleted: true,
+          completionDate: DateTime(2011, 3, 3),
+        ),
+      ]);
+
+      final updated = file.completeTask(0);
+
+      expect(updated.items[0].isCompleted, false);
+      expect(updated.items[0].completionDate, isNull);
+    });
+
+    test('serialize produces correct string', () {
+      final file = TodoFile([
+        TodoItem(description: 'Task 1', priority: 'A'),
+        TodoItem(description: 'Task 2'),
+      ]);
+
+      final result = file.serialize();
+
+      expect(result, '(A) Task 1\nTask 2\n');
+    });
+
+    test('serialize empty file produces empty string', () {
+      final file = TodoFile([]);
+
+      expect(file.serialize(), '');
+    });
+  });
+}
