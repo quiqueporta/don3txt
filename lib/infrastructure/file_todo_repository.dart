@@ -10,11 +10,9 @@ abstract class TodoRepository {
 }
 
 class FileTodoRepository implements TodoRepository {
-  final String _directoryPath;
+  final String _filePath;
 
-  FileTodoRepository(this._directoryPath);
-
-  String get _filePath => '$_directoryPath/todo.txt';
+  FileTodoRepository(this._filePath);
 
   @override
   Future<TodoFile> load() async {

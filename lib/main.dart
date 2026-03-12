@@ -8,11 +8,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final directory = await getApplicationDocumentsDirectory();
-  final repository = FileTodoRepository(directory.path);
+  final defaultFilePath = '${directory.path}/todo.txt';
   final settingsRepository = SharedPreferencesSettingsRepository();
+
+  final savedPath = await settingsRepository.loadTodoFilePath();
+  final repository = FileTodoRepository(savedPath ?? defaultFilePath);
 
   runApp(Don3txtApp(
     repository: repository,
     settingsRepository: settingsRepository,
+    defaultFilePath: defaultFilePath,
   ));
 }

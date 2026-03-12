@@ -4,6 +4,7 @@ import 'package:don3txt/infrastructure/settings_repository.dart';
 
 class SharedPreferencesSettingsRepository implements SettingsRepository {
   static const _key = 'start_of_week';
+  static const _todoFilePathKey = 'todo_file_path';
 
   @override
   Future<StartOfWeek> loadStartOfWeek() async {
@@ -20,5 +21,23 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setString(_key, value.name);
+  }
+
+  @override
+  Future<String?> loadTodoFilePath() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    return prefs.getString(_todoFilePathKey);
+  }
+
+  @override
+  Future<void> saveTodoFilePath(String? path) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (path == null) {
+      await prefs.remove(_todoFilePathKey);
+    } else {
+      await prefs.setString(_todoFilePathKey, path);
+    }
   }
 }

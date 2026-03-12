@@ -11,7 +11,7 @@ void main() {
 
   setUp(() {
     tempDir = Directory.systemTemp.createTempSync('don3txt_test_');
-    repository = FileTodoRepository(tempDir.path);
+    repository = FileTodoRepository('${tempDir.path}/todo.txt');
   });
 
   tearDown(() {

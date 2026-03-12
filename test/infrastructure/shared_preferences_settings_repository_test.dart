@@ -34,5 +34,28 @@ void main() {
 
       expect(result, StartOfWeek.monday);
     });
+
+    test('loadTodoFilePath returns null by default', () async {
+      final result = await repository.loadTodoFilePath();
+
+      expect(result, isNull);
+    });
+
+    test('saveTodoFilePath persists path', () async {
+      await repository.saveTodoFilePath('/storage/todo.txt');
+
+      final result = await repository.loadTodoFilePath();
+
+      expect(result, '/storage/todo.txt');
+    });
+
+    test('saveTodoFilePath with null clears path', () async {
+      await repository.saveTodoFilePath('/storage/todo.txt');
+      await repository.saveTodoFilePath(null);
+
+      final result = await repository.loadTodoFilePath();
+
+      expect(result, isNull);
+    });
   });
 }

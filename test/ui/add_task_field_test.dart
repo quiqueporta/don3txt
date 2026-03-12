@@ -9,6 +9,7 @@ import 'package:don3txt/ui/widgets/add_task_field.dart';
 
 class InMemorySettingsRepository implements SettingsRepository {
   StartOfWeek _stored;
+  String? _todoFilePath;
 
   InMemorySettingsRepository([this._stored = StartOfWeek.monday]);
 
@@ -18,6 +19,14 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> saveStartOfWeek(StartOfWeek value) async {
     _stored = value;
+  }
+
+  @override
+  Future<String?> loadTodoFilePath() async => _todoFilePath;
+
+  @override
+  Future<void> saveTodoFilePath(String? path) async {
+    _todoFilePath = path;
   }
 }
 

@@ -6,7 +6,7 @@ import 'package:don3txt/infrastructure/file_todo_repository.dart';
 enum TaskFilter { inbox, today }
 
 class TodoListNotifier extends ChangeNotifier {
-  final TodoRepository _repository;
+  TodoRepository _repository;
 
   TodoFile? _todoFile;
   bool _isLoading = false;
@@ -38,6 +38,12 @@ class TodoListNotifier extends ChangeNotifier {
         final now = DateTime.now();
         return _todoFile!.todayTasks(DateTime(now.year, now.month, now.day));
     }
+  }
+
+  Future<void> switchRepository(TodoRepository repository) async {
+    _repository = repository;
+
+    await loadTasks();
   }
 
   Future<void> loadTasks() async {

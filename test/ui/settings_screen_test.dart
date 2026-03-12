@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/start_of_week.dart';
+import 'package:don3txt/domain/todo_file.dart';
+import 'package:don3txt/application/todo_list_notifier.dart';
+import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/ui/screens/settings_screen.dart';
 
 class InMemorySettingsRepository implements SettingsRepository {
   StartOfWeek _stored = StartOfWeek.monday;
+  String? _todoFilePath;
 
   InMemorySettingsRepository([StartOfWeek? initial]) {
     if (initial != null) _stored = initial;
@@ -20,12 +24,34 @@ class InMemorySettingsRepository implements SettingsRepository {
   Future<void> saveStartOfWeek(StartOfWeek value) async {
     _stored = value;
   }
+
+  @override
+  Future<String?> loadTodoFilePath() async => _todoFilePath;
+
+  @override
+  Future<void> saveTodoFilePath(String? path) async {
+    _todoFilePath = path;
+  }
+}
+
+class InMemoryTodoRepository implements TodoRepository {
+  @override
+  Future<TodoFile> load() async => TodoFile([]);
+
+  @override
+  Future<void> save(TodoFile todoFile) async {}
 }
 
 Widget buildTestApp(SettingsNotifier notifier) {
   return MaterialApp(
-    home: ChangeNotifierProvider.value(
-      value: notifier,
+    home: MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: notifier),
+        ChangeNotifierProvider(
+          create: (_) => TodoListNotifier(InMemoryTodoRepository()),
+        ),
+        Provider<String>.value(value: '/default/todo.txt'),
+      ],
       child: const SettingsScreen(),
     ),
   );
@@ -71,6 +97,23 @@ void main() {
       await tester.pumpWidget(buildTestApp(notifier));
 
       expect(find.text('Settings'), findsOneWidget);
+    });
+
+    testWidgets('shows todo file tile with Default when no custom path', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier));
+
+      expect(find.text('Todo file'), findsOneWidget);
+      expect(find.text('Default'), findsOneWidget);
+    });
+
+    testWidgets('shows custom path when todoFilePath is set', (tester) async {
+      final repo = InMemorySettingsRepository();
+      notifier = SettingsNotifier(repo);
+      await notifier.setTodoFilePath('/storage/emulated/0/todo.txt');
+
+      await tester.pumpWidget(buildTestApp(notifier));
+
+      expect(find.text('/storage/emulated/0/todo.txt'), findsOneWidget);
     });
   });
 }

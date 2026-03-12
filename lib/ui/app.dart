@@ -11,11 +11,13 @@ import 'package:don3txt/ui/screens/task_list_screen.dart';
 class Don3txtApp extends StatelessWidget {
   final TodoRepository repository;
   final SettingsRepository settingsRepository;
+  final String defaultFilePath;
 
   const Don3txtApp({
     super.key,
     required this.repository,
     required this.settingsRepository,
+    required this.defaultFilePath,
   });
 
   @override
@@ -28,6 +30,7 @@ class Don3txtApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => SettingsNotifier(settingsRepository)..load(),
         ),
+        Provider<String>.value(value: defaultFilePath),
       ],
       child: MaterialApp(
         title: 'don3txt',

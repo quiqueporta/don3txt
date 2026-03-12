@@ -28,6 +28,7 @@ class InMemoryTodoRepository implements TodoRepository {
 
 class InMemorySettingsRepository implements SettingsRepository {
   StartOfWeek _stored = StartOfWeek.monday;
+  String? _todoFilePath;
 
   @override
   Future<StartOfWeek> loadStartOfWeek() async => _stored;
@@ -36,6 +37,14 @@ class InMemorySettingsRepository implements SettingsRepository {
   Future<void> saveStartOfWeek(StartOfWeek value) async {
     _stored = value;
   }
+
+  @override
+  Future<String?> loadTodoFilePath() async => _todoFilePath;
+
+  @override
+  Future<void> saveTodoFilePath(String? path) async {
+    _todoFilePath = path;
+  }
 }
 
 Widget buildTestApp(TodoListNotifier notifier, SettingsNotifier settingsNotifier) {
@@ -43,6 +52,7 @@ Widget buildTestApp(TodoListNotifier notifier, SettingsNotifier settingsNotifier
     providers: [
       ChangeNotifierProvider.value(value: notifier),
       ChangeNotifierProvider.value(value: settingsNotifier),
+      Provider<String>.value(value: '/default/todo.txt'),
     ],
     child: MaterialApp(
       home: Scaffold(

@@ -130,6 +130,35 @@ void main() {
       expect(notifyCount, greaterThanOrEqualTo(2));
     });
 
+    group('switchRepository', () {
+      test('loads tasks from new repository', () async {
+        await notifier.loadTasks();
+
+        final newRepository = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'New task')]),
+        );
+
+        await notifier.switchRepository(newRepository);
+
+        expect(notifier.todoFile!.items.length, 1);
+        expect(notifier.todoFile!.items[0].description, 'New task');
+      });
+
+      test('notifies listeners', () async {
+        await notifier.loadTasks();
+        var notified = false;
+        notifier.addListener(() => notified = true);
+
+        final newRepository = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'New task')]),
+        );
+
+        await notifier.switchRepository(newRepository);
+
+        expect(notified, true);
+      });
+    });
+
     group('activeFilter', () {
       test('defaults to inbox', () {
         expect(notifier.activeFilter, TaskFilter.inbox);
