@@ -18,7 +18,7 @@ class SidebarDrawer extends StatelessWidget {
             child: Text('don3txt', style: TextStyle(fontSize: 24)),
           ),
           ListTile(
-            leading: const Icon(Icons.inbox),
+            leading: const Icon(Icons.inbox, color: Colors.blue),
             title: const Text('Inbox'),
             selected: notifier.activeFilter == TaskFilter.inbox,
             onTap: () {
@@ -27,7 +27,7 @@ class SidebarDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.today),
+            leading: const Icon(Icons.today, color: Colors.amber),
             title: const Text('Today'),
             selected: notifier.activeFilter == TaskFilter.today,
             onTap: () {

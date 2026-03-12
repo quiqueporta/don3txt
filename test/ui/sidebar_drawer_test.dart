@@ -108,6 +108,26 @@ void main() {
       expect(find.byType(Drawer), findsNothing);
     });
 
+    testWidgets('Inbox icon has blue color', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      final icon = tester.widget<Icon>(find.byIcon(Icons.inbox));
+
+      expect(icon.color, Colors.blue);
+    });
+
+    testWidgets('Today icon has amber color', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      final icon = tester.widget<Icon>(find.byIcon(Icons.today));
+
+      expect(icon.color, Colors.amber);
+    });
+
     testWidgets('shows Settings option', (tester) async {
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
       await tester.tap(find.byIcon(Icons.menu));
