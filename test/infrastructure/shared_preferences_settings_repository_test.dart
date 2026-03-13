@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/infrastructure/shared_preferences_settings_repository.dart';
 
@@ -56,6 +57,28 @@ void main() {
       final result = await repository.loadTodoFilePath();
 
       expect(result, isNull);
+    });
+
+    test('loadThemeMode returns system by default', () async {
+      final result = await repository.loadThemeMode();
+
+      expect(result, AppThemeMode.system);
+    });
+
+    test('saveThemeMode persists dark', () async {
+      await repository.saveThemeMode(AppThemeMode.dark);
+
+      final result = await repository.loadThemeMode();
+
+      expect(result, AppThemeMode.dark);
+    });
+
+    test('saveThemeMode persists light', () async {
+      await repository.saveThemeMode(AppThemeMode.light);
+
+      final result = await repository.loadThemeMode();
+
+      expect(result, AppThemeMode.light);
     });
   });
 }

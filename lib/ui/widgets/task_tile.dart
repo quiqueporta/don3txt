@@ -46,7 +46,7 @@ class TaskTile extends StatelessWidget {
                     fontSize: 16,
                     decoration:
                         item.isCompleted ? TextDecoration.lineThrough : null,
-                    color: item.isCompleted ? Colors.grey : Colors.black87,
+                    color: item.isCompleted ? Colors.grey : null,
                   ),
                 ),
                 if (hasMetadata)

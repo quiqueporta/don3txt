@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/settings_notifier.dart';
@@ -6,10 +7,16 @@ import 'package:don3txt/application/settings_notifier.dart';
 class InMemorySettingsRepository implements SettingsRepository {
   StartOfWeek _stored = StartOfWeek.monday;
   String? _todoFilePath;
+  AppThemeMode _themeMode = AppThemeMode.system;
 
-  InMemorySettingsRepository({StartOfWeek? startOfWeek, String? todoFilePath}) {
+  InMemorySettingsRepository({
+    StartOfWeek? startOfWeek,
+    String? todoFilePath,
+    AppThemeMode? themeMode,
+  }) {
     if (startOfWeek != null) _stored = startOfWeek;
     _todoFilePath = todoFilePath;
+    if (themeMode != null) _themeMode = themeMode;
   }
 
   @override
@@ -26,6 +33,14 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> saveTodoFilePath(String? path) async {
     _todoFilePath = path;
+  }
+
+  @override
+  Future<AppThemeMode> loadThemeMode() async => _themeMode;
+
+  @override
+  Future<void> saveThemeMode(AppThemeMode value) async {
+    _themeMode = value;
   }
 }
 
@@ -106,6 +121,37 @@ void main() {
       notifier.addListener(() => notified = true);
 
       await notifier.setTodoFilePath('/storage/todo.txt');
+
+      expect(notified, true);
+    });
+
+    test('themeMode defaults to system', () {
+      expect(notifier.themeMode, AppThemeMode.system);
+    });
+
+    test('load reads themeMode from repository', () async {
+      repository = InMemorySettingsRepository(themeMode: AppThemeMode.dark);
+      notifier = SettingsNotifier(repository);
+
+      await notifier.load();
+
+      expect(notifier.themeMode, AppThemeMode.dark);
+    });
+
+    test('setThemeMode updates and persists', () async {
+      await notifier.setThemeMode(AppThemeMode.light);
+
+      expect(notifier.themeMode, AppThemeMode.light);
+
+      final persisted = await repository.loadThemeMode();
+      expect(persisted, AppThemeMode.light);
+    });
+
+    test('setThemeMode notifies listeners', () async {
+      var notified = false;
+      notifier.addListener(() => notified = true);
+
+      await notifier.setThemeMode(AppThemeMode.dark);
 
       expect(notified, true);
     });

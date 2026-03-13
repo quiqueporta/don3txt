@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
@@ -39,6 +40,35 @@ class SettingsScreen extends StatelessWidget {
                   )
                 : null,
             onTap: () => _showFileOptions(context),
+          ),
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              'Theme',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          RadioListTile<AppThemeMode>(
+            title: const Text('System'),
+            value: AppThemeMode.system,
+            groupValue: settings.themeMode,
+            onChanged: (value) => settings.setThemeMode(value!),
+          ),
+          RadioListTile<AppThemeMode>(
+            title: const Text('Light'),
+            value: AppThemeMode.light,
+            groupValue: settings.themeMode,
+            onChanged: (value) => settings.setThemeMode(value!),
+          ),
+          RadioListTile<AppThemeMode>(
+            title: const Text('Dark'),
+            value: AppThemeMode.dark,
+            groupValue: settings.themeMode,
+            onChanged: (value) => settings.setThemeMode(value!),
           ),
           const Divider(),
           const Padding(

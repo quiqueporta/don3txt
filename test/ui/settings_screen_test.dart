@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
@@ -31,6 +32,16 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> saveTodoFilePath(String? path) async {
     _todoFilePath = path;
+  }
+
+  AppThemeMode _themeMode = AppThemeMode.system;
+
+  @override
+  Future<AppThemeMode> loadThemeMode() async => _themeMode;
+
+  @override
+  Future<void> saveThemeMode(AppThemeMode value) async {
+    _themeMode = value;
   }
 }
 
@@ -114,6 +125,36 @@ void main() {
       await tester.pumpWidget(buildTestApp(notifier));
 
       expect(find.text('/storage/emulated/0/todo.txt'), findsOneWidget);
+    });
+
+    testWidgets('shows theme options', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier));
+
+      expect(find.text('Theme'), findsOneWidget);
+      expect(find.text('System'), findsOneWidget);
+      expect(find.text('Light'), findsOneWidget);
+      expect(find.text('Dark'), findsOneWidget);
+    });
+
+    testWidgets('System theme is selected by default', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier));
+
+      final systemRadio = tester.widget<RadioListTile<AppThemeMode>>(
+        find.byWidgetPredicate(
+          (w) => w is RadioListTile<AppThemeMode> && w.value == AppThemeMode.system,
+        ),
+      );
+
+      expect(systemRadio.groupValue, AppThemeMode.system);
+    });
+
+    testWidgets('tapping Dark changes theme selection', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier));
+
+      await tester.tap(find.text('Dark'));
+      await tester.pumpAndSettle();
+
+      expect(notifier.themeMode, AppThemeMode.dark);
     });
   });
 }

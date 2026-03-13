@@ -1,10 +1,12 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 
 class SharedPreferencesSettingsRepository implements SettingsRepository {
   static const _key = 'start_of_week';
   static const _todoFilePathKey = 'todo_file_path';
+  static const _themeModeKey = 'theme_mode';
 
   @override
   Future<StartOfWeek> loadStartOfWeek() async {
@@ -39,5 +41,23 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
     } else {
       await prefs.setString(_todoFilePathKey, path);
     }
+  }
+
+  @override
+  Future<AppThemeMode> loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getString(_themeModeKey);
+
+    return AppThemeMode.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => AppThemeMode.system,
+    );
+  }
+
+  @override
+  Future<void> saveThemeMode(AppThemeMode value) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString(_themeModeKey, value.name);
   }
 }

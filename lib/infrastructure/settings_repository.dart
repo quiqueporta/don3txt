@@ -1,3 +1,4 @@
+import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 
 abstract class SettingsRepository {
@@ -5,4 +6,6 @@ abstract class SettingsRepository {
   Future<void> saveStartOfWeek(StartOfWeek value);
   Future<String?> loadTodoFilePath();
   Future<void> saveTodoFilePath(String? path);
+  Future<AppThemeMode> loadThemeMode();
+  Future<void> saveThemeMode(AppThemeMode value);
 }

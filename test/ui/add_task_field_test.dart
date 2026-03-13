@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/settings_notifier.dart';
@@ -27,6 +28,16 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> saveTodoFilePath(String? path) async {
     _todoFilePath = path;
+  }
+
+  AppThemeMode _themeMode = AppThemeMode.system;
+
+  @override
+  Future<AppThemeMode> loadThemeMode() async => _themeMode;
+
+  @override
+  Future<void> saveThemeMode(AppThemeMode value) async {
+    _themeMode = value;
   }
 }
 
