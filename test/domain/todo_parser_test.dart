@@ -73,6 +73,31 @@ void main() {
       expect(item.description, 'Call Mom');
     });
 
+    test('preserves URLs in description', () {
+      final item = parseLine('Check https://example.com/page for info');
+
+      expect(item!.description, 'Check https://example.com/page for info');
+      expect(item.metadata, isEmpty);
+    });
+
+    test('preserves http URL in description', () {
+      final item = parseLine('Visit http://example.com +Project');
+
+      expect(item!.description, 'Visit http://example.com');
+      expect(item.projects, ['+Project']);
+      expect(item.metadata, isEmpty);
+    });
+
+    test('preserves URL alongside metadata', () {
+      final item = parseLine(
+        'Check https://example.com/page due:2026-03-15 t:2026-03-10',
+      );
+
+      expect(item!.description, 'Check https://example.com/page');
+      expect(item.metadata['due'], '2026-03-15');
+      expect(item.metadata['t'], '2026-03-10');
+    });
+
     test('returns null for empty line', () {
       expect(parseLine(''), isNull);
       expect(parseLine('   '), isNull);
@@ -168,6 +193,7 @@ void main() {
         '(A) Call Mom',
         '(B) 2011-03-02 Call Mom +Family @phone due:2011-03-04',
         'x 2011-03-03 2011-03-01 Review PR +Project @github',
+        'Check https://example.com/page for info',
       ];
 
       for (final line in lines) {

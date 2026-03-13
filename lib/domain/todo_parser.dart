@@ -5,6 +5,7 @@ final _priorityRegex = RegExp(r'^\(([A-Z])\)$');
 final _projectRegex = RegExp(r'^\+\S+$');
 final _contextRegex = RegExp(r'^@\S+$');
 final _metadataRegex = RegExp(r'^(\S+):(\S+)$');
+final _urlRegex = RegExp(r'^https?://', caseSensitive: false);
 
 DateTime? _tryParseDate(String s) {
   if (!_dateRegex.hasMatch(s)) return null;
@@ -81,7 +82,7 @@ TodoItem? parseLine(String line) {
       contexts.add(token);
     } else {
       final metaMatch = _metadataRegex.firstMatch(token);
-      if (metaMatch != null && !token.startsWith('//') && metaMatch.group(1) != token) {
+      if (metaMatch != null && !token.startsWith('//') && !_urlRegex.hasMatch(token) && metaMatch.group(1) != token) {
         metadata[metaMatch.group(1)!] = metaMatch.group(2)!;
       } else {
         descriptionParts.add(token);
