@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="don3txt_logo.png" alt="don3txt" width="120">
+  <img src="don3txt_logo.png" alt="don3txt" width="250">
 </p>
 
 <h1 align="center">don3txt</h1>
