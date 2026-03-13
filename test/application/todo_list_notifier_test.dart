@@ -838,6 +838,95 @@ void main() {
       });
     });
 
+    group('search', () {
+      test('searchQuery initial is empty', () {
+        expect(notifier.searchQuery, '');
+      });
+
+      test('hasActiveSearch is false initially', () {
+        expect(notifier.hasActiveSearch, false);
+      });
+
+      test('setSearchQuery updates query and notifies listeners', () async {
+        var notified = false;
+        notifier.addListener(() => notified = true);
+
+        notifier.setSearchQuery('milk');
+
+        expect(notifier.searchQuery, 'milk');
+        expect(notified, true);
+      });
+
+      test('hasActiveSearch returns true when query is set', () {
+        notifier.setSearchQuery('milk');
+
+        expect(notifier.hasActiveSearch, true);
+      });
+
+      test('clearSearch clears query and notifies listeners', () async {
+        notifier.setSearchQuery('milk');
+        var notified = false;
+        notifier.addListener(() => notified = true);
+
+        notifier.clearSearch();
+
+        expect(notifier.searchQuery, '');
+        expect(notifier.hasActiveSearch, false);
+        expect(notified, true);
+      });
+
+      test('filteredTasks filters by text in description case-insensitive',
+          () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Buy milk'),
+            TodoItem(description: 'Call mom'),
+            TodoItem(description: 'Buy BREAD'),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        notifier.setSearchQuery('buy');
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 2);
+        expect(result[0].description, 'Buy milk');
+        expect(result[1].description, 'Buy BREAD');
+      });
+
+      test('search combines with existing filters', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Buy milk', projects: ['+Home']),
+            TodoItem(description: 'Buy pens', projects: ['+Work']),
+            TodoItem(description: 'Call mom', projects: ['+Home']),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        notifier.toggleFilterProject('+Home');
+        notifier.setSearchQuery('buy');
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Buy milk');
+      });
+
+      test('changing view clears search', () {
+        notifier.setSearchQuery('milk');
+        expect(notifier.hasActiveSearch, true);
+
+        notifier.activeFilter = TaskFilter.today;
+
+        expect(notifier.hasActiveSearch, false);
+        expect(notifier.searchQuery, '');
+      });
+    });
+
     group('task ordering', () {
       test('sorts by priority first (A before B)', () async {
         final repository = InMemoryTodoRepository(

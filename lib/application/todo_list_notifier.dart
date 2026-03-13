@@ -17,6 +17,8 @@ class TodoListNotifier extends ChangeNotifier {
   String? _selectedContext;
   int _upcomingDays = 7;
 
+  String _searchQuery = '';
+
   Set<String> _filterProjects = {};
   Set<String> _filterContexts = {};
   Set<String> _filterPriorities = {};
@@ -35,6 +37,9 @@ class TodoListNotifier extends ChangeNotifier {
   Set<String> get filterContexts => Set.unmodifiable(_filterContexts);
   Set<String> get filterPriorities => Set.unmodifiable(_filterPriorities);
 
+  String get searchQuery => _searchQuery;
+  bool get hasActiveSearch => _searchQuery.isNotEmpty;
+
   bool get hasActiveFilters =>
       _filterProjects.isNotEmpty ||
       _filterContexts.isNotEmpty ||
@@ -46,6 +51,7 @@ class TodoListNotifier extends ChangeNotifier {
     _activeFilter = value;
     _selectedProject = null;
     _selectedContext = null;
+    _searchQuery = '';
     _clearFiltersInternal();
     notifyListeners();
   }
@@ -54,6 +60,7 @@ class TodoListNotifier extends ChangeNotifier {
     _activeFilter = TaskFilter.project;
     _selectedProject = project;
     _selectedContext = null;
+    _searchQuery = '';
     notifyListeners();
   }
 
@@ -61,6 +68,7 @@ class TodoListNotifier extends ChangeNotifier {
     _activeFilter = TaskFilter.context;
     _selectedContext = context;
     _selectedProject = null;
+    _searchQuery = '';
     notifyListeners();
   }
 
@@ -170,7 +178,9 @@ class TodoListNotifier extends ChangeNotifier {
     final tasks = List<TodoItem>.from(_unfilteredViewTasks)
       ..sort(_compareTasks);
 
-    if (!hasActiveFilters) return tasks;
+    if (!hasActiveFilters && !hasActiveSearch) return tasks;
+
+    final queryLower = _searchQuery.toLowerCase();
 
     return tasks.where((task) {
       if (_filterProjects.isNotEmpty &&
@@ -185,6 +195,11 @@ class TodoListNotifier extends ChangeNotifier {
 
       if (_filterPriorities.isNotEmpty &&
           !_filterPriorities.contains(task.priority)) {
+        return false;
+      }
+
+      if (hasActiveSearch &&
+          !task.description.toLowerCase().contains(queryLower)) {
         return false;
       }
 
@@ -253,6 +268,18 @@ class TodoListNotifier extends ChangeNotifier {
     } else {
       _filterPriorities = Set.from(_filterPriorities)..add(priority);
     }
+
+    notifyListeners();
+  }
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+
+    notifyListeners();
+  }
+
+  void clearSearch() {
+    _searchQuery = '';
 
     notifyListeners();
   }

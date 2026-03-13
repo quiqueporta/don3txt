@@ -278,6 +278,99 @@ void main() {
       });
     });
 
+    group('search', () {
+      testWidgets('shows search icon in AppBar', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Task 1')]),
+        ));
+        await notifier.loadTasks();
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byIcon(Icons.search), findsOneWidget);
+      });
+
+      testWidgets('tapping search icon shows TextField', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Task 1')]),
+        ));
+        await notifier.loadTasks();
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.search));
+        await tester.pump();
+
+        expect(find.byType(TextField), findsOneWidget);
+        expect(find.byIcon(Icons.close), findsOneWidget);
+      });
+
+      testWidgets('typing text filters tasks', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Buy milk'),
+            TodoItem(description: 'Call mom'),
+          ]),
+        ));
+        await notifier.loadTasks();
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.search));
+        await tester.pump();
+
+        await tester.enterText(find.byType(TextField), 'buy');
+        await tester.pump();
+
+        expect(find.text('Buy milk'), findsOneWidget);
+        expect(find.text('Call mom'), findsNothing);
+      });
+
+      testWidgets('tapping close clears search and restores title',
+          (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Buy milk'),
+            TodoItem(description: 'Call mom'),
+          ]),
+        ));
+        await notifier.loadTasks();
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.search));
+        await tester.pump();
+
+        await tester.enterText(find.byType(TextField), 'buy');
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.close));
+        await tester.pump();
+
+        expect(find.text('Inbox'), findsOneWidget);
+        expect(find.byType(TextField), findsNothing);
+        expect(find.text('Buy milk'), findsOneWidget);
+        expect(find.text('Call mom'), findsOneWidget);
+      });
+
+      testWidgets('search icon is available in all views', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Task', projects: ['+Work'])]),
+        ));
+        await notifier.loadTasks();
+        notifier.selectProject('+Work');
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byIcon(Icons.search), findsOneWidget);
+      });
+    });
+
     group('filter chips', () {
       testWidgets('shows chips when filters are active', (tester) async {
         final notifier = TodoListNotifier(InMemoryTodoRepository(

@@ -7,8 +7,22 @@ import 'package:don3txt/ui/widgets/edit_task_field.dart';
 import 'package:don3txt/ui/widgets/filter_bottom_sheet.dart';
 import 'package:don3txt/ui/widgets/sidebar_drawer.dart';
 
-class TaskListScreen extends StatelessWidget {
+class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
+
+  @override
+  State<TaskListScreen> createState() => _TaskListScreenState();
+}
+
+class _TaskListScreenState extends State<TaskListScreen> {
+  bool _isSearching = false;
+  final _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   String _titleFor(TodoListNotifier notifier) {
     switch (notifier.activeFilter) {
@@ -79,17 +93,57 @@ class TaskListScreen extends StatelessWidget {
     );
   }
 
+  void _startSearch() {
+    setState(() {
+      _isSearching = true;
+    });
+  }
+
+  void _stopSearch(TodoListNotifier notifier) {
+    notifier.clearSearch();
+    _searchController.clear();
+
+    setState(() {
+      _isSearching = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<TodoListNotifier>();
+
+    if (_isSearching && !notifier.hasActiveSearch && _searchController.text.isNotEmpty) {
+      _isSearching = false;
+      _searchController.clear();
+    }
 
     final showFilter = _supportsFiltering(notifier.activeFilter);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_titleFor(notifier)),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Search...',
+                  border: InputBorder.none,
+                ),
+                onChanged: (text) => notifier.setSearchQuery(text),
+              )
+            : Text(_titleFor(notifier)),
         actions: [
-          if (showFilter)
+          if (!_isSearching)
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: _startSearch,
+            ),
+          if (_isSearching)
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => _stopSearch(notifier),
+            ),
+          if (!_isSearching && showFilter)
             IconButton(
               icon: Icon(
                 notifier.hasActiveFilters
@@ -149,7 +203,7 @@ class TaskListScreen extends StatelessWidget {
 
     final tasks = notifier.filteredTasks;
 
-    if (tasks.isEmpty && !notifier.hasActiveFilters) {
+    if (tasks.isEmpty && !notifier.hasActiveFilters && !notifier.hasActiveSearch) {
       return Center(
         child: Text(
           'No pending tasks',
