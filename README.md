@@ -1,8 +1,4 @@
-<p align="center">
-  <img src="don3txt_logo.png" alt="don3txt" width="400">
-</p>
-
-<h1 align="center">don3txt</h1>
+<h1 align="center">don<em>3</em>txt</h1>
 
 <p align="center">
   <a href="https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml">
@@ -11,9 +7,9 @@
 </p>
 
 <p align="center">
-  Task manager based on <a href="http://todotxt.org/">todo.txt</a> for Android
+  🌐 <a href="https://quiqueporta.com/don3txt/">quiqueporta.com/don3txt</a>
   <br>
-  <a href="https://quiqueporta.com/don3txt/">quiqueporta.com/don3txt</a>
+  Task manager based on <a href="http://todotxt.org/">todo.txt</a> for Android
 </p>
 
 ---
