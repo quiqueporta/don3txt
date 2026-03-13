@@ -27,6 +27,7 @@ Clean Architecture con separación en capas:
 - Fechas de inicio/threshold (`t:`) con selector de calendario — oculta tareas con `t:` futuro de todas las vistas excepto Recurring
 - Tareas recurrentes (`rec:`) con modo flexible y estricto (`+`). Estricto requiere `t:` para calcular desde fecha original; sin `t:` cae a flexible
 - Vistas: Inbox, Hoy (con badges de atrasadas/hoy), Upcoming (tareas de mañana a N días, periodo configurable), filtro por Proyecto, filtro por Contexto, Recurring (tareas con `rec:`, sin filtro threshold)
+- Búsqueda por texto libre en la descripción de las tareas, disponible en todas las vistas
 - Selección de fichero todo.txt desde cualquier ubicación del dispositivo
 - Tema claro/oscuro/sistema, primer día de la semana configurable, periodo upcoming configurable
 

@@ -33,6 +33,7 @@ A mobile application for managing tasks based on the [todo.txt](http://todotxt.o
 - **My Projects**: filters by project (`+name`), generated dynamically from pending tasks
 - **My Contexts**: filters by context (`@name`), generated dynamically from pending tasks
 - **Recurring**: shows all recurring tasks (with `rec:`), including those with a future threshold date
+- **Search**: free-text search across tasks in any view, accessible from the AppBar search icon
 
 ### File management
 
