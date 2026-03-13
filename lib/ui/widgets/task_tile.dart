@@ -15,6 +15,7 @@ class TaskTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final tags = [...item.projects, ...item.contexts];
     final hasMetadata = tags.isNotEmpty;
+    final dueDate = item.metadata['due'];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -49,13 +50,15 @@ class TaskTile extends StatelessWidget {
                     color: item.isCompleted ? Colors.grey : null,
                   ),
                 ),
-                if (hasMetadata)
+                if (hasMetadata || dueDate != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Wrap(
                       spacing: 8,
                       runSpacing: 4,
                       children: [
+                        if (dueDate != null)
+                          _DueDateChip(date: dueDate),
                         for (final project in item.projects)
                           _TagChip(
                             icon: Icons.tag,
@@ -76,6 +79,29 @@ class TaskTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DueDateChip extends StatelessWidget {
+  final String date;
+
+  const _DueDateChip({required this.date});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Colors.grey.shade500;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.calendar_today, size: 13, color: color),
+        const SizedBox(width: 3),
+        Text(
+          date,
+          style: TextStyle(fontSize: 13, color: color),
+        ),
+      ],
     );
   }
 }

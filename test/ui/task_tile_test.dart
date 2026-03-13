@@ -142,5 +142,40 @@ void main() {
       expect(find.byIcon(Icons.tag), findsNothing);
       expect(find.byIcon(Icons.alternate_email), findsNothing);
     });
+
+    testWidgets('shows due date with calendar icon', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(
+                description: 'Buy milk',
+                metadata: {'due': '2026-03-15'},
+              ),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.calendar_today), findsOneWidget);
+      expect(find.text('2026-03-15'), findsOneWidget);
+    });
+
+    testWidgets('does not show calendar icon when no due date',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(description: 'Buy milk'),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.calendar_today), findsNothing);
+    });
   });
 }
