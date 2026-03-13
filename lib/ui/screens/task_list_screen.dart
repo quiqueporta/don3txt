@@ -98,7 +98,7 @@ class TaskListScreen extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 8, bottom: 80),
       itemCount: tasks.length,
       itemBuilder: (context, index) {
         final item = tasks[index];
