@@ -234,8 +234,85 @@ void main() {
       test('returns empty when no file loaded', () {
         expect(notifier.filteredTasks, isEmpty);
       });
+
+      test('includes overdue tasks when filter is today', () async {
+        final now = DateTime.now();
+        final yesterdayStr = _formatDate(now.subtract(const Duration(days: 1)));
+        final todayStr = _formatDate(now);
+        final tomorrowStr = _formatDate(now.add(const Duration(days: 1)));
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+                description: 'Overdue', metadata: {'due': yesterdayStr}),
+            TodoItem(
+                description: 'Due today', metadata: {'due': todayStr}),
+            TodoItem(
+                description: 'Due tomorrow', metadata: {'due': tomorrowStr}),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.today;
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 2);
+      });
+    });
+
+    group('todayTaskCount', () {
+      test('returns count of today and overdue tasks', () async {
+        final now = DateTime.now();
+        final yesterdayStr = _formatDate(now.subtract(const Duration(days: 1)));
+        final todayStr = _formatDate(now);
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'No due'),
+            TodoItem(
+                description: 'Overdue', metadata: {'due': yesterdayStr}),
+            TodoItem(
+                description: 'Due today', metadata: {'due': todayStr}),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        expect(notifier.todayTaskCount, 2);
+      });
+
+      test('returns 0 when no file loaded', () {
+        expect(notifier.todayTaskCount, 0);
+      });
+    });
+
+    group('overdueTaskCount', () {
+      test('returns count of overdue tasks only', () async {
+        final now = DateTime.now();
+        final yesterdayStr = _formatDate(now.subtract(const Duration(days: 1)));
+        final todayStr = _formatDate(now);
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+                description: 'Overdue', metadata: {'due': yesterdayStr}),
+            TodoItem(
+                description: 'Due today', metadata: {'due': todayStr}),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        expect(notifier.overdueTaskCount, 1);
+      });
+
+      test('returns 0 when no file loaded', () {
+        expect(notifier.overdueTaskCount, 0);
+      });
     });
   });
+}
+
+String _formatDate(DateTime date) {
+  return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
 
 class _FailingRepository implements TodoRepository {

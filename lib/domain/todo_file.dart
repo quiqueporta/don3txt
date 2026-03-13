@@ -10,12 +10,29 @@ class TodoFile {
       items.where((item) => !item.isCompleted).toList();
 
   List<TodoItem> todayTasks(DateTime today) {
-    final todayString =
-        '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    final todayString = _formatDate(today);
 
     return items
-        .where((item) => !item.isCompleted && item.metadata['due'] == todayString)
+        .where((item) =>
+            !item.isCompleted &&
+            item.metadata['due'] != null &&
+            item.metadata['due']!.compareTo(todayString) <= 0)
         .toList();
+  }
+
+  List<TodoItem> overdueTasks(DateTime today) {
+    final todayString = _formatDate(today);
+
+    return items
+        .where((item) =>
+            !item.isCompleted &&
+            item.metadata['due'] != null &&
+            item.metadata['due']!.compareTo(todayString) < 0)
+        .toList();
+  }
+
+  static String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   TodoFile addTask(String description, {DateTime? dueDate}) {

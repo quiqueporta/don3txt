@@ -161,13 +161,60 @@ void main() {
         expect(file.todayTasks(today), isEmpty);
       });
 
-      test('excludes tasks with different due date', () {
+      test('excludes tasks with future due date', () {
         final file = TodoFile([
           TodoItem(description: 'Tomorrow', metadata: {'due': '2026-03-13'}),
-          TodoItem(description: 'Yesterday', metadata: {'due': '2026-03-11'}),
         ]);
 
         expect(file.todayTasks(today), isEmpty);
+      });
+
+      test('includes overdue tasks', () {
+        final file = TodoFile([
+          TodoItem(description: 'Yesterday', metadata: {'due': '2026-03-11'}),
+        ]);
+
+        final result = file.todayTasks(today);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Yesterday');
+      });
+    });
+
+    group('overdueTasks', () {
+      final today = DateTime(2026, 3, 12);
+
+      test('returns pending tasks with due date before today', () {
+        final file = TodoFile([
+          TodoItem(description: 'Overdue', metadata: {'due': '2026-03-11'}),
+          TodoItem(description: 'Today', metadata: {'due': '2026-03-12'}),
+          TodoItem(description: 'Tomorrow', metadata: {'due': '2026-03-13'}),
+        ]);
+
+        final result = file.overdueTasks(today);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Overdue');
+      });
+
+      test('excludes completed tasks', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Done overdue',
+            isCompleted: true,
+            metadata: {'due': '2026-03-11'},
+          ),
+        ]);
+
+        expect(file.overdueTasks(today), isEmpty);
+      });
+
+      test('excludes tasks without due date', () {
+        final file = TodoFile([
+          TodoItem(description: 'No due'),
+        ]);
+
+        expect(file.overdueTasks(today), isEmpty);
       });
     });
   });

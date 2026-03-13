@@ -28,6 +28,26 @@ class TodoListNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  int get todayTaskCount {
+    if (_todoFile == null) return 0;
+
+    final now = DateTime.now();
+
+    return _todoFile!.todayTasks(DateTime(now.year, now.month, now.day)).length;
+  }
+
+  int get todayOnlyTaskCount => todayTaskCount - overdueTaskCount;
+
+  int get overdueTaskCount {
+    if (_todoFile == null) return 0;
+
+    final now = DateTime.now();
+
+    return _todoFile!
+        .overdueTasks(DateTime(now.year, now.month, now.day))
+        .length;
+  }
+
   List<TodoItem> get filteredTasks {
     if (_todoFile == null) return [];
 

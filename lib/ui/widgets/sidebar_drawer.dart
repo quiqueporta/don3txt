@@ -9,6 +9,9 @@ class SidebarDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<TodoListNotifier>();
+    final todayOnlyCount = notifier.todayOnlyTaskCount;
+    final overdueCount = notifier.overdueTaskCount;
+    final hasBadges = todayOnlyCount > 0 || overdueCount > 0;
 
     return Drawer(
       child: ListView(
@@ -29,6 +32,25 @@ class SidebarDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.today, color: Colors.amber),
             title: const Text('Today'),
+            trailing: hasBadges
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (overdueCount > 0)
+                        Badge(
+                          backgroundColor: Colors.red,
+                          label: Text('$overdueCount'),
+                        ),
+                      if (overdueCount > 0 && todayOnlyCount > 0)
+                        const SizedBox(width: 6),
+                      if (todayOnlyCount > 0)
+                        Badge(
+                          backgroundColor: Colors.grey,
+                          label: Text('$todayOnlyCount'),
+                        ),
+                    ],
+                  )
+                : null,
             selected: notifier.activeFilter == TaskFilter.today,
             onTap: () {
               notifier.activeFilter = TaskFilter.today;

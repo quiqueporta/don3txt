@@ -31,7 +31,7 @@ class _AddTaskFieldState extends State<AddTaskField> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? now,
-      firstDate: now,
+      firstDate: DateTime(2000),
       lastDate: DateTime(now.year + 5),
       locale: settings.startOfWeek.datePickerLocale,
     );
