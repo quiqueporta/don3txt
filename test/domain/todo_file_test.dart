@@ -286,6 +286,61 @@ void main() {
       expect(file.serialize(), '');
     });
 
+    group('updateTask', () {
+      test('replaces item at given index', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 1'),
+          TodoItem(description: 'Task 2'),
+          TodoItem(description: 'Task 3'),
+        ]);
+
+        final updated = file.updateTask(
+            1, TodoItem(description: 'Task 2 edited'));
+
+        expect(updated.items.length, 3);
+        expect(updated.items[0].description, 'Task 1');
+        expect(updated.items[1].description, 'Task 2 edited');
+        expect(updated.items[2].description, 'Task 3');
+      });
+
+      test('preserves all other items unchanged', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Important',
+            priority: 'A',
+            projects: ['+Work'],
+            contexts: ['@office'],
+            metadata: {'due': '2026-03-20'},
+          ),
+          TodoItem(description: 'Edit me'),
+        ]);
+
+        final updated = file.updateTask(
+            1, TodoItem(description: 'Edited'));
+
+        expect(updated.items[0].priority, 'A');
+        expect(updated.items[0].projects, ['+Work']);
+        expect(updated.items[0].contexts, ['@office']);
+        expect(updated.items[0].metadata['due'], '2026-03-20');
+      });
+
+      test('preserves custom tags in description', () {
+        final file = TodoFile([
+          TodoItem(description: 'My task next:'),
+        ]);
+
+        final updated = file.updateTask(
+            0,
+            TodoItem(
+              description: 'My task next:',
+              metadata: {'due': '2026-03-20'},
+            ));
+
+        expect(updated.items[0].description, 'My task next:');
+        expect(updated.items[0].metadata['due'], '2026-03-20');
+      });
+    });
+
     group('todayTasks', () {
       final today = DateTime(2026, 3, 12);
 

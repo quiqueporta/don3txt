@@ -198,6 +198,13 @@ class TodoFile {
     );
   }
 
+  TodoFile updateTask(int index, TodoItem newItem) {
+    final updatedItems = List<TodoItem>.from(items);
+    updatedItems[index] = newItem;
+
+    return TodoFile(updatedItems);
+  }
+
   String serialize() {
     if (items.isEmpty) return '';
 

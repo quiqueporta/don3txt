@@ -4,11 +4,13 @@ import 'package:don3txt/domain/todo_item.dart';
 class TaskTile extends StatelessWidget {
   final TodoItem item;
   final VoidCallback onToggle;
+  final VoidCallback? onTap;
 
   const TaskTile({
     super.key,
     required this.item,
     required this.onToggle,
+    this.onTap,
   });
 
   @override
@@ -41,7 +43,10 @@ class TaskTile extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Column(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onTap,
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -91,6 +96,7 @@ class TaskTile extends StatelessWidget {
                     ),
                   ),
               ],
+            ),
             ),
           ),
         ],

@@ -160,6 +160,15 @@ class TodoListNotifier extends ChangeNotifier {
     await _repository.save(_todoFile!);
   }
 
+  Future<void> updateTask(int index, TodoItem newItem) async {
+    if (_todoFile == null) return;
+
+    _todoFile = _todoFile!.updateTask(index, newItem);
+    notifyListeners();
+
+    await _repository.save(_todoFile!);
+  }
+
   Future<void> toggleTask(int index) async {
     if (_todoFile == null) return;
 

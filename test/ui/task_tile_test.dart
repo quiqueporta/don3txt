@@ -230,6 +230,26 @@ void main() {
       expect(find.byIcon(Icons.repeat), findsNothing);
     });
 
+    testWidgets('calls onTap when task row is tapped', (tester) async {
+      var tapped = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(description: 'Buy milk'),
+              onToggle: () {},
+              onTap: () => tapped = true,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Buy milk'));
+
+      expect(tapped, true);
+    });
+
     testWidgets('does not show calendar icon when no due date',
         (tester) async {
       await tester.pumpWidget(

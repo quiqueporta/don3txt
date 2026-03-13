@@ -468,6 +468,69 @@ void main() {
       });
     });
 
+    group('updateTask', () {
+      test('updates task and persists', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Original task'),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        await notifier.updateTask(
+            0, TodoItem(description: 'Updated task'));
+
+        expect(notifier.todoFile!.items[0].description, 'Updated task');
+
+        final reloaded = await repository.load();
+        expect(reloaded.items[0].description, 'Updated task');
+      });
+
+      test('notifies listeners', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Task')]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        var notified = false;
+        notifier.addListener(() => notified = true);
+
+        await notifier.updateTask(
+            0, TodoItem(description: 'Edited'));
+
+        expect(notified, true);
+      });
+
+      test('does nothing when no file loaded', () async {
+        await notifier.updateTask(
+            0, TodoItem(description: 'Should not crash'));
+
+        expect(notifier.todoFile, isNull);
+      });
+
+      test('preserves custom tags in description', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'My task next: important'),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        await notifier.updateTask(
+            0,
+            TodoItem(
+              description: 'My task next: important',
+              metadata: {'due': '2026-03-20'},
+            ));
+
+        expect(
+            notifier.todoFile!.items[0].description, 'My task next: important');
+        expect(notifier.todoFile!.items[0].metadata['due'], '2026-03-20');
+      });
+    });
+
     group('context filter', () {
       test('filters tasks by context', () async {
         repository = InMemoryTodoRepository(

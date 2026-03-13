@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/ui/widgets/task_tile.dart';
 import 'package:don3txt/ui/widgets/add_task_field.dart';
+import 'package:don3txt/ui/widgets/edit_task_field.dart';
 import 'package:don3txt/ui/widgets/sidebar_drawer.dart';
 
 class TaskListScreen extends StatelessWidget {
@@ -35,6 +36,23 @@ class TaskListScreen extends StatelessWidget {
               dueDate: dueDate,
               startDate: startDate,
               recurrence: recurrence);
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
+
+  void _showEditTaskSheet(
+      BuildContext context, TodoListNotifier notifier, int originalIndex) {
+    final item = notifier.todoFile!.items[originalIndex];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => EditTaskField(
+        item: item,
+        onSave: (updatedItem) {
+          notifier.updateTask(originalIndex, updatedItem);
           Navigator.of(context).pop();
         },
       ),
@@ -87,6 +105,7 @@ class TaskListScreen extends StatelessWidget {
         return TaskTile(
           item: item,
           onToggle: () => notifier.toggleTask(originalIndex),
+          onTap: () => _showEditTaskSheet(context, notifier, originalIndex),
         );
       },
     );
