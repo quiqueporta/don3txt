@@ -191,7 +191,7 @@ class SidebarDrawer extends StatelessWidget {
               showAboutDialog(
                 context: context,
                 applicationName: 'don3txt',
-                applicationVersion: '1.1.1',
+                applicationVersion: '1.2.0',
                 children: [
                   const Text('Author: Quique Porta'),
                   const SizedBox(height: 8),

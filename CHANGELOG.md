@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.0] - 2026-03-13
 
 ### Added
 - Free-text search across tasks in any view, accessible from the AppBar search icon
