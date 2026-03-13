@@ -342,6 +342,57 @@ void main() {
       expect(notifier.selectedContext, '@phone');
     });
 
+    testWidgets('shows Recurring section when recurring tasks exist',
+        (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Weekly', metadata: {'rec': '1w'}),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Recurring'), findsOneWidget);
+      expect(find.byIcon(Icons.repeat), findsOneWidget);
+    });
+
+    testWidgets('tapping Recurring sets recurring filter', (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Weekly', metadata: {'rec': '1w'}),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Recurring'));
+      await tester.pumpAndSettle();
+
+      expect(notifier.activeFilter, TaskFilter.recurring);
+    });
+
+    testWidgets('does not show Recurring when no recurring tasks',
+        (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Normal task'),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Recurring'), findsNothing);
+    });
+
     testWidgets('does not show My Contexts when no contexts', (tester) async {
       notifier = TodoListNotifier(InMemoryTodoRepository(
         TodoFile([

@@ -78,6 +78,25 @@ void main() {
       expect(updated.items[0].metadata['due'], '2026-03-20');
     });
 
+    test('addTask with startDate sets t metadata', () {
+      final file = TodoFile([]);
+
+      final updated = file.addTask('Review', startDate: DateTime(2026, 3, 18));
+
+      expect(updated.items[0].metadata['t'], '2026-03-18');
+    });
+
+    test('addTask with startDate overrides t in description', () {
+      final file = TodoFile([]);
+
+      final updated = file.addTask(
+        'Review t:2026-01-01',
+        startDate: DateTime(2026, 3, 18),
+      );
+
+      expect(updated.items[0].metadata['t'], '2026-03-18');
+    });
+
     test('addTask with recurrence sets rec metadata', () {
       final file = TodoFile([]);
 
@@ -206,6 +225,30 @@ void main() {
 
       expect(newTask.metadata['due'], dueStr);
       expect(newTask.metadata['t'], tStr);
+    });
+
+    test(
+        'completeTask with strict recurrence without t falls back to simple behavior',
+        () {
+      final file = TodoFile([
+        TodoItem(
+          description: 'Pay bills',
+          metadata: {'due': '2026-03-10', 'rec': '+2w'},
+        ),
+      ]);
+
+      final updated = file.completeTask(0);
+
+      expect(updated.items.length, 2);
+      expect(updated.items[0].isCompleted, true);
+
+      final newTask = updated.items[1];
+      final now = DateTime.now();
+      final expectedDue = DateTime(now.year, now.month, now.day + 14);
+      final expectedDueStr =
+          '${expectedDue.year}-${expectedDue.month.toString().padLeft(2, '0')}-${expectedDue.day.toString().padLeft(2, '0')}';
+      expect(newTask.metadata['due'], expectedDueStr);
+      expect(newTask.metadata['rec'], '+2w');
     });
 
     test('completeTask with recurrence does not create new task on uncomplete',
@@ -343,7 +386,7 @@ void main() {
           TodoItem(description: 'Task 3', projects: ['+Health']),
         ]);
 
-        expect(file.allProjects, ['+Health', '+Home', '+Work']);
+        expect(file.allProjects(), ['+Health', '+Home', '+Work']);
       });
 
       test('excludes projects from completed tasks', () {
@@ -352,7 +395,7 @@ void main() {
           TodoItem(description: 'Active', projects: ['+Current']),
         ]);
 
-        expect(file.allProjects, ['+Current']);
+        expect(file.allProjects(), ['+Current']);
       });
 
       test('returns empty list when no projects', () {
@@ -360,7 +403,7 @@ void main() {
           TodoItem(description: 'No project'),
         ]);
 
-        expect(file.allProjects, isEmpty);
+        expect(file.allProjects(), isEmpty);
       });
     });
 
@@ -403,7 +446,7 @@ void main() {
           TodoItem(description: 'Task 3', contexts: ['@office']),
         ]);
 
-        expect(file.allContexts, ['@home', '@office', '@phone']);
+        expect(file.allContexts(), ['@home', '@office', '@phone']);
       });
 
       test('excludes contexts from completed tasks', () {
@@ -415,7 +458,7 @@ void main() {
           TodoItem(description: 'Active', contexts: ['@current']),
         ]);
 
-        expect(file.allContexts, ['@current']);
+        expect(file.allContexts(), ['@current']);
       });
 
       test('returns empty list when no contexts', () {
@@ -423,7 +466,177 @@ void main() {
           TodoItem(description: 'No context'),
         ]);
 
-        expect(file.allContexts, isEmpty);
+        expect(file.allContexts(), isEmpty);
+      });
+    });
+
+    group('threshold filtering', () {
+      final today = DateTime(2026, 3, 13);
+
+      test('visiblePendingTasks excludes tasks with future t:', () {
+        final file = TodoFile([
+          TodoItem(description: 'Visible', metadata: {'t': '2026-03-13'}),
+          TodoItem(description: 'Hidden', metadata: {'t': '2026-03-14'}),
+          TodoItem(description: 'No threshold'),
+        ]);
+
+        final result = file.visiblePendingTasks(today);
+
+        expect(result.length, 2);
+        expect(result[0].description, 'Visible');
+        expect(result[1].description, 'No threshold');
+      });
+
+      test('todayTasks includes tasks with t: <= today', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Ready',
+            metadata: {'due': '2026-03-13', 't': '2026-03-12'},
+          ),
+        ]);
+
+        final result = file.todayTasks(today);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Ready');
+      });
+
+      test('todayTasks excludes tasks with t: > today even if due today', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Not yet',
+            metadata: {'due': '2026-03-13', 't': '2026-03-14'},
+          ),
+        ]);
+
+        final result = file.todayTasks(today);
+
+        expect(result, isEmpty);
+      });
+
+      test('overdueTasks excludes tasks with future t:', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Overdue visible',
+            metadata: {'due': '2026-03-12', 't': '2026-03-10'},
+          ),
+          TodoItem(
+            description: 'Overdue hidden',
+            metadata: {'due': '2026-03-12', 't': '2026-03-14'},
+          ),
+        ]);
+
+        final result = file.overdueTasks(today);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Overdue visible');
+      });
+
+      test('tasksByProject excludes tasks with future t:', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Visible',
+            projects: ['+Work'],
+            metadata: {'t': '2026-03-13'},
+          ),
+          TodoItem(
+            description: 'Hidden',
+            projects: ['+Work'],
+            metadata: {'t': '2026-03-14'},
+          ),
+        ]);
+
+        final result = file.tasksByProject('+Work', today);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Visible');
+      });
+
+      test('tasksByContext excludes tasks with future t:', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Visible',
+            contexts: ['@phone'],
+            metadata: {'t': '2026-03-13'},
+          ),
+          TodoItem(
+            description: 'Hidden',
+            contexts: ['@phone'],
+            metadata: {'t': '2026-03-14'},
+          ),
+        ]);
+
+        final result = file.tasksByContext('@phone', today);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Visible');
+      });
+
+      test('allProjects excludes projects from tasks with future t:', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Visible',
+            projects: ['+Work'],
+            metadata: {'t': '2026-03-13'},
+          ),
+          TodoItem(
+            description: 'Hidden',
+            projects: ['+Secret'],
+            metadata: {'t': '2026-03-14'},
+          ),
+        ]);
+
+        expect(file.allProjects(today), ['+Work']);
+      });
+
+      test('allContexts excludes contexts from tasks with future t:', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Visible',
+            contexts: ['@phone'],
+            metadata: {'t': '2026-03-13'},
+          ),
+          TodoItem(
+            description: 'Hidden',
+            contexts: ['@secret'],
+            metadata: {'t': '2026-03-14'},
+          ),
+        ]);
+
+        expect(file.allContexts(today), ['@phone']);
+      });
+    });
+
+    group('recurringTasks', () {
+      test('returns pending tasks with rec: metadata', () {
+        final file = TodoFile([
+          TodoItem(description: 'Recurring', metadata: {'rec': '1w'}),
+          TodoItem(description: 'Normal'),
+          TodoItem(
+            description: 'Done recurring',
+            isCompleted: true,
+            metadata: {'rec': '1m'},
+          ),
+        ]);
+
+        final result = file.recurringTasks;
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Recurring');
+      });
+
+      test('includes tasks with future threshold', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Future recurring',
+            metadata: {'rec': '1w', 't': '2099-01-01'},
+          ),
+        ]);
+
+        final result = file.recurringTasks;
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Future recurring');
       });
     });
 

@@ -162,6 +162,74 @@ void main() {
       expect(find.text('2026-03-15'), findsOneWidget);
     });
 
+    testWidgets('shows start date with event_available icon', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(
+                description: 'Review',
+                metadata: {'t': '2026-03-18'},
+              ),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.event_available), findsOneWidget);
+      expect(find.text('2026-03-18'), findsOneWidget);
+    });
+
+    testWidgets('does not show start date icon when no t:', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(description: 'Simple'),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.event_available), findsNothing);
+    });
+
+    testWidgets('shows recurrence with repeat icon', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(
+                description: 'Pay bills',
+                metadata: {'rec': '2w'},
+              ),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.repeat), findsOneWidget);
+      expect(find.text('2w'), findsOneWidget);
+    });
+
+    testWidgets('does not show repeat icon when no rec:', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(description: 'Simple'),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.repeat), findsNothing);
+    });
+
     testWidgets('does not show calendar icon when no due date',
         (tester) async {
       await tester.pumpWidget(

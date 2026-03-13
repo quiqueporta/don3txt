@@ -18,6 +18,8 @@ class TaskListScreen extends StatelessWidget {
         return notifier.selectedProject?.replaceFirst('+', '') ?? '';
       case TaskFilter.context:
         return notifier.selectedContext?.replaceFirst('@', '') ?? '';
+      case TaskFilter.recurring:
+        return 'Recurring';
     }
   }
 
@@ -28,8 +30,11 @@ class TaskListScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       builder: (_) => AddTaskField(
-        onSubmit: (text, {dueDate, recurrence}) {
-          notifier.addTask(text, dueDate: dueDate, recurrence: recurrence);
+        onSubmit: (text, {dueDate, startDate, recurrence}) {
+          notifier.addTask(text,
+              dueDate: dueDate,
+              startDate: startDate,
+              recurrence: recurrence);
           Navigator.of(context).pop();
         },
       ),

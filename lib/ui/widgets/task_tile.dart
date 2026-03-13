@@ -14,8 +14,11 @@ class TaskTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tags = [...item.projects, ...item.contexts];
-    final hasMetadata = tags.isNotEmpty;
     final dueDate = item.metadata['due'];
+    final startDate = item.metadata['t'];
+    final recurrence = item.metadata['rec'];
+    final hasMetadata =
+        tags.isNotEmpty || dueDate != null || startDate != null || recurrence != null;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -50,7 +53,7 @@ class TaskTile extends StatelessWidget {
                     color: item.isCompleted ? Colors.grey : null,
                   ),
                 ),
-                if (hasMetadata || dueDate != null)
+                if (hasMetadata)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Wrap(
@@ -58,7 +61,20 @@ class TaskTile extends StatelessWidget {
                       runSpacing: 4,
                       children: [
                         if (dueDate != null)
-                          _DueDateChip(date: dueDate),
+                          _MetadataChip(
+                            icon: Icons.calendar_today,
+                            label: dueDate,
+                          ),
+                        if (startDate != null)
+                          _MetadataChip(
+                            icon: Icons.event_available,
+                            label: startDate,
+                          ),
+                        if (recurrence != null)
+                          _MetadataChip(
+                            icon: Icons.repeat,
+                            label: recurrence,
+                          ),
                         for (final project in item.projects)
                           _TagChip(
                             icon: Icons.tag,
@@ -83,10 +99,11 @@ class TaskTile extends StatelessWidget {
   }
 }
 
-class _DueDateChip extends StatelessWidget {
-  final String date;
+class _MetadataChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
 
-  const _DueDateChip({required this.date});
+  const _MetadataChip({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +112,10 @@ class _DueDateChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.calendar_today, size: 13, color: color),
+        Icon(icon, size: 13, color: color),
         const SizedBox(width: 3),
         Text(
-          date,
+          label,
           style: TextStyle(fontSize: 13, color: color),
         ),
       ],

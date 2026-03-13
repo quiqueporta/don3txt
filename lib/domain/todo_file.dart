@@ -10,12 +10,17 @@ class TodoFile {
   List<TodoItem> get pendingTasks =>
       items.where((item) => !item.isCompleted).toList();
 
+  List<TodoItem> visiblePendingTasks(DateTime today) {
+    return pendingTasks.where((item) => _isVisible(item, today)).toList();
+  }
+
   List<TodoItem> todayTasks(DateTime today) {
     final todayString = _formatDate(today);
 
     return items
         .where((item) =>
             !item.isCompleted &&
+            _isVisible(item, today) &&
             item.metadata['due'] != null &&
             item.metadata['due']!.compareTo(todayString) <= 0)
         .toList();
@@ -27,13 +32,15 @@ class TodoFile {
     return items
         .where((item) =>
             !item.isCompleted &&
+            _isVisible(item, today) &&
             item.metadata['due'] != null &&
             item.metadata['due']!.compareTo(todayString) < 0)
         .toList();
   }
 
-  List<String> get allProjects {
-    final projects = pendingTasks
+  List<String> allProjects([DateTime? today]) {
+    final source = today != null ? visiblePendingTasks(today) : pendingTasks;
+    final projects = source
         .expand((item) => item.projects)
         .toSet()
         .toList()
@@ -42,14 +49,18 @@ class TodoFile {
     return projects;
   }
 
-  List<TodoItem> tasksByProject(String project) {
+  List<TodoItem> tasksByProject(String project, [DateTime? today]) {
     return items
-        .where((item) => !item.isCompleted && item.projects.contains(project))
+        .where((item) =>
+            !item.isCompleted &&
+            (today == null || _isVisible(item, today)) &&
+            item.projects.contains(project))
         .toList();
   }
 
-  List<String> get allContexts {
-    final contexts = pendingTasks
+  List<String> allContexts([DateTime? today]) {
+    final source = today != null ? visiblePendingTasks(today) : pendingTasks;
+    final contexts = source
         .expand((item) => item.contexts)
         .toSet()
         .toList()
@@ -58,17 +69,31 @@ class TodoFile {
     return contexts;
   }
 
-  List<TodoItem> tasksByContext(String context) {
+  List<TodoItem> tasksByContext(String context, [DateTime? today]) {
     return items
-        .where((item) => !item.isCompleted && item.contexts.contains(context))
+        .where((item) =>
+            !item.isCompleted &&
+            (today == null || _isVisible(item, today)) &&
+            item.contexts.contains(context))
         .toList();
+  }
+
+  List<TodoItem> get recurringTasks =>
+      pendingTasks.where((item) => item.metadata.containsKey('rec')).toList();
+
+  bool _isVisible(TodoItem item, DateTime today) {
+    final threshold = item.metadata['t'];
+    if (threshold == null) return true;
+
+    return threshold.compareTo(_formatDate(today)) <= 0;
   }
 
   static String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  TodoFile addTask(String description, {DateTime? dueDate, String? recurrence}) {
+  TodoFile addTask(String description,
+      {DateTime? dueDate, DateTime? startDate, String? recurrence}) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -80,6 +105,13 @@ class TodoFile {
       final m = dueDate.month.toString().padLeft(2, '0');
       final d = dueDate.day.toString().padLeft(2, '0');
       metadata['due'] = '$y-$m-$d';
+    }
+
+    if (startDate != null) {
+      final y = startDate.year.toString().padLeft(4, '0');
+      final m = startDate.month.toString().padLeft(2, '0');
+      final d = startDate.day.toString().padLeft(2, '0');
+      metadata['t'] = '$y-$m-$d';
     }
 
     if (recurrence != null) {
@@ -134,7 +166,7 @@ class TodoFile {
       TodoItem item, Recurrence rec, DateTime completionDate) {
     final newMetadata = Map<String, String>.from(item.metadata);
 
-    if (rec.isStrict) {
+    if (rec.isStrict && newMetadata.containsKey('t')) {
       if (newMetadata.containsKey('due')) {
         final oldDue = DateTime.parse(newMetadata['due']!);
         newMetadata['due'] = _formatDate(rec.applyTo(oldDue));

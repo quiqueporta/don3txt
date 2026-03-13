@@ -381,6 +381,31 @@ void main() {
       });
     });
 
+    group('recurring filter', () {
+      test('filteredTasks returns recurring tasks when filter is recurring',
+          () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Normal task'),
+            TodoItem(description: 'Recurring', metadata: {'rec': '1w'}),
+            TodoItem(
+              description: 'Future recurring',
+              metadata: {'rec': '1m', 't': '2099-01-01'},
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.recurring;
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 2);
+        expect(result[0].description, 'Recurring');
+        expect(result[1].description, 'Future recurring');
+      });
+    });
+
     group('context filter', () {
       test('filters tasks by context', () async {
         repository = InMemoryTodoRepository(

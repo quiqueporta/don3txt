@@ -42,7 +42,8 @@ class InMemorySettingsRepository implements SettingsRepository {
 }
 
 Widget buildTestApp({
-  required void Function(String text, {DateTime? dueDate, String? recurrence}) onSubmit,
+  required void Function(String text,
+      {DateTime? dueDate, DateTime? startDate, String? recurrence}) onSubmit,
   SettingsNotifier? settingsNotifier,
 }) {
   settingsNotifier ??= SettingsNotifier(InMemorySettingsRepository());
@@ -74,7 +75,7 @@ void main() {
   group('AddTaskField', () {
     testWidgets('renders text field', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
       );
 
       expect(find.byType(TextField), findsOneWidget);
@@ -84,7 +85,7 @@ void main() {
       String? submitted;
 
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (text, {dueDate, recurrence}) => submitted = text),
+        buildTestApp(onSubmit: (text, {dueDate, startDate, recurrence}) => submitted = text),
       );
 
       await tester.enterText(find.byType(TextField), 'Buy milk');
@@ -96,7 +97,7 @@ void main() {
 
     testWidgets('clears field after submit', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
       );
 
       await tester.enterText(find.byType(TextField), 'Buy milk');
@@ -109,7 +110,7 @@ void main() {
 
     testWidgets('has calendar icon button', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
       );
 
       expect(find.byIcon(Icons.calendar_today), findsOneWidget);
@@ -117,7 +118,7 @@ void main() {
 
     testWidgets('shows date chip after selecting date', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
       );
       await tester.pumpAndSettle();
 
@@ -134,7 +135,7 @@ void main() {
 
     testWidgets('can clear selected date', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
       );
       await tester.pumpAndSettle();
 
@@ -155,7 +156,7 @@ void main() {
       DateTime? receivedDate;
 
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (text, {dueDate, recurrence}) => receivedDate = dueDate),
+        buildTestApp(onSubmit: (text, {dueDate, startDate, recurrence}) => receivedDate = dueDate),
       );
       await tester.pumpAndSettle();
 
@@ -173,7 +174,7 @@ void main() {
 
     testWidgets('clears date after submit', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
       );
       await tester.pumpAndSettle();
 
@@ -196,7 +197,7 @@ void main() {
       await settings.load();
 
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, recurrence}) {}, settingsNotifier: settings),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}, settingsNotifier: settings),
       );
       await tester.pumpAndSettle();
 
@@ -217,7 +218,7 @@ void main() {
       await settings.load();
 
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, recurrence}) {}, settingsNotifier: settings),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}, settingsNotifier: settings),
       );
       await tester.pumpAndSettle();
 
@@ -231,9 +232,53 @@ void main() {
       expect(localizations.firstDayOfWeekIndex, 0);
     });
 
+    testWidgets('has start date icon button', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
+      );
+
+      expect(find.byIcon(Icons.event_available), findsOneWidget);
+    });
+
+    testWidgets('onSubmit receives startDate when start date is selected',
+        (tester) async {
+      DateTime? receivedStartDate;
+
+      await tester.pumpWidget(
+        buildTestApp(
+            onSubmit: (text, {dueDate, startDate, recurrence}) =>
+                receivedStartDate = startDate),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.event_available));
+      await tester.pumpAndSettle();
+      await confirmDatePicker(tester);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Task');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(receivedStartDate, isNotNull);
+    });
+
+    testWidgets('shows strict label as "Strict (from start date)"',
+        (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.repeat));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Strict (from start date)'), findsOneWidget);
+    });
+
     testWidgets('has repeat icon button', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
       );
 
       expect(find.byIcon(Icons.repeat), findsOneWidget);
@@ -242,7 +287,7 @@ void main() {
     testWidgets('shows recurrence chip after selecting recurrence',
         (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
       );
       await tester.pumpAndSettle();
 
@@ -262,7 +307,7 @@ void main() {
 
       await tester.pumpWidget(
         buildTestApp(
-            onSubmit: (text, {dueDate, recurrence}) =>
+            onSubmit: (text, {dueDate, startDate, recurrence}) =>
                 receivedRec = recurrence),
       );
       await tester.pumpAndSettle();

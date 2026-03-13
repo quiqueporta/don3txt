@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 
 class AddTaskField extends StatefulWidget {
-  final void Function(String text, {DateTime? dueDate, String? recurrence})
-      onSubmit;
+  final void Function(String text,
+      {DateTime? dueDate, DateTime? startDate, String? recurrence}) onSubmit;
 
   const AddTaskField({super.key, required this.onSubmit});
 
@@ -15,16 +15,21 @@ class AddTaskField extends StatefulWidget {
 class _AddTaskFieldState extends State<AddTaskField> {
   final _controller = TextEditingController();
   DateTime? _selectedDate;
+  DateTime? _selectedStartDate;
   String? _recurrence;
 
   void _handleSubmit(String value) {
     final text = value.trim();
     if (text.isEmpty) return;
 
-    widget.onSubmit(text, dueDate: _selectedDate, recurrence: _recurrence);
+    widget.onSubmit(text,
+        dueDate: _selectedDate,
+        startDate: _selectedStartDate,
+        recurrence: _recurrence);
     _controller.clear();
     setState(() {
       _selectedDate = null;
+      _selectedStartDate = null;
       _recurrence = null;
     });
   }
@@ -94,7 +99,7 @@ class _AddTaskFieldState extends State<AddTaskField> {
                     value: strict,
                     onChanged: (v) => setDialogState(() => strict = v!),
                   ),
-                  const Text('Strict (from due date)'),
+                  const Text('Strict (from start date)'),
                 ],
               ),
             ],
@@ -118,6 +123,23 @@ class _AddTaskFieldState extends State<AddTaskField> {
 
     if (result != null) {
       setState(() => _recurrence = result);
+    }
+  }
+
+  Future<void> _pickStartDate() async {
+    final now = DateTime.now();
+    final settings = context.read<SettingsNotifier>();
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedStartDate ?? now,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(now.year + 5),
+      locale: settings.startOfWeek.datePickerLocale,
+    );
+
+    if (picked != null) {
+      setState(() => _selectedStartDate = picked);
     }
   }
 
@@ -177,6 +199,10 @@ class _AddTaskFieldState extends State<AddTaskField> {
                 onPressed: _pickDate,
               ),
               IconButton(
+                icon: const Icon(Icons.event_available),
+                onPressed: _pickStartDate,
+              ),
+              IconButton(
                 icon: const Icon(Icons.repeat),
                 onPressed: _pickRecurrence,
               ),
@@ -194,6 +220,17 @@ class _AddTaskFieldState extends State<AddTaskField> {
                   ),
                   deleteIcon: const Icon(Icons.close, size: 18),
                   onDeleted: () => setState(() => _selectedDate = null),
+                ),
+              if (_selectedStartDate != null)
+                Chip(
+                  label: Text(
+                    'Start: ${_selectedStartDate!.year}-'
+                    '${_selectedStartDate!.month.toString().padLeft(2, '0')}-'
+                    '${_selectedStartDate!.day.toString().padLeft(2, '0')}',
+                  ),
+                  deleteIcon: const Icon(Icons.close, size: 18),
+                  onDeleted: () =>
+                      setState(() => _selectedStartDate = null),
                 ),
               if (_recurrence != null)
                 Chip(

@@ -3,7 +3,7 @@ import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 
-enum TaskFilter { inbox, today, project, context }
+enum TaskFilter { inbox, today, project, context, recurring }
 
 class TodoListNotifier extends ChangeNotifier {
   TodoRepository _repository;
@@ -48,24 +48,34 @@ class TodoListNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  DateTime get _today {
+    final now = DateTime.now();
+
+    return DateTime(now.year, now.month, now.day);
+  }
+
   List<String> get allProjects {
     if (_todoFile == null) return [];
 
-    return _todoFile!.allProjects;
+    return _todoFile!.allProjects(_today);
   }
 
   List<String> get allContexts {
     if (_todoFile == null) return [];
 
-    return _todoFile!.allContexts;
+    return _todoFile!.allContexts(_today);
+  }
+
+  bool get hasRecurringTasks {
+    if (_todoFile == null) return false;
+
+    return _todoFile!.recurringTasks.isNotEmpty;
   }
 
   int get todayTaskCount {
     if (_todoFile == null) return 0;
 
-    final now = DateTime.now();
-
-    return _todoFile!.todayTasks(DateTime(now.year, now.month, now.day)).length;
+    return _todoFile!.todayTasks(_today).length;
   }
 
   int get todayOnlyTaskCount => todayTaskCount - overdueTaskCount;
@@ -73,28 +83,27 @@ class TodoListNotifier extends ChangeNotifier {
   int get overdueTaskCount {
     if (_todoFile == null) return 0;
 
-    final now = DateTime.now();
-
-    return _todoFile!
-        .overdueTasks(DateTime(now.year, now.month, now.day))
-        .length;
+    return _todoFile!.overdueTasks(_today).length;
   }
 
   List<TodoItem> get filteredTasks {
     if (_todoFile == null) return [];
 
+    final today = _today;
+
     switch (_activeFilter) {
       case TaskFilter.inbox:
-        return _todoFile!.pendingTasks;
+        return _todoFile!.visiblePendingTasks(today);
       case TaskFilter.today:
-        final now = DateTime.now();
-        return _todoFile!.todayTasks(DateTime(now.year, now.month, now.day));
+        return _todoFile!.todayTasks(today);
       case TaskFilter.project:
         if (_selectedProject == null) return [];
-        return _todoFile!.tasksByProject(_selectedProject!);
+        return _todoFile!.tasksByProject(_selectedProject!, today);
       case TaskFilter.context:
         if (_selectedContext == null) return [];
-        return _todoFile!.tasksByContext(_selectedContext!);
+        return _todoFile!.tasksByContext(_selectedContext!, today);
+      case TaskFilter.recurring:
+        return _todoFile!.recurringTasks;
     }
   }
 
@@ -120,12 +129,12 @@ class TodoListNotifier extends ChangeNotifier {
   }
 
   Future<void> addTask(String description,
-      {DateTime? dueDate, String? recurrence}) async {
+      {DateTime? dueDate, DateTime? startDate, String? recurrence}) async {
     if (description.trim().isEmpty) return;
     if (_todoFile == null) return;
 
-    _todoFile = _todoFile!
-        .addTask(description, dueDate: dueDate, recurrence: recurrence);
+    _todoFile = _todoFile!.addTask(description,
+        dueDate: dueDate, startDate: startDate, recurrence: recurrence);
     notifyListeners();
 
     await _repository.save(_todoFile!);
