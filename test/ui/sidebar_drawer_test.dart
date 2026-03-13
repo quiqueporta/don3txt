@@ -422,6 +422,33 @@ void main() {
       expect(find.byType(DebugScreen), findsOneWidget);
     });
 
+    testWidgets('shows About option', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('About'), findsOneWidget);
+      expect(find.byIcon(Icons.info_outline), findsOneWidget);
+    });
+
+    testWidgets('tapping About shows about dialog', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('About'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('don3txt'), findsWidgets);
+      expect(find.textContaining('Quique Porta'), findsOneWidget);
+      expect(find.textContaining('MIT'), findsOneWidget);
+      final repoLink = find.textContaining('github.com/quiqueporta/don3txt');
+      expect(repoLink, findsOneWidget);
+
+      final inkWell = find.ancestor(of: repoLink, matching: find.byType(InkWell));
+      expect(inkWell, findsOneWidget);
+    });
+
     testWidgets('does not show My Contexts when no contexts', (tester) async {
       notifier = TodoListNotifier(InMemoryTodoRepository(
         TodoFile([

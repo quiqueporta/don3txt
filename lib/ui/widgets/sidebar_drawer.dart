@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/application/settings_notifier.dart';
@@ -158,6 +159,38 @@ class SidebarDrawer extends StatelessWidget {
               Navigator.of(context).pop();
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const DebugScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('About'),
+            onTap: () {
+              Navigator.of(context).pop();
+
+              showAboutDialog(
+                context: context,
+                applicationName: 'don3txt',
+                applicationVersion: '1.0.0',
+                children: [
+                  const Text('Author: Quique Porta'),
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: () => launchUrl(
+                      Uri.parse('https://github.com/quiqueporta/don3txt'),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                    child: const Text(
+                      'https://github.com/quiqueporta/don3txt',
+                      style: TextStyle(
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('License: MIT'),
+                ],
               );
             },
           ),
