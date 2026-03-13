@@ -65,3 +65,18 @@ Revisar informe due:2024-03-01 t:2024-02-25 rec:+1m
 ```
 
 Componentes: completitud (`x`), prioridad (`(A)`-`(Z)`), fechas (`YYYY-MM-DD`), proyectos (`+nombre`), contextos (`@nombre`), metadata (`clave:valor`), recurrencia (`rec:[+]Nu`), fecha de inicio (`t:YYYY-MM-DD`).
+
+## Proceso de release
+
+Cuando sea conveniente subir versión, seguir estos pasos en orden:
+
+1. **Actualizar versión** en estos dos ficheros:
+   - `pubspec.yaml` → campo `version:`
+   - `lib/ui/widgets/sidebar_drawer.dart` → campo `applicationVersion:`
+2. **Actualizar `CHANGELOG.md`** — añadir nueva entrada al principio con fecha y cambios (secciones Added/Changed/Fixed según corresponda)
+3. **Ejecutar tests** — `flutter test` y confirmar que todos pasan
+4. **Commit** con mensaje `Bump version to X.Y.Z`
+5. **Crear tag** — `git tag vX.Y.Z`
+6. **Push** — `git push origin main && git push origin vX.Y.Z`
+7. **Compilar APK** — `flutter build apk --release`
+8. **Crear GitHub Release** — `gh release create vX.Y.Z build/app/outputs/flutter-apk/app-release.apk#don3txt-vX.Y.Z.apk --title "vX.Y.Z"` con las notas del changelog
