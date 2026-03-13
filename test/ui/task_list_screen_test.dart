@@ -131,10 +131,13 @@ void main() {
     });
 
     testWidgets('shows only today tasks when filter is today', (tester) async {
+      final today = DateTime.now();
+      final todayStr =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
       final repo = InMemoryTodoRepository(
         TodoFile([
           TodoItem(description: 'No due'),
-          TodoItem(description: 'Due today', metadata: {'due': '2026-03-12'}),
+          TodoItem(description: 'Due today', metadata: {'due': todayStr}),
         ]),
       );
       final notifier = TodoListNotifier(repo);

@@ -206,11 +206,19 @@ void main() {
       });
 
       test('returns todayTasks when filter is today', () async {
+        final now = DateTime.now();
+        final todayStr =
+            '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+        final tomorrow = now.add(const Duration(days: 1));
+        final tomorrowStr =
+            '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}';
         repository = InMemoryTodoRepository(
           TodoFile([
             TodoItem(description: 'No due'),
-            TodoItem(description: 'Due today', metadata: {'due': '2026-03-12'}),
-            TodoItem(description: 'Due tomorrow', metadata: {'due': '2026-03-13'}),
+            TodoItem(description: 'Due today', metadata: {'due': todayStr}),
+            TodoItem(
+                description: 'Due tomorrow',
+                metadata: {'due': tomorrowStr}),
           ]),
         );
         notifier = TodoListNotifier(repository);

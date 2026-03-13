@@ -69,7 +69,8 @@ void main() {
       expect(toggled, true);
     });
 
-    testWidgets('renders projects and contexts in grey', (tester) async {
+    testWidgets('renders projects and contexts as separate tags',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -85,7 +86,61 @@ void main() {
         ),
       );
 
-      expect(find.text('+Family @phone'), findsOneWidget);
+      expect(find.text('Family'), findsOneWidget);
+      expect(find.text('phone'), findsOneWidget);
+    });
+
+    testWidgets('shows tag icon for projects', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(
+                description: 'Call Mom',
+                projects: ['+Family'],
+              ),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.tag), findsOneWidget);
+    });
+
+    testWidgets('shows alternate_email icon for contexts', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(
+                description: 'Call Mom',
+                contexts: ['@phone'],
+              ),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.alternate_email), findsOneWidget);
+    });
+
+    testWidgets('shows no tag icons when no projects or contexts',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(description: 'Simple task'),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.tag), findsNothing);
+      expect(find.byIcon(Icons.alternate_email), findsNothing);
     });
   });
 }

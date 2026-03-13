@@ -51,13 +51,24 @@ class TaskTile extends StatelessWidget {
                 ),
                 if (hasMetadata)
                   Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      tags.join(' '),
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade500,
-                      ),
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        for (final project in item.projects)
+                          _TagChip(
+                            icon: Icons.tag,
+                            label: project.replaceFirst('+', ''),
+                            color: Colors.teal,
+                          ),
+                        for (final context in item.contexts)
+                          _TagChip(
+                            icon: Icons.alternate_email,
+                            label: context.replaceFirst('@', ''),
+                            color: Colors.deepPurple,
+                          ),
+                      ],
                     ),
                   ),
               ],
@@ -65,6 +76,33 @@ class TaskTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TagChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final MaterialColor color;
+
+  const _TagChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color.shade400),
+        const SizedBox(width: 2),
+        Text(
+          label,
+          style: TextStyle(fontSize: 13, color: color.shade400),
+        ),
+      ],
     );
   }
 }
