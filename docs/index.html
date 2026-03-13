@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -46,19 +47,17 @@
       margin-bottom: 40px;
     }
 
-    .features {
-      max-width: 640px;
+    .features-section {
+      max-width: 700px;
       margin: 0 auto;
       padding: 0 24px 60px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
     }
 
     .feature {
       background: #1a1a1a;
       border-radius: 12px;
       padding: 24px;
+      height: 100%;
     }
 
     .feature h3 {
@@ -71,6 +70,20 @@
     .feature p {
       font-size: 0.875rem;
       color: #999;
+      margin-bottom: 0;
+    }
+
+    .carousel-indicators [data-bs-target] {
+      background-color: #f5a623;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      filter: invert(1);
+    }
+
+    .carousel-item {
+      padding: 0 40px 40px;
     }
 
     .format-section {
@@ -131,7 +144,9 @@
       .hero { padding: 40px 20px 32px; }
       .hero h1 { font-size: 2rem; }
       .hero .logo { width: 240px; }
-      .features { grid-template-columns: 1fr; padding: 0 20px 40px; }
+      .carousel-item { padding: 0 32px 40px; }
+      .carousel-item .col-6 { flex: 0 0 100%; max-width: 100%; }
+      .carousel-item .col-6 + .col-6 { margin-top: 16px; }
     }
   </style>
 </head>
@@ -141,38 +156,86 @@
     <p class="tagline">Gestiona tus tareas en formato todo.txt desde tu Android. Texto plano, sin nubes, sin cuentas. Tus datos son tuyos.</p>
   </div>
 
-  <div class="features">
-    <div class="feature">
-      <h3>Texto plano</h3>
-      <p>Tus tareas viven en un fichero todo.txt que puedes abrir con cualquier editor.</p>
-    </div>
-    <div class="feature">
-      <h3>Sin dependencias</h3>
-      <p>No necesita internet, ni cuentas, ni servidores. Todo local en tu dispositivo.</p>
-    </div>
-    <div class="feature">
-      <h3>Formato abierto</h3>
-      <p>Compatible con el estándar todo.txt: prioridades, proyectos, contextos y metadata.</p>
-    </div>
-    <div class="feature">
-      <h3>Minimalista</h3>
-      <p>Interfaz limpia con Material Design 3. Sin distracciones, solo tus tareas.</p>
-    </div>
-    <div class="feature">
-      <h3>Tareas recurrentes</h3>
-      <p>Repetición flexible o estricta, con fecha de inicio (t:) para ocultar tareas hasta que toque.</p>
-    </div>
-    <div class="feature">
-      <h3>Vistas inteligentes</h3>
-      <p>Inbox, Hoy, Upcoming, filtros por proyecto y contexto, y vista de tareas recurrentes.</p>
-    </div>
-    <div class="feature">
-      <h3>Elige tu fichero</h3>
-      <p>Selecciona cualquier todo.txt de tu dispositivo. Compatible con Syncthing.</p>
-    </div>
-    <div class="feature">
-      <h3>Tema claro y oscuro</h3>
-      <p>Elige entre tema claro, oscuro o que siga la configuración de tu sistema.</p>
+  <div class="features-section">
+    <div id="featuresCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+      <div class="carousel-indicators">
+        <button type="button" data-bs-target="#featuresCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#featuresCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#featuresCarousel" data-bs-slide-to="2"></button>
+        <button type="button" data-bs-target="#featuresCarousel" data-bs-slide-to="3"></button>
+      </div>
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="feature">
+                <h3>Texto plano</h3>
+                <p>Tus tareas viven en un fichero todo.txt que puedes abrir con cualquier editor.</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="feature">
+                <h3>Sin dependencias</h3>
+                <p>No necesita internet, ni cuentas, ni servidores. Todo local en tu dispositivo.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="feature">
+                <h3>Formato abierto</h3>
+                <p>Compatible con el estándar todo.txt: prioridades, proyectos, contextos y metadata.</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="feature">
+                <h3>Minimalista</h3>
+                <p>Interfaz limpia con Material Design 3. Sin distracciones, solo tus tareas.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="feature">
+                <h3>Tareas recurrentes</h3>
+                <p>Repetición flexible o estricta, con fecha de inicio (t:) para ocultar tareas hasta que toque.</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="feature">
+                <h3>Vistas inteligentes</h3>
+                <p>Inbox, Hoy, Upcoming, filtros por proyecto y contexto, y vista de tareas recurrentes.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="feature">
+                <h3>Elige tu fichero</h3>
+                <p>Selecciona cualquier todo.txt de tu dispositivo. Compatible con Syncthing.</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="feature">
+                <h3>Tema claro y oscuro</h3>
+                <p>Elige entre tema claro, oscuro o que siga la configuración de tu sistema.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#featuresCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#featuresCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
     </div>
   </div>
 
@@ -194,5 +257,7 @@ Revisar informe due:2024-03-01 t:2024-02-25 rec:+1m</pre>
   <footer>
     <p>don3txt es software libre &middot; <a href="https://github.com/quiqueporta/don3txt/blob/main/LICENSE">MIT License</a> &middot; <a href="http://todotxt.org/">todo.txt</a></p>
   </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

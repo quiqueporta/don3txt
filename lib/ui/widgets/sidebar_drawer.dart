@@ -23,8 +23,28 @@ class SidebarDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
-            child: Text('don3txt', style: TextStyle(fontSize: 24)),
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: RichText(
+                text: TextSpan(
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                  children: const [
+                    TextSpan(text: 'don'),
+                    TextSpan(
+                      text: '3',
+                      style: TextStyle(color: Color(0xFFF5A623)),
+                    ),
+                    TextSpan(text: 'txt'),
+                  ],
+                ),
+              ),
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.inbox, color: Colors.blue),
