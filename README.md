@@ -23,11 +23,12 @@ Aplicación móvil para gestionar tareas basada en el formato [todo.txt](http://
 - **Prioridades** de la `(A)` a la `(Z)` siguiendo el estándar todo.txt
 - **Fechas de creación** asignadas automáticamente al crear una tarea
 - **Fechas de vencimiento** (`due:YYYY-MM-DD`) con selector de calendario integrado
+- **Fechas de inicio** (`t:YYYY-MM-DD`) con selector de calendario — las tareas con fecha de inicio futura se ocultan automáticamente de todas las vistas excepto Recurring
 
 ### Tareas recurrentes
 
 - **Recurrencia flexible**: la próxima fecha se calcula desde la fecha de completado (ej: `rec:2w`)
-- **Recurrencia estricta**: la próxima fecha se calcula desde la fecha de vencimiento original (ej: `rec:+2w`)
+- **Recurrencia estricta**: la próxima fecha se calcula desde la fecha de inicio (`t:`) original (ej: `rec:+2w`). Si no tiene `t:`, se comporta como recurrencia flexible
 - Unidades soportadas: días (`d`), semanas (`w`), meses (`m`), años (`y`)
 - Selector visual para configurar la recurrencia al crear la tarea
 - Al completar una tarea recurrente, se crea automáticamente la siguiente ocurrencia con la nueva fecha
@@ -38,6 +39,7 @@ Aplicación móvil para gestionar tareas basada en el formato [todo.txt](http://
 - **Hoy**: muestra tareas con vencimiento hoy o anterior (atrasadas), con badges de conteo en el sidebar
 - **Mis Proyectos**: filtra por proyecto (`+nombre`), generados dinámicamente desde las tareas pendientes
 - **Mis Contextos**: filtra por contexto (`@nombre`), generados dinámicamente desde las tareas pendientes
+- **Recurring**: muestra todas las tareas recurrentes (con `rec:`), incluyendo las que tienen fecha de inicio futura
 
 ### Gestión de ficheros
 
@@ -64,6 +66,7 @@ Call Mom
 x 2011-03-03 2011-03-01 Review PR +Project @github
 Buy milk due:2024-01-15
 Pay rent due:2024-02-01 rec:1m
+Review report due:2024-03-01 t:2024-02-25 rec:+1m
 ```
 
 | Componente | Formato | Ejemplo |
@@ -74,6 +77,7 @@ Pay rent due:2024-02-01 rec:1m
 | Proyecto | `+nombre` | `+Familia` |
 | Contexto | `@nombre` | `@teléfono` |
 | Fecha de vencimiento | `due:YYYY-MM-DD` | `due:2024-01-20` |
+| Fecha de inicio | `t:YYYY-MM-DD` | `t:2024-01-18` |
 | Recurrencia | `rec:[+]Nu` | `rec:2w`, `rec:+1m` |
 | Metadata genérica | `clave:valor` | `esfuerzo:alto` |
 

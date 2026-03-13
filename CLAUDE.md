@@ -24,8 +24,9 @@ Clean Architecture con separación en capas:
 - Gestión CRUD de tareas con formato todo.txt estándar
 - Prioridades `(A)`-`(Z)`, proyectos (`+nombre`), contextos (`@nombre`), metadata (`clave:valor`)
 - Fechas de vencimiento (`due:`) con selector de calendario
-- Tareas recurrentes (`rec:`) con modo flexible y estricto (`+`)
-- Vistas: Inbox, Hoy (con badges de atrasadas/hoy), filtro por Proyecto, filtro por Contexto
+- Fechas de inicio/threshold (`t:`) con selector de calendario — oculta tareas con `t:` futuro de todas las vistas excepto Recurring
+- Tareas recurrentes (`rec:`) con modo flexible y estricto (`+`). Estricto requiere `t:` para calcular desde fecha original; sin `t:` cae a flexible
+- Vistas: Inbox, Hoy (con badges de atrasadas/hoy), filtro por Proyecto, filtro por Contexto, Recurring (tareas con `rec:`, sin filtro threshold)
 - Selección de fichero todo.txt desde cualquier ubicación del dispositivo
 - Tema claro/oscuro/sistema, primer día de la semana configurable
 
@@ -60,6 +61,7 @@ Organizados por capa en `test/`:
 (A) 2024-01-15 Llamar a mamá +Familia @teléfono due:2024-01-20
 x 2024-01-16 2024-01-15 Revisar PR +Proyecto @github
 Pagar alquiler due:2024-02-01 rec:1m
+Revisar informe due:2024-03-01 t:2024-02-25 rec:+1m
 ```
 
-Componentes: completitud (`x`), prioridad (`(A)`-`(Z)`), fechas (`YYYY-MM-DD`), proyectos (`+nombre`), contextos (`@nombre`), metadata (`clave:valor`), recurrencia (`rec:[+]Nu`).
+Componentes: completitud (`x`), prioridad (`(A)`-`(Z)`), fechas (`YYYY-MM-DD`), proyectos (`+nombre`), contextos (`@nombre`), metadata (`clave:valor`), recurrencia (`rec:[+]Nu`), fecha de inicio (`t:YYYY-MM-DD`).
