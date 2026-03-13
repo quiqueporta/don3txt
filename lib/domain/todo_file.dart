@@ -1,3 +1,4 @@
+import 'package:don3txt/domain/recurrence.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/domain/todo_parser.dart';
 
@@ -67,7 +68,7 @@ class TodoFile {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  TodoFile addTask(String description, {DateTime? dueDate}) {
+  TodoFile addTask(String description, {DateTime? dueDate, String? recurrence}) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -79,6 +80,10 @@ class TodoFile {
       final m = dueDate.month.toString().padLeft(2, '0');
       final d = dueDate.day.toString().padLeft(2, '0');
       metadata['due'] = '$y-$m-$d';
+    }
+
+    if (recurrence != null) {
+      metadata['rec'] = recurrence;
     }
 
     final newItem = TodoItem(
@@ -101,17 +106,64 @@ class TodoFile {
         isCompleted: false,
         completionDate: null,
       );
-    } else {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
 
-      updatedItems[index] = item.copyWith(
-        isCompleted: true,
-        completionDate: today,
-      );
+      return TodoFile(updatedItems);
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    updatedItems[index] = item.copyWith(
+      isCompleted: true,
+      completionDate: today,
+    );
+
+    final recValue = item.metadata['rec'];
+    if (recValue != null) {
+      final rec = parseRecurrence(recValue);
+      if (rec != null) {
+        final nextTask = _createNextRecurrence(item, rec, today);
+        updatedItems.add(nextTask);
+      }
     }
 
     return TodoFile(updatedItems);
+  }
+
+  TodoItem _createNextRecurrence(
+      TodoItem item, Recurrence rec, DateTime completionDate) {
+    final newMetadata = Map<String, String>.from(item.metadata);
+
+    if (rec.isStrict) {
+      if (newMetadata.containsKey('due')) {
+        final oldDue = DateTime.parse(newMetadata['due']!);
+        newMetadata['due'] = _formatDate(rec.applyTo(oldDue));
+      }
+
+      if (newMetadata.containsKey('t')) {
+        final oldT = DateTime.parse(newMetadata['t']!);
+        newMetadata['t'] = _formatDate(rec.applyTo(oldT));
+      }
+    } else {
+      final newDue = rec.applyTo(completionDate);
+      newMetadata['due'] = _formatDate(newDue);
+
+      if (newMetadata.containsKey('t') && newMetadata.containsKey('due')) {
+        final oldDue = DateTime.parse(item.metadata['due']!);
+        final oldT = DateTime.parse(newMetadata['t']!);
+        final gap = oldDue.difference(oldT);
+        final newT = newDue.subtract(gap);
+        newMetadata['t'] = _formatDate(newT);
+      }
+    }
+
+    return TodoItem(
+      description: item.description,
+      creationDate: completionDate,
+      projects: List.from(item.projects),
+      contexts: List.from(item.contexts),
+      metadata: newMetadata,
+    );
   }
 
   String serialize() {

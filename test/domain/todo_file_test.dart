@@ -78,6 +78,22 @@ void main() {
       expect(updated.items[0].metadata['due'], '2026-03-20');
     });
 
+    test('addTask with recurrence sets rec metadata', () {
+      final file = TodoFile([]);
+
+      final updated = file.addTask('Pay bills', recurrence: '2w');
+
+      expect(updated.items[0].metadata['rec'], '2w');
+    });
+
+    test('addTask with strict recurrence sets rec metadata', () {
+      final file = TodoFile([]);
+
+      final updated = file.addTask('Pay subscription', recurrence: '+3m');
+
+      expect(updated.items[0].metadata['rec'], '+3m');
+    });
+
     test('completeTask marks item as completed with today date', () {
       final file = TodoFile([
         TodoItem(description: 'Task 1'),
@@ -107,6 +123,107 @@ void main() {
 
       expect(updated.items[0].isCompleted, false);
       expect(updated.items[0].completionDate, isNull);
+    });
+
+    test('completeTask with simple recurrence creates new task from completion date',
+        () {
+      final file = TodoFile([
+        TodoItem(
+          description: 'Pay bills',
+          metadata: {'due': '2026-03-10', 'rec': '2w'},
+          contexts: ['@personal'],
+          projects: ['+Finance'],
+        ),
+      ]);
+
+      final updated = file.completeTask(0);
+
+      expect(updated.items.length, 2);
+      expect(updated.items[0].isCompleted, true);
+
+      final newTask = updated.items[1];
+      expect(newTask.isCompleted, false);
+      expect(newTask.description, 'Pay bills');
+      expect(newTask.contexts, ['@personal']);
+      expect(newTask.projects, ['+Finance']);
+      expect(newTask.metadata['rec'], '2w');
+
+      final now = DateTime.now();
+      final expectedDue = DateTime(now.year, now.month, now.day + 14);
+      final expectedDueStr =
+          '${expectedDue.year}-${expectedDue.month.toString().padLeft(2, '0')}-${expectedDue.day.toString().padLeft(2, '0')}';
+      expect(newTask.metadata['due'], expectedDueStr);
+    });
+
+    test('completeTask with strict recurrence creates new task from original dates',
+        () {
+      final file = TodoFile([
+        TodoItem(
+          description: 'Pay subscription',
+          metadata: {
+            'due': '2026-03-16',
+            't': '2026-03-09',
+            'rec': '+2w',
+          },
+        ),
+      ]);
+
+      final updated = file.completeTask(0);
+
+      expect(updated.items.length, 2);
+      expect(updated.items[0].isCompleted, true);
+
+      final newTask = updated.items[1];
+      expect(newTask.metadata['due'], '2026-03-30');
+      expect(newTask.metadata['t'], '2026-03-23');
+      expect(newTask.metadata['rec'], '+2w');
+    });
+
+    test('completeTask with simple recurrence preserves gap between t and due',
+        () {
+      final file = TodoFile([
+        TodoItem(
+          description: 'Review',
+          metadata: {
+            'due': '2026-03-16',
+            't': '2026-03-09',
+            'rec': '1w',
+          },
+        ),
+      ]);
+
+      final updated = file.completeTask(0);
+      final newTask = updated.items[1];
+
+      final now = DateTime.now();
+      final expectedDue = DateTime(now.year, now.month, now.day + 7);
+      final expectedT = expectedDue.subtract(const Duration(days: 7));
+
+      final dueStr =
+          '${expectedDue.year}-${expectedDue.month.toString().padLeft(2, '0')}-${expectedDue.day.toString().padLeft(2, '0')}';
+      final tStr =
+          '${expectedT.year}-${expectedT.month.toString().padLeft(2, '0')}-${expectedT.day.toString().padLeft(2, '0')}';
+
+      expect(newTask.metadata['due'], dueStr);
+      expect(newTask.metadata['t'], tStr);
+    });
+
+    test('completeTask with recurrence does not create new task on uncomplete',
+        () {
+      final file = TodoFile([
+        TodoItem(
+          description: 'Recurring done',
+          isCompleted: true,
+          completionDate: DateTime(2026, 3, 10),
+          metadata: {'rec': '1w', 'due': '2026-03-17'},
+        ),
+        TodoItem(description: 'Other'),
+      ]);
+
+      final updated = file.completeTask(0);
+
+      expect(updated.items.length, 2);
+      expect(updated.items[0].isCompleted, false);
     });
 
     test('serialize produces correct string', () {

@@ -119,11 +119,13 @@ class TodoListNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> addTask(String description, {DateTime? dueDate}) async {
+  Future<void> addTask(String description,
+      {DateTime? dueDate, String? recurrence}) async {
     if (description.trim().isEmpty) return;
     if (_todoFile == null) return;
 
-    _todoFile = _todoFile!.addTask(description, dueDate: dueDate);
+    _todoFile = _todoFile!
+        .addTask(description, dueDate: dueDate, recurrence: recurrence);
     notifyListeners();
 
     await _repository.save(_todoFile!);
