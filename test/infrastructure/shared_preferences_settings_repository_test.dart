@@ -80,5 +80,18 @@ void main() {
 
       expect(result, AppThemeMode.light);
     });
+    test('loadUpcomingDays returns 7 by default', () async {
+      final result = await repository.loadUpcomingDays();
+
+      expect(result, 7);
+    });
+
+    test('saveUpcomingDays persists value', () async {
+      await repository.saveUpcomingDays(14);
+
+      final result = await repository.loadUpcomingDays();
+
+      expect(result, 14);
+    });
   });
 }

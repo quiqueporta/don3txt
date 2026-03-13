@@ -8,4 +8,6 @@ abstract class SettingsRepository {
   Future<void> saveTodoFilePath(String? path);
   Future<AppThemeMode> loadThemeMode();
   Future<void> saveThemeMode(AppThemeMode value);
+  Future<int> loadUpcomingDays();
+  Future<void> saveUpcomingDays(int value);
 }

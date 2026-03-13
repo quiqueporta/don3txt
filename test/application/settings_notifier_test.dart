@@ -8,15 +8,18 @@ class InMemorySettingsRepository implements SettingsRepository {
   StartOfWeek _stored = StartOfWeek.monday;
   String? _todoFilePath;
   AppThemeMode _themeMode = AppThemeMode.system;
+  int _upcomingDays = 7;
 
   InMemorySettingsRepository({
     StartOfWeek? startOfWeek,
     String? todoFilePath,
     AppThemeMode? themeMode,
+    int? upcomingDays,
   }) {
     if (startOfWeek != null) _stored = startOfWeek;
     _todoFilePath = todoFilePath;
     if (themeMode != null) _themeMode = themeMode;
+    if (upcomingDays != null) _upcomingDays = upcomingDays;
   }
 
   @override
@@ -41,6 +44,14 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> saveThemeMode(AppThemeMode value) async {
     _themeMode = value;
+  }
+
+  @override
+  Future<int> loadUpcomingDays() async => _upcomingDays;
+
+  @override
+  Future<void> saveUpcomingDays(int value) async {
+    _upcomingDays = value;
   }
 }
 
@@ -152,6 +163,37 @@ void main() {
       notifier.addListener(() => notified = true);
 
       await notifier.setThemeMode(AppThemeMode.dark);
+
+      expect(notified, true);
+    });
+
+    test('upcomingDays defaults to 7', () {
+      expect(notifier.upcomingDays, 7);
+    });
+
+    test('load reads upcomingDays from repository', () async {
+      repository = InMemorySettingsRepository(upcomingDays: 14);
+      notifier = SettingsNotifier(repository);
+
+      await notifier.load();
+
+      expect(notifier.upcomingDays, 14);
+    });
+
+    test('setUpcomingDays updates and persists', () async {
+      await notifier.setUpcomingDays(14);
+
+      expect(notifier.upcomingDays, 14);
+
+      final persisted = await repository.loadUpcomingDays();
+      expect(persisted, 14);
+    });
+
+    test('setUpcomingDays notifies listeners', () async {
+      var notified = false;
+      notifier.addListener(() => notified = true);
+
+      await notifier.setUpcomingDays(14);
 
       expect(notified, true);
     });

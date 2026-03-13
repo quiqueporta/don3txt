@@ -78,6 +78,20 @@ class TodoFile {
         .toList();
   }
 
+  List<TodoItem> upcomingTasks(DateTime today, int days) {
+    final tomorrowString = _formatDate(today.add(const Duration(days: 1)));
+    final limitString = _formatDate(today.add(Duration(days: days)));
+
+    return items
+        .where((item) =>
+            !item.isCompleted &&
+            _isVisible(item, today) &&
+            item.metadata['due'] != null &&
+            item.metadata['due']!.compareTo(tomorrowString) >= 0 &&
+            item.metadata['due']!.compareTo(limitString) <= 0)
+        .toList();
+  }
+
   List<TodoItem> get recurringTasks =>
       pendingTasks.where((item) => item.metadata.containsKey('rec')).toList();
 

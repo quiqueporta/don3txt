@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:don3txt/domain/app_theme_mode.dart';
+import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
+import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/todo_list_notifier.dart' show TodoListNotifier, TaskFilter;
+import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/ui/screens/task_list_screen.dart';
 
 class InMemoryTodoRepository implements TodoRepository {
@@ -23,10 +27,34 @@ class InMemoryTodoRepository implements TodoRepository {
   }
 }
 
+class InMemorySettingsRepository implements SettingsRepository {
+  @override
+  Future<StartOfWeek> loadStartOfWeek() async => StartOfWeek.monday;
+  @override
+  Future<void> saveStartOfWeek(StartOfWeek value) async {}
+  @override
+  Future<String?> loadTodoFilePath() async => null;
+  @override
+  Future<void> saveTodoFilePath(String? path) async {}
+  @override
+  Future<AppThemeMode> loadThemeMode() async => AppThemeMode.system;
+  @override
+  Future<void> saveThemeMode(AppThemeMode value) async {}
+  @override
+  Future<int> loadUpcomingDays() async => 7;
+  @override
+  Future<void> saveUpcomingDays(int value) async {}
+}
+
 Widget buildTestApp(TodoListNotifier notifier) {
   return MaterialApp(
-    home: ChangeNotifierProvider.value(
-      value: notifier,
+    home: MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: notifier),
+        ChangeNotifierProvider(
+          create: (_) => SettingsNotifier(InMemorySettingsRepository()),
+        ),
+      ],
       child: const TaskListScreen(),
     ),
   );

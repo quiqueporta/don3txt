@@ -15,6 +15,8 @@ class TaskListScreen extends StatelessWidget {
         return 'Inbox';
       case TaskFilter.today:
         return 'Today';
+      case TaskFilter.upcoming:
+        return 'Upcoming';
       case TaskFilter.project:
         return notifier.selectedProject?.replaceFirst('+', '') ?? '';
       case TaskFilter.context:

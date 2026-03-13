@@ -93,6 +93,24 @@ class SettingsScreen extends StatelessWidget {
             groupValue: settings.startOfWeek,
             onChanged: (value) => settings.setStartOfWeek(value!),
           ),
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              'Upcoming days',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          for (final days in [3, 7, 14, 30])
+            RadioListTile<int>(
+              title: Text('$days days'),
+              value: days,
+              groupValue: settings.upcomingDays,
+              onChanged: (value) => settings.setUpcomingDays(value!),
+            ),
         ],
       ),
     );

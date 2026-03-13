@@ -43,6 +43,12 @@ class InMemorySettingsRepository implements SettingsRepository {
   Future<void> saveThemeMode(AppThemeMode value) async {
     _themeMode = value;
   }
+
+  @override
+  Future<int> loadUpcomingDays() async => 7;
+
+  @override
+  Future<void> saveUpcomingDays(int value) async {}
 }
 
 class InMemoryTodoRepository implements TodoRepository {

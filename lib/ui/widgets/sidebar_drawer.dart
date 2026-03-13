@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
+import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/ui/screens/settings_screen.dart';
 import 'package:don3txt/ui/screens/debug_screen.dart';
 
@@ -10,9 +11,12 @@ class SidebarDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<TodoListNotifier>();
+    final settings = context.watch<SettingsNotifier>();
     final todayOnlyCount = notifier.todayOnlyTaskCount;
     final overdueCount = notifier.overdueTaskCount;
     final hasBadges = todayOnlyCount > 0 || overdueCount > 0;
+    final upcomingCount = notifier.upcomingTaskCount;
+    notifier.upcomingDays = settings.upcomingDays;
 
     return Drawer(
       child: ListView(
@@ -55,6 +59,21 @@ class SidebarDrawer extends StatelessWidget {
             selected: notifier.activeFilter == TaskFilter.today,
             onTap: () {
               notifier.activeFilter = TaskFilter.today;
+              Navigator.of(context).pop();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.calendar_month, color: Colors.orange),
+            title: const Text('Upcoming'),
+            trailing: upcomingCount > 0
+                ? Badge(
+                    backgroundColor: Colors.grey,
+                    label: Text('$upcomingCount'),
+                  )
+                : null,
+            selected: notifier.activeFilter == TaskFilter.upcoming,
+            onTap: () {
+              notifier.activeFilter = TaskFilter.upcoming;
               Navigator.of(context).pop();
             },
           ),

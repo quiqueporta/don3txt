@@ -7,6 +7,7 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
   static const _key = 'start_of_week';
   static const _todoFilePathKey = 'todo_file_path';
   static const _themeModeKey = 'theme_mode';
+  static const _upcomingDaysKey = 'upcoming_days';
 
   @override
   Future<StartOfWeek> loadStartOfWeek() async {
@@ -59,5 +60,19 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setString(_themeModeKey, value.name);
+  }
+
+  @override
+  Future<int> loadUpcomingDays() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    return prefs.getInt(_upcomingDaysKey) ?? 7;
+  }
+
+  @override
+  Future<void> saveUpcomingDays(int value) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setInt(_upcomingDaysKey, value);
   }
 }

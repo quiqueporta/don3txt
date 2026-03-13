@@ -725,5 +725,88 @@ void main() {
         expect(result[0].description, 'Active');
       });
     });
+
+    group('upcomingTasks', () {
+      final today = DateTime(2026, 3, 13);
+
+      test('includes task with due date tomorrow', () {
+        final file = TodoFile([
+          TodoItem(description: 'Tomorrow', metadata: {'due': '2026-03-14'}),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Tomorrow');
+      });
+
+      test('includes task with due date at limit', () {
+        final file = TodoFile([
+          TodoItem(description: 'In 7 days', metadata: {'due': '2026-03-20'}),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'In 7 days');
+      });
+
+      test('excludes task with due date beyond limit', () {
+        final file = TodoFile([
+          TodoItem(description: 'In 8 days', metadata: {'due': '2026-03-21'}),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result, isEmpty);
+      });
+
+      test('excludes task with due date today', () {
+        final file = TodoFile([
+          TodoItem(description: 'Today', metadata: {'due': '2026-03-13'}),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result, isEmpty);
+      });
+
+      test('excludes task without due date', () {
+        final file = TodoFile([
+          TodoItem(description: 'No due'),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result, isEmpty);
+      });
+
+      test('excludes completed task', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Done',
+            isCompleted: true,
+            metadata: {'due': '2026-03-14'},
+          ),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result, isEmpty);
+      });
+
+      test('excludes task with future threshold', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Hidden',
+            metadata: {'due': '2026-03-15', 't': '2026-03-14'},
+          ),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result, isEmpty);
+      });
+    });
   });
 }

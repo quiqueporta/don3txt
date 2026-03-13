@@ -4,7 +4,7 @@ import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/domain/todo_parser.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 
-enum TaskFilter { inbox, today, project, context, recurring }
+enum TaskFilter { inbox, today, upcoming, project, context, recurring }
 
 class TodoListNotifier extends ChangeNotifier {
   TodoRepository _repository;
@@ -15,6 +15,7 @@ class TodoListNotifier extends ChangeNotifier {
   TaskFilter _activeFilter = TaskFilter.inbox;
   String? _selectedProject;
   String? _selectedContext;
+  int _upcomingDays = 7;
 
   TodoListNotifier(this._repository);
 
@@ -67,6 +68,19 @@ class TodoListNotifier extends ChangeNotifier {
     return _todoFile!.allContexts(_today);
   }
 
+  set upcomingDays(int value) {
+    if (_upcomingDays == value) return;
+
+    _upcomingDays = value;
+    notifyListeners();
+  }
+
+  int get upcomingTaskCount {
+    if (_todoFile == null) return 0;
+
+    return _todoFile!.upcomingTasks(_today, _upcomingDays).length;
+  }
+
   bool get hasRecurringTasks {
     if (_todoFile == null) return false;
 
@@ -97,6 +111,8 @@ class TodoListNotifier extends ChangeNotifier {
         return _todoFile!.visiblePendingTasks(today);
       case TaskFilter.today:
         return _todoFile!.todayTasks(today);
+      case TaskFilter.upcoming:
+        return _todoFile!.upcomingTasks(today, _upcomingDays);
       case TaskFilter.project:
         if (_selectedProject == null) return [];
         return _todoFile!.tasksByProject(_selectedProject!, today);

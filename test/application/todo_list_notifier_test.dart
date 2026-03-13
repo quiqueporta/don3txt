@@ -531,6 +531,77 @@ void main() {
       });
     });
 
+    group('upcoming filter', () {
+      test('filteredTasks returns upcoming tasks when filter is upcoming',
+          () async {
+        final now = DateTime.now();
+        final tomorrowStr = _formatDate(now.add(const Duration(days: 1)));
+        final in3DaysStr = _formatDate(now.add(const Duration(days: 3)));
+        final in8DaysStr = _formatDate(now.add(const Duration(days: 8)));
+        final todayStr = _formatDate(now);
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Tomorrow', metadata: {'due': tomorrowStr}),
+            TodoItem(description: 'In 3 days', metadata: {'due': in3DaysStr}),
+            TodoItem(description: 'In 8 days', metadata: {'due': in8DaysStr}),
+            TodoItem(description: 'Today', metadata: {'due': todayStr}),
+            TodoItem(description: 'No due'),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.upcoming;
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 2);
+        expect(result[0].description, 'Tomorrow');
+        expect(result[1].description, 'In 3 days');
+      });
+
+      test('upcomingTaskCount returns correct count', () async {
+        final now = DateTime.now();
+        final tomorrowStr = _formatDate(now.add(const Duration(days: 1)));
+        final in3DaysStr = _formatDate(now.add(const Duration(days: 3)));
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Tomorrow', metadata: {'due': tomorrowStr}),
+            TodoItem(description: 'In 3 days', metadata: {'due': in3DaysStr}),
+            TodoItem(description: 'No due'),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        expect(notifier.upcomingTaskCount, 2);
+      });
+
+      test('upcomingTaskCount returns 0 when no file loaded', () {
+        expect(notifier.upcomingTaskCount, 0);
+      });
+
+      test('respects upcomingDays setting', () async {
+        final now = DateTime.now();
+        final in3DaysStr = _formatDate(now.add(const Duration(days: 3)));
+        final in5DaysStr = _formatDate(now.add(const Duration(days: 5)));
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'In 3 days', metadata: {'due': in3DaysStr}),
+            TodoItem(description: 'In 5 days', metadata: {'due': in5DaysStr}),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        notifier.upcomingDays = 3;
+        notifier.activeFilter = TaskFilter.upcoming;
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 1);
+        expect(result[0].description, 'In 3 days');
+      });
+    });
+
     group('context filter', () {
       test('filters tasks by context', () async {
         repository = InMemoryTodoRepository(
