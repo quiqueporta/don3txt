@@ -277,5 +277,68 @@ void main() {
         expect(result[0].description, 'Active');
       });
     });
+
+    group('allContexts', () {
+      test('returns unique sorted contexts from pending tasks', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 1', contexts: ['@phone', '@home']),
+          TodoItem(description: 'Task 2', contexts: ['@phone']),
+          TodoItem(description: 'Task 3', contexts: ['@office']),
+        ]);
+
+        expect(file.allContexts, ['@home', '@office', '@phone']);
+      });
+
+      test('excludes contexts from completed tasks', () {
+        final file = TodoFile([
+          TodoItem(
+              description: 'Done',
+              contexts: ['@old'],
+              isCompleted: true),
+          TodoItem(description: 'Active', contexts: ['@current']),
+        ]);
+
+        expect(file.allContexts, ['@current']);
+      });
+
+      test('returns empty list when no contexts', () {
+        final file = TodoFile([
+          TodoItem(description: 'No context'),
+        ]);
+
+        expect(file.allContexts, isEmpty);
+      });
+    });
+
+    group('tasksByContext', () {
+      test('returns pending tasks matching context', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 1', contexts: ['@phone']),
+          TodoItem(description: 'Task 2', contexts: ['@home']),
+          TodoItem(description: 'Task 3', contexts: ['@phone', '@home']),
+        ]);
+
+        final result = file.tasksByContext('@phone');
+
+        expect(result.length, 2);
+        expect(result[0].description, 'Task 1');
+        expect(result[1].description, 'Task 3');
+      });
+
+      test('excludes completed tasks', () {
+        final file = TodoFile([
+          TodoItem(
+              description: 'Done',
+              contexts: ['@phone'],
+              isCompleted: true),
+          TodoItem(description: 'Active', contexts: ['@phone']),
+        ]);
+
+        final result = file.tasksByContext('@phone');
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Active');
+      });
+    });
   });
 }

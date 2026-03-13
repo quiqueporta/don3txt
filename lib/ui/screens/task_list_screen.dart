@@ -8,11 +8,18 @@ import 'package:don3txt/ui/widgets/sidebar_drawer.dart';
 class TaskListScreen extends StatelessWidget {
   const TaskListScreen({super.key});
 
-  static const _filterTitles = {
-    TaskFilter.inbox: 'Inbox',
-    TaskFilter.today: 'Today',
-    TaskFilter.project: '',
-  };
+  String _titleFor(TodoListNotifier notifier) {
+    switch (notifier.activeFilter) {
+      case TaskFilter.inbox:
+        return 'Inbox';
+      case TaskFilter.today:
+        return 'Today';
+      case TaskFilter.project:
+        return notifier.selectedProject?.replaceFirst('+', '') ?? '';
+      case TaskFilter.context:
+        return notifier.selectedContext?.replaceFirst('@', '') ?? '';
+    }
+  }
 
   void _showAddTaskSheet(BuildContext context) {
     final notifier = context.read<TodoListNotifier>();
@@ -35,11 +42,7 @@ class TaskListScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          notifier.activeFilter == TaskFilter.project
-              ? (notifier.selectedProject?.replaceFirst('+', '') ?? '')
-              : _filterTitles[notifier.activeFilter]!,
-        ),
+        title: Text(_titleFor(notifier)),
       ),
       drawer: const SidebarDrawer(),
       body: _buildBody(notifier),

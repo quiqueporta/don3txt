@@ -82,6 +82,32 @@ class SidebarDrawer extends StatelessWidget {
                 },
               ),
           ],
+          if (notifier.allContexts.isNotEmpty) ...[
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
+              child: Text(
+                'My Contexts',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
+            for (final ctx in notifier.allContexts)
+              ListTile(
+                leading:
+                    Icon(Icons.alternate_email, color: Colors.deepPurple.shade400),
+                title: Text(ctx.replaceFirst('@', '')),
+                selected: notifier.activeFilter == TaskFilter.context &&
+                    notifier.selectedContext == ctx,
+                onTap: () {
+                  notifier.selectContext(ctx);
+                  Navigator.of(context).pop();
+                },
+              ),
+          ],
           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),

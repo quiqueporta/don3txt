@@ -47,6 +47,22 @@ class TodoFile {
         .toList();
   }
 
+  List<String> get allContexts {
+    final contexts = pendingTasks
+        .expand((item) => item.contexts)
+        .toSet()
+        .toList()
+      ..sort();
+
+    return contexts;
+  }
+
+  List<TodoItem> tasksByContext(String context) {
+    return items
+        .where((item) => !item.isCompleted && item.contexts.contains(context))
+        .toList();
+  }
+
   static String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }

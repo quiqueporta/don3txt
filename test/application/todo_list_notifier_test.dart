@@ -361,6 +361,46 @@ void main() {
         expect(notifier.selectedProject, '+Work');
       });
     });
+
+    group('allContexts', () {
+      test('returns contexts from pending tasks', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task 1', contexts: ['@phone']),
+            TodoItem(description: 'Task 2', contexts: ['@home']),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        expect(notifier.allContexts, ['@home', '@phone']);
+      });
+
+      test('returns empty when no file loaded', () {
+        expect(notifier.allContexts, isEmpty);
+      });
+    });
+
+    group('context filter', () {
+      test('filters tasks by context', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task 1', contexts: ['@phone']),
+            TodoItem(description: 'Task 2', contexts: ['@home']),
+            TodoItem(description: 'Task 3', contexts: ['@phone']),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        notifier.selectContext('@phone');
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 2);
+        expect(notifier.activeFilter, TaskFilter.context);
+        expect(notifier.selectedContext, '@phone');
+      });
+    });
   });
 }
 

@@ -303,6 +303,59 @@ void main() {
 
       expect(find.text('My Projects'), findsNothing);
     });
+
+    testWidgets('shows My Contexts section with context list',
+        (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Task 1', contexts: ['@phone']),
+          TodoItem(description: 'Task 2', contexts: ['@home']),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('My Contexts'), findsOneWidget);
+      expect(find.text('home'), findsOneWidget);
+      expect(find.text('phone'), findsOneWidget);
+    });
+
+    testWidgets('tapping context selects context filter', (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Task 1', contexts: ['@phone']),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('phone'));
+      await tester.pumpAndSettle();
+
+      expect(notifier.activeFilter, TaskFilter.context);
+      expect(notifier.selectedContext, '@phone');
+    });
+
+    testWidgets('does not show My Contexts when no contexts', (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'No context'),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('My Contexts'), findsNothing);
+    });
   });
 }
 

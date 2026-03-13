@@ -3,7 +3,7 @@ import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 
-enum TaskFilter { inbox, today, project }
+enum TaskFilter { inbox, today, project, context }
 
 class TodoListNotifier extends ChangeNotifier {
   TodoRepository _repository;
@@ -13,6 +13,7 @@ class TodoListNotifier extends ChangeNotifier {
   String? _error;
   TaskFilter _activeFilter = TaskFilter.inbox;
   String? _selectedProject;
+  String? _selectedContext;
 
   TodoListNotifier(this._repository);
 
@@ -22,18 +23,28 @@ class TodoListNotifier extends ChangeNotifier {
 
   TaskFilter get activeFilter => _activeFilter;
   String? get selectedProject => _selectedProject;
+  String? get selectedContext => _selectedContext;
 
   set activeFilter(TaskFilter value) {
     if (_activeFilter == value) return;
 
     _activeFilter = value;
     _selectedProject = null;
+    _selectedContext = null;
     notifyListeners();
   }
 
   void selectProject(String project) {
     _activeFilter = TaskFilter.project;
     _selectedProject = project;
+    _selectedContext = null;
+    notifyListeners();
+  }
+
+  void selectContext(String context) {
+    _activeFilter = TaskFilter.context;
+    _selectedContext = context;
+    _selectedProject = null;
     notifyListeners();
   }
 
@@ -41,6 +52,12 @@ class TodoListNotifier extends ChangeNotifier {
     if (_todoFile == null) return [];
 
     return _todoFile!.allProjects;
+  }
+
+  List<String> get allContexts {
+    if (_todoFile == null) return [];
+
+    return _todoFile!.allContexts;
   }
 
   int get todayTaskCount {
@@ -75,6 +92,9 @@ class TodoListNotifier extends ChangeNotifier {
       case TaskFilter.project:
         if (_selectedProject == null) return [];
         return _todoFile!.tasksByProject(_selectedProject!);
+      case TaskFilter.context:
+        if (_selectedContext == null) return [];
+        return _todoFile!.tasksByContext(_selectedContext!);
     }
   }
 
