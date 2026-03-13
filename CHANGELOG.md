@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1] - 2026-03-13
+
+### Changed
+- Update file_picker 8.3.7 → 10.3.10
+- Update google_fonts 6.3.3 → 8.0.2
+- Update flutter_lints 5.0.0 → 6.0.0
+
 ## [1.1.0] - 2026-03-13
 
 ### Added
