@@ -1,34 +1,10 @@
-<h1 align="center">don<em>3</em>txt</h1>
+# don*3*txt
 
-<p align="center">
-  <a href="https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml">
-    <img src="https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml/badge.svg" alt="Tests">
-  </a>
-</p>
+[![Tests](https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml/badge.svg)](https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml)
 
-<p align="center">
-  🌐 <a href="https://quiqueporta.com/don3txt/">quiqueporta.com/don3txt</a>
-  <br>
-  Task manager based on <a href="http://todotxt.org/">todo.txt</a> for Android
-</p>
+🌐 [quiqueporta.com/don3txt](https://quiqueporta.com/don3txt/)
 
----
-
-<p align="center">
-  <img src="docs/screen_1.png" alt="Sidebar navigation" width="220">
-  &nbsp;&nbsp;&nbsp;
-  <img src="docs/screen_2.png" alt="Inbox view" width="220">
-  &nbsp;&nbsp;&nbsp;
-  <img src="docs/screen_3.png" alt="Settings screen" width="220">
-</p>
-
-<p align="center">
-  <sub>Sidebar navigation</sub>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <sub>Inbox view</sub>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <sub>Settings screen</sub>
-</p>
+Task manager based on [todo.txt](http://todotxt.org/) for Android
 
 ---
 
@@ -166,3 +142,11 @@ lib/
 ├── application/         # Reactive state (ChangeNotifier)
 └── ui/                  # Theme, screens and widgets
 ```
+
+## Screenshots
+
+![Sidebar navigation](docs/screen_1.png)
+
+![Inbox view](docs/screen_2.png)
+
+![Settings screen](docs/screen_3.png)
