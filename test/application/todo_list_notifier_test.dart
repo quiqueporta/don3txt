@@ -308,6 +308,59 @@ void main() {
         expect(notifier.overdueTaskCount, 0);
       });
     });
+
+    group('allProjects', () {
+      test('returns projects from pending tasks', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task 1', projects: ['+Work']),
+            TodoItem(description: 'Task 2', projects: ['+Home']),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        expect(notifier.allProjects, ['+Home', '+Work']);
+      });
+
+      test('returns empty when no file loaded', () {
+        expect(notifier.allProjects, isEmpty);
+      });
+    });
+
+    group('project filter', () {
+      test('filters tasks by project', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task 1', projects: ['+Work']),
+            TodoItem(description: 'Task 2', projects: ['+Home']),
+            TodoItem(description: 'Task 3', projects: ['+Work']),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        notifier.selectProject('+Work');
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 2);
+        expect(notifier.activeFilter, TaskFilter.project);
+        expect(notifier.selectedProject, '+Work');
+      });
+
+      test('title returns project name without prefix', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task', projects: ['+Work']),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        notifier.selectProject('+Work');
+
+        expect(notifier.selectedProject, '+Work');
+      });
+    });
   });
 }
 

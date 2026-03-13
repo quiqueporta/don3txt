@@ -31,6 +31,22 @@ class TodoFile {
         .toList();
   }
 
+  List<String> get allProjects {
+    final projects = pendingTasks
+        .expand((item) => item.projects)
+        .toSet()
+        .toList()
+      ..sort();
+
+    return projects;
+  }
+
+  List<TodoItem> tasksByProject(String project) {
+    return items
+        .where((item) => !item.isCompleted && item.projects.contains(project))
+        .toList();
+  }
+
   static String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }

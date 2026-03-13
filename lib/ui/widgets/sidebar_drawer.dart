@@ -57,6 +57,31 @@ class SidebarDrawer extends StatelessWidget {
               Navigator.of(context).pop();
             },
           ),
+          if (notifier.allProjects.isNotEmpty) ...[
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
+              child: Text(
+                'My Projects',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
+            for (final project in notifier.allProjects)
+              ListTile(
+                leading: Icon(Icons.tag, color: Colors.teal.shade400),
+                title: Text(project.replaceFirst('+', '')),
+                selected: notifier.activeFilter == TaskFilter.project &&
+                    notifier.selectedProject == project,
+                onTap: () {
+                  notifier.selectProject(project);
+                  Navigator.of(context).pop();
+                },
+              ),
+          ],
           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),

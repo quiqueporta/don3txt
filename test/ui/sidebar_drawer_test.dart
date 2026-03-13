@@ -250,6 +250,59 @@ void main() {
 
       expect(find.byType(Badge), findsNothing);
     });
+
+    testWidgets('shows My Projects section with project list',
+        (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Task 1', projects: ['+Work']),
+          TodoItem(description: 'Task 2', projects: ['+Home']),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('My Projects'), findsOneWidget);
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('Work'), findsOneWidget);
+    });
+
+    testWidgets('tapping project selects project filter', (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Task 1', projects: ['+Work']),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Work'));
+      await tester.pumpAndSettle();
+
+      expect(notifier.activeFilter, TaskFilter.project);
+      expect(notifier.selectedProject, '+Work');
+    });
+
+    testWidgets('does not show My Projects when no projects', (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'No project'),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('My Projects'), findsNothing);
+    });
   });
 }
 

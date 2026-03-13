@@ -217,5 +217,65 @@ void main() {
         expect(file.overdueTasks(today), isEmpty);
       });
     });
+
+    group('allProjects', () {
+      test('returns unique sorted projects from pending tasks', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 1', projects: ['+Work', '+Home']),
+          TodoItem(description: 'Task 2', projects: ['+Work']),
+          TodoItem(description: 'Task 3', projects: ['+Health']),
+        ]);
+
+        expect(file.allProjects, ['+Health', '+Home', '+Work']);
+      });
+
+      test('excludes projects from completed tasks', () {
+        final file = TodoFile([
+          TodoItem(description: 'Done', projects: ['+Old'], isCompleted: true),
+          TodoItem(description: 'Active', projects: ['+Current']),
+        ]);
+
+        expect(file.allProjects, ['+Current']);
+      });
+
+      test('returns empty list when no projects', () {
+        final file = TodoFile([
+          TodoItem(description: 'No project'),
+        ]);
+
+        expect(file.allProjects, isEmpty);
+      });
+    });
+
+    group('tasksByProject', () {
+      test('returns pending tasks matching project', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 1', projects: ['+Work']),
+          TodoItem(description: 'Task 2', projects: ['+Home']),
+          TodoItem(description: 'Task 3', projects: ['+Work', '+Home']),
+        ]);
+
+        final result = file.tasksByProject('+Work');
+
+        expect(result.length, 2);
+        expect(result[0].description, 'Task 1');
+        expect(result[1].description, 'Task 3');
+      });
+
+      test('excludes completed tasks', () {
+        final file = TodoFile([
+          TodoItem(
+              description: 'Done',
+              projects: ['+Work'],
+              isCompleted: true),
+          TodoItem(description: 'Active', projects: ['+Work']),
+        ]);
+
+        final result = file.tasksByProject('+Work');
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Active');
+      });
+    });
   });
 }

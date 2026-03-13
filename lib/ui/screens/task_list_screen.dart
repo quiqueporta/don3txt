@@ -11,6 +11,7 @@ class TaskListScreen extends StatelessWidget {
   static const _filterTitles = {
     TaskFilter.inbox: 'Inbox',
     TaskFilter.today: 'Today',
+    TaskFilter.project: '',
   };
 
   void _showAddTaskSheet(BuildContext context) {
@@ -34,7 +35,11 @@ class TaskListScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_filterTitles[notifier.activeFilter]!),
+        title: Text(
+          notifier.activeFilter == TaskFilter.project
+              ? (notifier.selectedProject?.replaceFirst('+', '') ?? '')
+              : _filterTitles[notifier.activeFilter]!,
+        ),
       ),
       drawer: const SidebarDrawer(),
       body: _buildBody(notifier),
