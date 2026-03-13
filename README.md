@@ -1,4 +1,4 @@
-![don3txt](don3txt_logo.png)
+![don3txt](don3txt_logo_small.png)
 
 [![Tests](https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml/badge.svg)](https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml)
 
