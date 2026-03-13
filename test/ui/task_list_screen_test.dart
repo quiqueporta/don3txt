@@ -178,5 +178,165 @@ void main() {
       expect(find.text('Due today'), findsOneWidget);
       expect(find.text('No due'), findsNothing);
     });
+
+    group('filter icon', () {
+      testWidgets('shows filter icon in Inbox view', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Task', projects: ['+Work'])]),
+        ));
+        await notifier.loadTasks();
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byIcon(Icons.filter_list), findsOneWidget);
+      });
+
+      testWidgets('shows filter icon in Today view', (tester) async {
+        final now = DateTime.now();
+        final todayStr =
+            '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task', metadata: {'due': todayStr}),
+          ]),
+        ));
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.today;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byIcon(Icons.filter_list), findsOneWidget);
+      });
+
+      testWidgets('shows filter icon in Upcoming view', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.upcoming;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byIcon(Icons.filter_list), findsOneWidget);
+      });
+
+      testWidgets('does NOT show filter icon in Project view', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Task', projects: ['+Work'])]),
+        ));
+        await notifier.loadTasks();
+        notifier.selectProject('+Work');
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byIcon(Icons.filter_list), findsNothing);
+        expect(find.byIcon(Icons.filter_list_off), findsNothing);
+      });
+
+      testWidgets('does NOT show filter icon in Context view', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Task', contexts: ['@home'])]),
+        ));
+        await notifier.loadTasks();
+        notifier.selectContext('@home');
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byIcon(Icons.filter_list), findsNothing);
+        expect(find.byIcon(Icons.filter_list_off), findsNothing);
+      });
+
+      testWidgets('does NOT show filter icon in Recurring view', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.recurring;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byIcon(Icons.filter_list), findsNothing);
+        expect(find.byIcon(Icons.filter_list_off), findsNothing);
+      });
+
+      testWidgets('shows filled filter icon when filters active', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task 1', projects: ['+Work']),
+            TodoItem(description: 'Task 2', projects: ['+Home']),
+          ]),
+        ));
+        await notifier.loadTasks();
+        notifier.toggleFilterProject('+Work');
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byIcon(Icons.filter_list_off), findsOneWidget);
+      });
+    });
+
+    group('filter chips', () {
+      testWidgets('shows chips when filters are active', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task 1', projects: ['+Work']),
+            TodoItem(description: 'Task 2', projects: ['+Home']),
+          ]),
+        ));
+        await notifier.loadTasks();
+        notifier.toggleFilterProject('+Work');
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byType(Chip), findsOneWidget);
+        expect(find.text('+Work'), findsOneWidget);
+      });
+
+      testWidgets('dismissing chip removes filter', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task 1', projects: ['+Work']),
+            TodoItem(description: 'Task 2', projects: ['+Home']),
+          ]),
+        ));
+        await notifier.loadTasks();
+        notifier.toggleFilterProject('+Work');
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.close));
+        await tester.pump();
+
+        expect(notifier.hasActiveFilters, false);
+        expect(find.byType(Chip), findsNothing);
+      });
+
+      testWidgets('shows multiple chips for different filter types', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+              description: 'Task',
+              projects: ['+Work'],
+              contexts: ['@email'],
+              priority: 'A',
+            ),
+          ]),
+        ));
+        await notifier.loadTasks();
+        notifier.toggleFilterProject('+Work');
+        notifier.toggleFilterContext('@email');
+        notifier.toggleFilterPriority('A');
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byType(Chip), findsNWidgets(3));
+      });
+    });
   });
 }

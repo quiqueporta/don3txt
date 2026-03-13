@@ -17,6 +17,10 @@ class TodoListNotifier extends ChangeNotifier {
   String? _selectedContext;
   int _upcomingDays = 7;
 
+  Set<String> _filterProjects = {};
+  Set<String> _filterContexts = {};
+  Set<String> _filterPriorities = {};
+
   TodoListNotifier(this._repository);
 
   TodoFile? get todoFile => _todoFile;
@@ -27,12 +31,22 @@ class TodoListNotifier extends ChangeNotifier {
   String? get selectedProject => _selectedProject;
   String? get selectedContext => _selectedContext;
 
+  Set<String> get filterProjects => Set.unmodifiable(_filterProjects);
+  Set<String> get filterContexts => Set.unmodifiable(_filterContexts);
+  Set<String> get filterPriorities => Set.unmodifiable(_filterPriorities);
+
+  bool get hasActiveFilters =>
+      _filterProjects.isNotEmpty ||
+      _filterContexts.isNotEmpty ||
+      _filterPriorities.isNotEmpty;
+
   set activeFilter(TaskFilter value) {
     if (_activeFilter == value) return;
 
     _activeFilter = value;
     _selectedProject = null;
     _selectedContext = null;
+    _clearFiltersInternal();
     notifyListeners();
   }
 
@@ -101,7 +115,7 @@ class TodoListNotifier extends ChangeNotifier {
     return _todoFile!.overdueTasks(_today).length;
   }
 
-  List<TodoItem> get filteredTasks {
+  List<TodoItem> get _unfilteredViewTasks {
     if (_todoFile == null) return [];
 
     final today = _today;
@@ -122,6 +136,107 @@ class TodoListNotifier extends ChangeNotifier {
       case TaskFilter.recurring:
         return _todoFile!.recurringTasks;
     }
+  }
+
+  List<TodoItem> get filteredTasks {
+    final tasks = _unfilteredViewTasks;
+
+    if (!hasActiveFilters) return tasks;
+
+    return tasks.where((task) {
+      if (_filterProjects.isNotEmpty &&
+          !task.projects.any(_filterProjects.contains)) {
+        return false;
+      }
+
+      if (_filterContexts.isNotEmpty &&
+          !task.contexts.any(_filterContexts.contains)) {
+        return false;
+      }
+
+      if (_filterPriorities.isNotEmpty &&
+          !_filterPriorities.contains(task.priority)) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+  }
+
+  List<String> get availableProjectsForView {
+    final tasks = _unfilteredViewTasks;
+    final projects = <String>{};
+
+    for (final task in tasks) {
+      projects.addAll(task.projects);
+    }
+
+    return projects.toList()..sort();
+  }
+
+  List<String> get availableContextsForView {
+    final tasks = _unfilteredViewTasks;
+    final contexts = <String>{};
+
+    for (final task in tasks) {
+      contexts.addAll(task.contexts);
+    }
+
+    return contexts.toList()..sort();
+  }
+
+  List<String> get availablePrioritiesForView {
+    final tasks = _unfilteredViewTasks;
+    final priorities = <String>{};
+
+    for (final task in tasks) {
+      if (task.priority != null) {
+        priorities.add(task.priority!);
+      }
+    }
+
+    return priorities.toList()..sort();
+  }
+
+  void toggleFilterProject(String project) {
+    if (_filterProjects.contains(project)) {
+      _filterProjects = Set.from(_filterProjects)..remove(project);
+    } else {
+      _filterProjects = Set.from(_filterProjects)..add(project);
+    }
+
+    notifyListeners();
+  }
+
+  void toggleFilterContext(String context) {
+    if (_filterContexts.contains(context)) {
+      _filterContexts = Set.from(_filterContexts)..remove(context);
+    } else {
+      _filterContexts = Set.from(_filterContexts)..add(context);
+    }
+
+    notifyListeners();
+  }
+
+  void toggleFilterPriority(String priority) {
+    if (_filterPriorities.contains(priority)) {
+      _filterPriorities = Set.from(_filterPriorities)..remove(priority);
+    } else {
+      _filterPriorities = Set.from(_filterPriorities)..add(priority);
+    }
+
+    notifyListeners();
+  }
+
+  void clearFilters() {
+    _clearFiltersInternal();
+    notifyListeners();
+  }
+
+  void _clearFiltersInternal() {
+    _filterProjects = {};
+    _filterContexts = {};
+    _filterPriorities = {};
   }
 
   Future<void> switchRepository(TodoRepository repository) async {

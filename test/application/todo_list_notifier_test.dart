@@ -622,6 +622,221 @@ void main() {
         expect(notifier.selectedContext, '@phone');
       });
     });
+
+    group('view filters (project/context/priority)', () {
+      late TodoListNotifier notifier;
+
+      setUp(() async {
+        final now = DateTime.now();
+        final todayStr = _formatDate(now);
+        final tomorrowStr = _formatDate(now.add(const Duration(days: 1)));
+        final repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+              description: 'Work email',
+              projects: ['+Work'],
+              contexts: ['@email'],
+              priority: 'A',
+            ),
+            TodoItem(
+              description: 'Home phone',
+              projects: ['+Home'],
+              contexts: ['@phone'],
+              priority: 'B',
+            ),
+            TodoItem(
+              description: 'Work phone',
+              projects: ['+Work'],
+              contexts: ['@phone'],
+              priority: 'A',
+            ),
+            TodoItem(
+              description: 'Home email',
+              projects: ['+Home'],
+              contexts: ['@email'],
+            ),
+            TodoItem(
+              description: 'Due today work',
+              projects: ['+Work'],
+              metadata: {'due': todayStr},
+              priority: 'C',
+            ),
+            TodoItem(
+              description: 'Due tomorrow home',
+              projects: ['+Home'],
+              contexts: ['@email'],
+              metadata: {'due': tomorrowStr},
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+      });
+
+      test('empty filters do not alter results', () {
+        final unfilteredCount = notifier.filteredTasks.length;
+
+        expect(unfilteredCount, 6);
+        expect(notifier.hasActiveFilters, false);
+      });
+
+      test('filter by one project returns only tasks with that project', () {
+        notifier.toggleFilterProject('+Work');
+
+        final result = notifier.filteredTasks;
+
+        expect(result.every((t) => t.projects.contains('+Work')), true);
+        expect(result.length, 3);
+      });
+
+      test('filter by multiple projects uses OR', () {
+        notifier.toggleFilterProject('+Work');
+        notifier.toggleFilterProject('+Home');
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 6);
+      });
+
+      test('filter by context', () {
+        notifier.toggleFilterContext('@email');
+
+        final result = notifier.filteredTasks;
+
+        expect(result.every((t) => t.contexts.contains('@email')), true);
+        expect(result.length, 3);
+      });
+
+      test('filter by priority', () {
+        notifier.toggleFilterPriority('A');
+
+        final result = notifier.filteredTasks;
+
+        expect(result.every((t) => t.priority == 'A'), true);
+        expect(result.length, 2);
+      });
+
+      test('combine project + context uses AND', () {
+        notifier.toggleFilterProject('+Work');
+        notifier.toggleFilterContext('@phone');
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Work phone');
+      });
+
+      test('combine project + priority uses AND', () {
+        notifier.toggleFilterProject('+Work');
+        notifier.toggleFilterPriority('A');
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 2);
+      });
+
+      test('clearFilters resets all filters', () {
+        notifier.toggleFilterProject('+Work');
+        notifier.toggleFilterContext('@email');
+        notifier.toggleFilterPriority('A');
+
+        notifier.clearFilters();
+
+        expect(notifier.hasActiveFilters, false);
+        expect(notifier.filteredTasks.length, 6);
+      });
+
+      test('changing view clears filters', () {
+        notifier.toggleFilterProject('+Work');
+        expect(notifier.hasActiveFilters, true);
+
+        notifier.activeFilter = TaskFilter.today;
+
+        expect(notifier.hasActiveFilters, false);
+      });
+
+      test('hasActiveFilters reflects state correctly', () {
+        expect(notifier.hasActiveFilters, false);
+
+        notifier.toggleFilterProject('+Work');
+        expect(notifier.hasActiveFilters, true);
+
+        notifier.toggleFilterProject('+Work');
+        expect(notifier.hasActiveFilters, false);
+      });
+
+      test('toggle same filter twice removes it', () {
+        notifier.toggleFilterProject('+Work');
+        notifier.toggleFilterProject('+Work');
+
+        expect(notifier.filteredTasks.length, 6);
+        expect(notifier.hasActiveFilters, false);
+      });
+
+      test('availableProjectsForView returns projects from current view', () {
+        final projects = notifier.availableProjectsForView;
+
+        expect(projects, containsAll(['+Work', '+Home']));
+      });
+
+      test('availableContextsForView returns contexts from current view', () {
+        final contexts = notifier.availableContextsForView;
+
+        expect(contexts, containsAll(['@email', '@phone']));
+      });
+
+      test('availablePrioritiesForView returns priorities from current view', () {
+        final priorities = notifier.availablePrioritiesForView;
+
+        expect(priorities, containsAll(['A', 'B', 'C']));
+      });
+
+      test('availableProjectsForView scoped to today view', () {
+        notifier.activeFilter = TaskFilter.today;
+
+        final projects = notifier.availableProjectsForView;
+
+        expect(projects, ['+Work']);
+      });
+
+      test('availablePrioritiesForView scoped to today view', () {
+        notifier.activeFilter = TaskFilter.today;
+
+        final priorities = notifier.availablePrioritiesForView;
+
+        expect(priorities, ['C']);
+      });
+
+      test('filters apply on today view', () {
+        notifier.activeFilter = TaskFilter.today;
+        notifier.toggleFilterPriority('C');
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Due today work');
+      });
+
+      test('filters apply on upcoming view', () {
+        notifier.activeFilter = TaskFilter.upcoming;
+        notifier.toggleFilterProject('+Home');
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Due tomorrow home');
+      });
+
+      test('filter getters return current selections', () {
+        notifier.toggleFilterProject('+Work');
+        notifier.toggleFilterContext('@email');
+        notifier.toggleFilterPriority('A');
+
+        expect(notifier.filterProjects, {'+Work'});
+        expect(notifier.filterContexts, {'@email'});
+        expect(notifier.filterPriorities, {'A'});
+      });
+    });
   });
 }
 
