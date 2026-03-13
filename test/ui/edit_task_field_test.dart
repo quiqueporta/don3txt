@@ -290,5 +290,58 @@ void main() {
       expect(saved!.projects, ['+Work']);
       expect(saved!.contexts, ['@office']);
     });
+
+    testWidgets('shows existing priority as chip', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(
+          item: TodoItem(description: 'Task', priority: 'A'),
+          onSave: (_) {},
+        ),
+      );
+
+      expect(find.text('(A)'), findsOneWidget);
+    });
+
+    testWidgets('can change priority', (tester) async {
+      TodoItem? saved;
+
+      await tester.pumpWidget(
+        buildTestApp(
+          item: TodoItem(description: 'Task', priority: 'A'),
+          onSave: (item) => saved = item,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.flag));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('(B)'));
+      await tester.pumpAndSettle();
+
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(saved!.priority, 'B');
+    });
+
+    testWidgets('can clear priority', (tester) async {
+      TodoItem? saved;
+
+      await tester.pumpWidget(
+        buildTestApp(
+          item: TodoItem(description: 'Task', priority: 'A'),
+          onSave: (item) => saved = item,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.close).first);
+      await tester.pumpAndSettle();
+
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(saved!.priority, isNull);
+    });
   });
 }

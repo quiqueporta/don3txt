@@ -113,6 +113,15 @@ void main() {
       expect(updated.items[0].metadata['rec'], '+3m');
     });
 
+    test('addTask parses priority from description', () {
+      final file = TodoFile([]);
+
+      final updated = file.addTask('(A) Call mom');
+
+      expect(updated.items[0].priority, 'A');
+      expect(updated.items[0].description, 'Call mom');
+    });
+
     test('completeTask marks item as completed with today date', () {
       final file = TodoFile([
         TodoItem(description: 'Task 1'),

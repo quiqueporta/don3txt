@@ -19,6 +19,7 @@ class _EditTaskFieldState extends State<EditTaskField> {
   DateTime? _selectedDate;
   DateTime? _selectedStartDate;
   String? _recurrence;
+  String? _priority;
 
   @override
   void initState() {
@@ -38,6 +39,7 @@ class _EditTaskFieldState extends State<EditTaskField> {
     }
 
     _recurrence = item.metadata['rec'];
+    _priority = item.priority;
   }
 
   String _buildEditableText(TodoItem item) {
@@ -88,6 +90,7 @@ class _EditTaskFieldState extends State<EditTaskField> {
 
     final updatedItem = widget.item.copyWith(
       description: parsed?.description ?? text,
+      priority: _priority,
       projects: parsed?.projects ?? [],
       contexts: parsed?.contexts ?? [],
       metadata: metadata,
@@ -196,6 +199,32 @@ class _EditTaskFieldState extends State<EditTaskField> {
     }
   }
 
+  void _pickPriority() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Wrap(
+            spacing: 8,
+            alignment: WrapAlignment.center,
+            children: List.generate(6, (i) {
+              final letter = String.fromCharCode(65 + i);
+
+              return ActionChip(
+                label: Text('($letter)'),
+                onPressed: () {
+                  setState(() => _priority = letter);
+                  Navigator.pop(context);
+                },
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _pickStartDate() async {
     final now = DateTime.now();
     final settings = context.read<SettingsNotifier>();
@@ -276,11 +305,21 @@ class _EditTaskFieldState extends State<EditTaskField> {
                 icon: const Icon(Icons.repeat),
                 onPressed: _pickRecurrence,
               ),
+              IconButton(
+                icon: const Icon(Icons.flag),
+                onPressed: _pickPriority,
+              ),
             ],
           ),
           Wrap(
             spacing: 8,
             children: [
+              if (_priority != null)
+                Chip(
+                  label: Text('($_priority)'),
+                  deleteIcon: const Icon(Icons.close, size: 18),
+                  onDeleted: () => setState(() => _priority = null),
+                ),
               if (_selectedDate != null)
                 Chip(
                   label: Text(

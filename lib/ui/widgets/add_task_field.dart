@@ -4,7 +4,10 @@ import 'package:don3txt/application/settings_notifier.dart';
 
 class AddTaskField extends StatefulWidget {
   final void Function(String text,
-      {DateTime? dueDate, DateTime? startDate, String? recurrence}) onSubmit;
+      {DateTime? dueDate,
+      DateTime? startDate,
+      String? recurrence,
+      String? priority}) onSubmit;
 
   const AddTaskField({super.key, required this.onSubmit});
 
@@ -17,6 +20,7 @@ class _AddTaskFieldState extends State<AddTaskField> {
   DateTime? _selectedDate;
   DateTime? _selectedStartDate;
   String? _recurrence;
+  String? _priority;
 
   void _handleSubmit(String value) {
     final text = value.trim();
@@ -25,12 +29,14 @@ class _AddTaskFieldState extends State<AddTaskField> {
     widget.onSubmit(text,
         dueDate: _selectedDate,
         startDate: _selectedStartDate,
-        recurrence: _recurrence);
+        recurrence: _recurrence,
+        priority: _priority);
     _controller.clear();
     setState(() {
       _selectedDate = null;
       _selectedStartDate = null;
       _recurrence = null;
+      _priority = null;
     });
   }
 
@@ -126,6 +132,32 @@ class _AddTaskFieldState extends State<AddTaskField> {
     }
   }
 
+  void _pickPriority() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Wrap(
+            spacing: 8,
+            alignment: WrapAlignment.center,
+            children: List.generate(6, (i) {
+              final letter = String.fromCharCode(65 + i);
+
+              return ActionChip(
+                label: Text('($letter)'),
+                onPressed: () {
+                  setState(() => _priority = letter);
+                  Navigator.pop(context);
+                },
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _pickStartDate() async {
     final now = DateTime.now();
     final settings = context.read<SettingsNotifier>();
@@ -206,11 +238,21 @@ class _AddTaskFieldState extends State<AddTaskField> {
                 icon: const Icon(Icons.repeat),
                 onPressed: _pickRecurrence,
               ),
+              IconButton(
+                icon: const Icon(Icons.flag),
+                onPressed: _pickPriority,
+              ),
             ],
           ),
           Wrap(
             spacing: 8,
             children: [
+              if (_priority != null)
+                Chip(
+                  label: Text('($_priority)'),
+                  deleteIcon: const Icon(Icons.close, size: 18),
+                  onDeleted: () => setState(() => _priority = null),
+                ),
               if (_selectedDate != null)
                 Chip(
                   label: Text(

@@ -49,7 +49,10 @@ class InMemorySettingsRepository implements SettingsRepository {
 
 Widget buildTestApp({
   required void Function(String text,
-      {DateTime? dueDate, DateTime? startDate, String? recurrence}) onSubmit,
+      {DateTime? dueDate,
+      DateTime? startDate,
+      String? recurrence,
+      String? priority}) onSubmit,
   SettingsNotifier? settingsNotifier,
 }) {
   settingsNotifier ??= SettingsNotifier(InMemorySettingsRepository());
@@ -81,7 +84,7 @@ void main() {
   group('AddTaskField', () {
     testWidgets('renders text field', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
       );
 
       expect(find.byType(TextField), findsOneWidget);
@@ -91,7 +94,7 @@ void main() {
       String? submitted;
 
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (text, {dueDate, startDate, recurrence}) => submitted = text),
+        buildTestApp(onSubmit: (text, {dueDate, startDate, recurrence, priority}) => submitted = text),
       );
 
       await tester.enterText(find.byType(TextField), 'Buy milk');
@@ -103,7 +106,7 @@ void main() {
 
     testWidgets('clears field after submit', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
       );
 
       await tester.enterText(find.byType(TextField), 'Buy milk');
@@ -116,7 +119,7 @@ void main() {
 
     testWidgets('has calendar icon button', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
       );
 
       expect(find.byIcon(Icons.calendar_today), findsOneWidget);
@@ -124,7 +127,7 @@ void main() {
 
     testWidgets('shows date chip after selecting date', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
       );
       await tester.pumpAndSettle();
 
@@ -141,7 +144,7 @@ void main() {
 
     testWidgets('can clear selected date', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
       );
       await tester.pumpAndSettle();
 
@@ -162,7 +165,7 @@ void main() {
       DateTime? receivedDate;
 
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (text, {dueDate, startDate, recurrence}) => receivedDate = dueDate),
+        buildTestApp(onSubmit: (text, {dueDate, startDate, recurrence, priority}) => receivedDate = dueDate),
       );
       await tester.pumpAndSettle();
 
@@ -180,7 +183,7 @@ void main() {
 
     testWidgets('clears date after submit', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
       );
       await tester.pumpAndSettle();
 
@@ -203,7 +206,7 @@ void main() {
       await settings.load();
 
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}, settingsNotifier: settings),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}, settingsNotifier: settings),
       );
       await tester.pumpAndSettle();
 
@@ -224,7 +227,7 @@ void main() {
       await settings.load();
 
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}, settingsNotifier: settings),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}, settingsNotifier: settings),
       );
       await tester.pumpAndSettle();
 
@@ -240,7 +243,7 @@ void main() {
 
     testWidgets('has start date icon button', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
       );
 
       expect(find.byIcon(Icons.event_available), findsOneWidget);
@@ -252,7 +255,7 @@ void main() {
 
       await tester.pumpWidget(
         buildTestApp(
-            onSubmit: (text, {dueDate, startDate, recurrence}) =>
+            onSubmit: (text, {dueDate, startDate, recurrence, priority}) =>
                 receivedStartDate = startDate),
       );
       await tester.pumpAndSettle();
@@ -272,7 +275,7 @@ void main() {
     testWidgets('shows strict label as "Strict (from start date)"',
         (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
       );
       await tester.pumpAndSettle();
 
@@ -284,7 +287,7 @@ void main() {
 
     testWidgets('has repeat icon button', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
       );
 
       expect(find.byIcon(Icons.repeat), findsOneWidget);
@@ -293,7 +296,7 @@ void main() {
     testWidgets('shows recurrence chip after selecting recurrence',
         (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence}) {}),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
       );
       await tester.pumpAndSettle();
 
@@ -313,7 +316,7 @@ void main() {
 
       await tester.pumpWidget(
         buildTestApp(
-            onSubmit: (text, {dueDate, startDate, recurrence}) =>
+            onSubmit: (text, {dueDate, startDate, recurrence, priority}) =>
                 receivedRec = recurrence),
       );
       await tester.pumpAndSettle();
@@ -329,6 +332,89 @@ void main() {
       await tester.pump();
 
       expect(receivedRec, isNotNull);
+    });
+
+    testWidgets('has priority icon button', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
+      );
+
+      expect(find.byIcon(Icons.flag), findsOneWidget);
+    });
+
+    testWidgets('shows priority chip after selecting priority', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.flag));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('(A)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('(A)'), findsOneWidget);
+      expect(find.byType(Chip), findsOneWidget);
+    });
+
+    testWidgets('onSubmit receives priority when set', (tester) async {
+      String? receivedPriority;
+
+      await tester.pumpWidget(
+        buildTestApp(
+            onSubmit: (text, {dueDate, startDate, recurrence, priority}) =>
+                receivedPriority = priority),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.flag));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('(B)'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Task');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(receivedPriority, 'B');
+    });
+
+    testWidgets('can clear selected priority', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.flag));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('(A)'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Chip), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Chip), findsNothing);
+    });
+
+    testWidgets('clears priority after submit', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.flag));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('(A)'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Task');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Chip), findsNothing);
     });
   });
 }

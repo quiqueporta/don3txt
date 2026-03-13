@@ -837,6 +837,226 @@ void main() {
         expect(notifier.filterPriorities, {'A'});
       });
     });
+
+    group('task ordering', () {
+      test('sorts by priority first (A before B)', () async {
+        final repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Low', priority: 'B'),
+            TodoItem(description: 'High', priority: 'A'),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        final result = notifier.filteredTasks;
+
+        expect(result[0].description, 'High');
+        expect(result[1].description, 'Low');
+      });
+
+      test('tasks with priority come before tasks without', () async {
+        final repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'No priority'),
+            TodoItem(description: 'Has priority', priority: 'C'),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        final result = notifier.filteredTasks;
+
+        expect(result[0].description, 'Has priority');
+        expect(result[1].description, 'No priority');
+      });
+
+      test('same priority sorts by due date (earlier first)', () async {
+        final repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+              description: 'Later',
+              priority: 'A',
+              metadata: {'due': '2026-03-20'},
+            ),
+            TodoItem(
+              description: 'Sooner',
+              priority: 'A',
+              metadata: {'due': '2026-03-15'},
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        final result = notifier.filteredTasks;
+
+        expect(result[0].description, 'Sooner');
+        expect(result[1].description, 'Later');
+      });
+
+      test('tasks with due date come before tasks without (same priority)', () async {
+        final repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'No due', priority: 'A'),
+            TodoItem(
+              description: 'Has due',
+              priority: 'A',
+              metadata: {'due': '2026-03-20'},
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        final result = notifier.filteredTasks;
+
+        expect(result[0].description, 'Has due');
+        expect(result[1].description, 'No due');
+      });
+
+      test('same priority and due date sorts by creation date (older first)', () async {
+        final repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+              description: 'Newer',
+              priority: 'A',
+              metadata: {'due': '2026-03-20'},
+              creationDate: DateTime(2026, 3, 10),
+            ),
+            TodoItem(
+              description: 'Older',
+              priority: 'A',
+              metadata: {'due': '2026-03-20'},
+              creationDate: DateTime(2026, 3, 5),
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        final result = notifier.filteredTasks;
+
+        expect(result[0].description, 'Older');
+        expect(result[1].description, 'Newer');
+      });
+
+      test('tasks with creation date come before tasks without (all else equal)', () async {
+        final repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'No creation'),
+            TodoItem(
+              description: 'Has creation',
+              creationDate: DateTime(2026, 3, 5),
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        final result = notifier.filteredTasks;
+
+        expect(result[0].description, 'Has creation');
+        expect(result[1].description, 'No creation');
+      });
+
+      test('full ordering: priority > due > creation', () async {
+        final repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'No priority no due'),
+            TodoItem(
+              description: 'B with late due',
+              priority: 'B',
+              metadata: {'due': '2026-03-25'},
+            ),
+            TodoItem(
+              description: 'A with early due',
+              priority: 'A',
+              metadata: {'due': '2026-03-15'},
+            ),
+            TodoItem(
+              description: 'A with late due',
+              priority: 'A',
+              metadata: {'due': '2026-03-20'},
+            ),
+            TodoItem(description: 'A no due', priority: 'A'),
+            TodoItem(
+              description: 'No priority with due',
+              metadata: {'due': '2026-03-10'},
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        final descriptions = notifier.filteredTasks
+            .map((t) => t.description)
+            .toList();
+
+        expect(descriptions, [
+          'A with early due',
+          'A with late due',
+          'A no due',
+          'B with late due',
+          'No priority with due',
+          'No priority no due',
+        ]);
+      });
+
+      test('ordering applies to today view', () async {
+        final now = DateTime.now();
+        final todayStr = _formatDate(now);
+        final repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+              description: 'Low priority',
+              priority: 'C',
+              metadata: {'due': todayStr},
+            ),
+            TodoItem(
+              description: 'High priority',
+              priority: 'A',
+              metadata: {'due': todayStr},
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.today;
+
+        final result = notifier.filteredTasks;
+
+        expect(result[0].description, 'High priority');
+        expect(result[1].description, 'Low priority');
+      });
+
+      test('ordering applies to upcoming view', () async {
+        final now = DateTime.now();
+        final tomorrowStr = _formatDate(now.add(const Duration(days: 1)));
+        final repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+              description: 'Low priority',
+              priority: 'B',
+              metadata: {'due': tomorrowStr},
+            ),
+            TodoItem(
+              description: 'High priority',
+              priority: 'A',
+              metadata: {'due': tomorrowStr},
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.upcoming;
+
+        final result = notifier.filteredTasks;
+
+        expect(result[0].description, 'High priority');
+        expect(result[1].description, 'Low priority');
+      });
+    });
   });
 }
 

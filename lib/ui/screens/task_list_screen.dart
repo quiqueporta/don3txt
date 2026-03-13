@@ -50,11 +50,12 @@ class TaskListScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       builder: (_) => AddTaskField(
-        onSubmit: (text, {dueDate, startDate, recurrence}) {
+        onSubmit: (text, {dueDate, startDate, recurrence, priority}) {
           notifier.addTask(text,
               dueDate: dueDate,
               startDate: startDate,
-              recurrence: recurrence);
+              recurrence: recurrence,
+              priority: priority);
           Navigator.of(context).pop();
         },
       ),

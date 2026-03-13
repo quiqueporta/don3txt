@@ -138,8 +138,37 @@ class TodoListNotifier extends ChangeNotifier {
     }
   }
 
+  static int _compareTasks(TodoItem a, TodoItem b) {
+    final aPri = a.priority;
+    final bPri = b.priority;
+    if (aPri != null && bPri == null) return -1;
+    if (aPri == null && bPri != null) return 1;
+    if (aPri != null && bPri != null && aPri != bPri) {
+      return aPri.compareTo(bPri);
+    }
+
+    final aDue = a.metadata['due'];
+    final bDue = b.metadata['due'];
+    if (aDue != null && bDue == null) return -1;
+    if (aDue == null && bDue != null) return 1;
+    if (aDue != null && bDue != null && aDue != bDue) {
+      return aDue.compareTo(bDue);
+    }
+
+    final aCreation = a.creationDate;
+    final bCreation = b.creationDate;
+    if (aCreation != null && bCreation == null) return -1;
+    if (aCreation == null && bCreation != null) return 1;
+    if (aCreation != null && bCreation != null) {
+      return aCreation.compareTo(bCreation);
+    }
+
+    return 0;
+  }
+
   List<TodoItem> get filteredTasks {
-    final tasks = _unfilteredViewTasks;
+    final tasks = List<TodoItem>.from(_unfilteredViewTasks)
+      ..sort(_compareTasks);
 
     if (!hasActiveFilters) return tasks;
 
@@ -261,12 +290,18 @@ class TodoListNotifier extends ChangeNotifier {
   }
 
   Future<void> addTask(String description,
-      {DateTime? dueDate, DateTime? startDate, String? recurrence}) async {
+      {DateTime? dueDate,
+      DateTime? startDate,
+      String? recurrence,
+      String? priority}) async {
     if (description.trim().isEmpty) return;
     if (_todoFile == null) return;
 
     _todoFile = _todoFile!.addTask(description,
-        dueDate: dueDate, startDate: startDate, recurrence: recurrence);
+        dueDate: dueDate,
+        startDate: startDate,
+        recurrence: recurrence,
+        priority: priority);
     notifyListeners();
 
     await _repository.save(_todoFile!);

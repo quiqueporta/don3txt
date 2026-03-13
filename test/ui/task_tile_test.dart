@@ -265,5 +265,36 @@ void main() {
 
       expect(find.byIcon(Icons.calendar_today), findsNothing);
     });
+
+    testWidgets('shows priority badge when task has priority', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(description: 'Urgent', priority: 'A'),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('A'), findsOneWidget);
+      expect(find.byIcon(Icons.flag), findsOneWidget);
+    });
+
+    testWidgets('does not show priority badge when no priority', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(description: 'Normal task'),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.flag), findsNothing);
+    });
   });
 }

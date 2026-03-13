@@ -107,7 +107,10 @@ class TodoFile {
   }
 
   TodoFile addTask(String description,
-      {DateTime? dueDate, DateTime? startDate, String? recurrence}) {
+      {DateTime? dueDate,
+      DateTime? startDate,
+      String? recurrence,
+      String? priority}) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -134,6 +137,7 @@ class TodoFile {
 
     final newItem = TodoItem(
       description: parsed?.description ?? description,
+      priority: priority ?? parsed?.priority,
       creationDate: today,
       projects: parsed?.projects ?? [],
       contexts: parsed?.contexts ?? [],

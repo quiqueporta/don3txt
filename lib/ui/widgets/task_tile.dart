@@ -19,8 +19,12 @@ class TaskTile extends StatelessWidget {
     final dueDate = item.metadata['due'];
     final startDate = item.metadata['t'];
     final recurrence = item.metadata['rec'];
-    final hasMetadata =
-        tags.isNotEmpty || dueDate != null || startDate != null || recurrence != null;
+    final priority = item.priority;
+    final hasMetadata = priority != null ||
+        tags.isNotEmpty ||
+        dueDate != null ||
+        startDate != null ||
+        recurrence != null;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -65,6 +69,12 @@ class TaskTile extends StatelessWidget {
                       spacing: 8,
                       runSpacing: 4,
                       children: [
+                        if (priority != null)
+                          _TagChip(
+                            icon: Icons.flag,
+                            label: priority,
+                            color: Colors.orange,
+                          ),
                         if (dueDate != null)
                           _MetadataChip(
                             icon: Icons.calendar_today,
