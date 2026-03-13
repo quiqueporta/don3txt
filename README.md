@@ -1,12 +1,8 @@
-# don*3*txt
+![don3txt](don3txt_logo.png)
 
 [![Tests](https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml/badge.svg)](https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml)
 
-🌐 [quiqueporta.com/don3txt](https://quiqueporta.com/don3txt/)
-
-Task manager based on [todo.txt](http://todotxt.org/) for Android
-
----
+https://quiqueporta.com/don3txt/
 
 A mobile application for managing tasks based on the [todo.txt](http://todotxt.org/) format, designed for users who prefer plain text, full data ownership, and simple workflows.
 
@@ -143,10 +139,3 @@ lib/
 └── ui/                  # Theme, screens and widgets
 ```
 
-## Screenshots
-
-![Sidebar navigation](docs/screen_1.png)
-
-![Inbox view](docs/screen_2.png)
-
-![Settings screen](docs/screen_3.png)
