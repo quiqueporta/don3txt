@@ -5,6 +5,12 @@
 <h1 align="center">don3txt</h1>
 
 <p align="center">
+  <a href="https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml">
+    <img src="https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml/badge.svg" alt="Tests">
+  </a>
+</p>
+
+<p align="center">
   Gestor de tareas basado en <a href="http://todotxt.org/">todo.txt</a> para Android
   <br>
   <a href="https://quiqueporta.com/don3txt/">quiqueporta.com/don3txt</a>
