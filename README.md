@@ -37,6 +37,7 @@ Aplicación móvil para gestionar tareas basada en el formato [todo.txt](http://
 
 - **Inbox**: muestra todas las tareas pendientes
 - **Hoy**: muestra tareas con vencimiento hoy o anterior (atrasadas), con badges de conteo en el sidebar
+- **Upcoming**: muestra tareas con vencimiento desde mañana hasta N días vista, con badge de conteo. El periodo es configurable en ajustes (3, 7, 14 o 30 días)
 - **Mis Proyectos**: filtra por proyecto (`+nombre`), generados dinámicamente desde las tareas pendientes
 - **Mis Contextos**: filtra por contexto (`@nombre`), generados dinámicamente desde las tareas pendientes
 - **Recurring**: muestra todas las tareas recurrentes (con `rec:`), incluyendo las que tienen fecha de inicio futura
@@ -53,6 +54,7 @@ Aplicación móvil para gestionar tareas basada en el formato [todo.txt](http://
 
 - **Tema**: Sistema (por defecto), Claro u Oscuro — Material Design 3
 - **Primer día de la semana**: Lunes o Domingo (afecta al selector de fechas)
+- **Upcoming days**: periodo de la vista Upcoming (3, 7, 14 o 30 días)
 - **Ruta del fichero todo.txt**: configurable desde ajustes
 
 ## Formato todo.txt
