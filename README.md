@@ -1,8 +1,18 @@
-# don3txt
+<p align="center">
+  <img src="don3txt_logo.png" alt="don3txt" width="120">
+</p>
+
+<h1 align="center">don3txt</h1>
+
+<p align="center">
+  Gestor de tareas basado en <a href="http://todotxt.org/">todo.txt</a> para Android
+  <br>
+  <a href="https://quiqueporta.com/don3txt/">quiqueporta.com/don3txt</a>
+</p>
+
+---
 
 Aplicación móvil para gestionar tareas basada en el formato [todo.txt](http://todotxt.org/), diseñada para usuarios que prefieren texto plano, control total de sus datos y flujos de trabajo simples.
-
-Estética inspirada en Things 3: limpia, minimalista, fondo blanco, azul como accent.
 
 ## Requisitos
 
@@ -71,7 +81,7 @@ lib/
 
 ## Formato todo.txt
 
-La app trabaja con un fichero `todo.txt` en texto plano almacenado en el directorio de documentos de la app. Ejemplos de formato:
+La app trabaja con ficheros `todo.txt` en texto plano. Puedes seleccionar cualquier fichero de tu dispositivo para sincronizarlo con herramientas externas como Syncthing. Ejemplos de formato:
 
 ```
 Call Mom
