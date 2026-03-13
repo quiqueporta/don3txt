@@ -406,6 +406,68 @@ void main() {
       });
     });
 
+    group('rawContent', () {
+      test('returns serialized content of todoFile', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task 1'),
+            TodoItem(description: 'Task 2'),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        expect(notifier.rawContent, 'Task 1\nTask 2\n');
+      });
+
+      test('returns empty string when no file loaded', () {
+        expect(notifier.rawContent, '');
+      });
+    });
+
+    group('saveRawContent', () {
+      test('parses raw text and updates todoFile', () async {
+        await notifier.loadTasks();
+
+        await notifier.saveRawContent('Buy milk\n(A) Call mom +Family @phone\n');
+
+        expect(notifier.todoFile!.items.length, 2);
+        expect(notifier.todoFile!.items[0].description, 'Buy milk');
+        expect(notifier.todoFile!.items[1].description, 'Call mom');
+        expect(notifier.todoFile!.items[1].priority, 'A');
+        expect(notifier.todoFile!.items[1].projects, ['+Family']);
+        expect(notifier.todoFile!.items[1].contexts, ['@phone']);
+      });
+
+      test('persists to repository', () async {
+        await notifier.loadTasks();
+
+        await notifier.saveRawContent('Task from raw\n');
+
+        final reloaded = await repository.load();
+        expect(reloaded.items.length, 1);
+        expect(reloaded.items[0].description, 'Task from raw');
+      });
+
+      test('notifies listeners', () async {
+        await notifier.loadTasks();
+        var notified = false;
+        notifier.addListener(() => notified = true);
+
+        await notifier.saveRawContent('New task\n');
+
+        expect(notified, true);
+      });
+
+      test('skips empty lines', () async {
+        await notifier.loadTasks();
+
+        await notifier.saveRawContent('Task 1\n\nTask 2\n');
+
+        expect(notifier.todoFile!.items.length, 2);
+      });
+    });
+
     group('context filter', () {
       test('filters tasks by context', () async {
         repository = InMemoryTodoRepository(

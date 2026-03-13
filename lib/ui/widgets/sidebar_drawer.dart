@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/ui/screens/settings_screen.dart';
+import 'package:don3txt/ui/screens/debug_screen.dart';
 
 class SidebarDrawer extends StatelessWidget {
   const SidebarDrawer({super.key});
@@ -128,6 +129,16 @@ class SidebarDrawer extends StatelessWidget {
               Navigator.of(context).pop();
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.bug_report),
+            title: const Text('Debug'),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const DebugScreen()),
               );
             },
           ),

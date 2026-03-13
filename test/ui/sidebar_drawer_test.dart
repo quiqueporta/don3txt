@@ -11,6 +11,7 @@ import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/ui/widgets/sidebar_drawer.dart';
 import 'package:don3txt/ui/screens/settings_screen.dart';
+import 'package:don3txt/ui/screens/debug_screen.dart';
 
 class InMemoryTodoRepository implements TodoRepository {
   TodoFile _stored = TodoFile([]);
@@ -391,6 +392,28 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Recurring'), findsNothing);
+    });
+
+    testWidgets('shows Debug option', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Debug'), findsOneWidget);
+      expect(find.byIcon(Icons.bug_report), findsOneWidget);
+    });
+
+    testWidgets('tapping Debug navigates to DebugScreen', (tester) async {
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Debug'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DebugScreen), findsOneWidget);
     });
 
     testWidgets('does not show My Contexts when no contexts', (tester) async {

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
+import 'package:don3txt/domain/todo_parser.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 
 enum TaskFilter { inbox, today, project, context, recurring }
@@ -135,6 +136,25 @@ class TodoListNotifier extends ChangeNotifier {
 
     _todoFile = _todoFile!.addTask(description,
         dueDate: dueDate, startDate: startDate, recurrence: recurrence);
+    notifyListeners();
+
+    await _repository.save(_todoFile!);
+  }
+
+  String get rawContent => _todoFile?.serialize() ?? '';
+
+  Future<void> saveRawContent(String content) async {
+    final lines = content.split('\n');
+    final items = <TodoItem>[];
+
+    for (final line in lines) {
+      final item = parseLine(line);
+      if (item != null) {
+        items.add(item);
+      }
+    }
+
+    _todoFile = TodoFile(items);
     notifyListeners();
 
     await _repository.save(_todoFile!);
