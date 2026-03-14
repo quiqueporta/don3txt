@@ -927,6 +927,94 @@ void main() {
       });
     });
 
+    group('completed filter', () {
+      test('filteredTasks returns completed tasks when filter is completed',
+          () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Pending task'),
+            TodoItem(
+              description: 'Done task',
+              isCompleted: true,
+              completionDate: DateTime(2026, 3, 10),
+            ),
+            TodoItem(
+              description: 'Another done',
+              isCompleted: true,
+              completionDate: DateTime(2026, 3, 12),
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.completed;
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 2);
+        expect(result.every((t) => t.isCompleted), true);
+      });
+
+      test('completed tasks sorted by completion date descending', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+              description: 'Oldest',
+              isCompleted: true,
+              completionDate: DateTime(2026, 3, 5),
+            ),
+            TodoItem(
+              description: 'Newest',
+              isCompleted: true,
+              completionDate: DateTime(2026, 3, 12),
+            ),
+            TodoItem(
+              description: 'Middle',
+              isCompleted: true,
+              completionDate: DateTime(2026, 3, 8),
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.completed;
+
+        final result = notifier.filteredTasks;
+
+        expect(result[0].description, 'Newest');
+        expect(result[1].description, 'Middle');
+        expect(result[2].description, 'Oldest');
+      });
+
+      test('hasCompletedTasks returns true when completed tasks exist',
+          () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Pending'),
+            TodoItem(description: 'Done', isCompleted: true),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        expect(notifier.hasCompletedTasks, true);
+      });
+
+      test('hasCompletedTasks returns false when no completed tasks', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Pending')]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        expect(notifier.hasCompletedTasks, false);
+      });
+
+      test('hasCompletedTasks returns false when no file loaded', () {
+        expect(notifier.hasCompletedTasks, false);
+      });
+    });
+
     group('task ordering', () {
       test('sorts by priority first (A before B)', () async {
         final repository = InMemoryTodoRepository(

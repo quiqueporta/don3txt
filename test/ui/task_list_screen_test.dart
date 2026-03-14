@@ -371,6 +371,74 @@ void main() {
       });
     });
 
+    group('task completion snackbar', () {
+      testWidgets('shows snackbar with undo when completing a task',
+          (tester) async {
+        final repo = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Buy milk')]),
+        );
+        final notifier = TodoListNotifier(repo);
+        await notifier.loadTasks();
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.radio_button_unchecked));
+        await tester.pump();
+
+        expect(find.text('Task completed'), findsOneWidget);
+        expect(find.text('Undo'), findsOneWidget);
+      });
+
+      testWidgets('tapping undo restores the task', (tester) async {
+        final repo = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Buy milk')]),
+        );
+        final notifier = TodoListNotifier(repo);
+        await notifier.loadTasks();
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.radio_button_unchecked));
+        await tester.pump();
+
+        expect(find.text('Buy milk'), findsNothing);
+
+        await tester.pump(const Duration(milliseconds: 750));
+        await tester.tap(find.text('Undo'));
+        await tester.pump();
+        await tester.pump();
+
+        expect(notifier.todoFile!.items[0].isCompleted, false);
+        expect(find.text('Buy milk'), findsOneWidget);
+      });
+
+      testWidgets('does not show snackbar when uncompleting a task',
+          (tester) async {
+        final repo = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+              description: 'Done task',
+              isCompleted: true,
+              completionDate: DateTime(2026, 3, 10),
+            ),
+          ]),
+        );
+        final notifier = TodoListNotifier(repo);
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.completed;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.check_circle));
+        await tester.pump();
+
+        expect(find.text('Task completed'), findsNothing);
+      });
+    });
+
     group('filter chips', () {
       testWidgets('shows chips when filters are active', (tester) async {
         final notifier = TodoListNotifier(InMemoryTodoRepository(

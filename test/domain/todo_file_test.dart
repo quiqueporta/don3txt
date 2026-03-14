@@ -817,5 +817,19 @@ void main() {
         expect(result, isEmpty);
       });
     });
+    test('completedTasks returns only completed items', () {
+      final file = TodoFile([
+        TodoItem(description: 'Task 1'),
+        TodoItem(description: 'Task 2', isCompleted: true),
+        TodoItem(description: 'Task 3', isCompleted: true),
+        TodoItem(description: 'Task 4'),
+      ]);
+
+      final completed = file.completedTasks;
+
+      expect(completed.length, 2);
+      expect(completed[0].description, 'Task 2');
+      expect(completed[1].description, 'Task 3');
+    });
   });
 }

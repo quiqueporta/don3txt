@@ -10,6 +10,9 @@ class TodoFile {
   List<TodoItem> get pendingTasks =>
       items.where((item) => !item.isCompleted).toList();
 
+  List<TodoItem> get completedTasks =>
+      items.where((item) => item.isCompleted).toList();
+
   List<TodoItem> visiblePendingTasks(DateTime today) {
     return pendingTasks.where((item) => _isVisible(item, today)).toList();
   }

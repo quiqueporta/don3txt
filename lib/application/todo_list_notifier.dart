@@ -4,7 +4,7 @@ import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/domain/todo_parser.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 
-enum TaskFilter { inbox, today, upcoming, project, context, recurring }
+enum TaskFilter { inbox, today, upcoming, project, context, recurring, completed }
 
 class TodoListNotifier extends ChangeNotifier {
   TodoRepository _repository;
@@ -109,6 +109,12 @@ class TodoListNotifier extends ChangeNotifier {
     return _todoFile!.recurringTasks.isNotEmpty;
   }
 
+  bool get hasCompletedTasks {
+    if (_todoFile == null) return false;
+
+    return _todoFile!.completedTasks.isNotEmpty;
+  }
+
   int get todayTaskCount {
     if (_todoFile == null) return 0;
 
@@ -143,6 +149,8 @@ class TodoListNotifier extends ChangeNotifier {
         return _todoFile!.tasksByContext(_selectedContext!, today);
       case TaskFilter.recurring:
         return _todoFile!.recurringTasks;
+      case TaskFilter.completed:
+        return _todoFile!.completedTasks;
     }
   }
 
@@ -174,9 +182,23 @@ class TodoListNotifier extends ChangeNotifier {
     return 0;
   }
 
+  static int _compareCompletedTasks(TodoItem a, TodoItem b) {
+    final aDate = a.completionDate;
+    final bDate = b.completionDate;
+
+    if (aDate != null && bDate != null) return bDate.compareTo(aDate);
+    if (aDate != null && bDate == null) return -1;
+    if (aDate == null && bDate != null) return 1;
+
+    return 0;
+  }
+
   List<TodoItem> get filteredTasks {
+    final comparator = _activeFilter == TaskFilter.completed
+        ? _compareCompletedTasks
+        : _compareTasks;
     final tasks = List<TodoItem>.from(_unfilteredViewTasks)
-      ..sort(_compareTasks);
+      ..sort(comparator);
 
     if (!hasActiveFilters && !hasActiveSearch) return tasks;
 

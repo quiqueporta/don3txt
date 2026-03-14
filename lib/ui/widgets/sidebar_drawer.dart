@@ -149,17 +149,29 @@ class SidebarDrawer extends StatelessWidget {
                 },
               ),
           ],
-          if (notifier.hasRecurringTasks) ...[
+          if (notifier.hasRecurringTasks || notifier.hasCompletedTasks) ...[
             const Divider(),
-            ListTile(
-              leading: Icon(Icons.repeat, color: Colors.green.shade400),
-              title: const Text('Recurring'),
-              selected: notifier.activeFilter == TaskFilter.recurring,
-              onTap: () {
-                notifier.activeFilter = TaskFilter.recurring;
-                Navigator.of(context).pop();
-              },
-            ),
+            if (notifier.hasRecurringTasks)
+              ListTile(
+                leading: Icon(Icons.repeat, color: Colors.green.shade400),
+                title: const Text('Recurring'),
+                selected: notifier.activeFilter == TaskFilter.recurring,
+                onTap: () {
+                  notifier.activeFilter = TaskFilter.recurring;
+                  Navigator.of(context).pop();
+                },
+              ),
+            if (notifier.hasCompletedTasks)
+              ListTile(
+                leading: Icon(Icons.check_circle_outline,
+                    color: Colors.grey.shade500),
+                title: const Text('Completed'),
+                selected: notifier.activeFilter == TaskFilter.completed,
+                onTap: () {
+                  notifier.activeFilter = TaskFilter.completed;
+                  Navigator.of(context).pop();
+                },
+              ),
           ],
           const Divider(),
           ListTile(

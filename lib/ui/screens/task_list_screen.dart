@@ -38,6 +38,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
         return notifier.selectedContext?.replaceFirst('@', '') ?? '';
       case TaskFilter.recurring:
         return 'Recurring';
+      case TaskFilter.completed:
+        return 'Completed';
     }
   }
 
@@ -239,7 +241,25 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
                     return TaskTile(
                       item: item,
-                      onToggle: () => notifier.toggleTask(originalIndex),
+                      onToggle: () {
+                        final wasCompleted = item.isCompleted;
+                        notifier.toggleTask(originalIndex);
+
+                        if (!wasCompleted) {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('Task completed'),
+                              action: SnackBarAction(
+                                label: 'Undo',
+                                onPressed: () {
+                                  notifier.toggleTask(originalIndex);
+                                },
+                              ),
+                            ),
+                          );
+                        }
+                      },
                       onTap: () => _showEditTaskSheet(
                           context, notifier, originalIndex),
                     );
