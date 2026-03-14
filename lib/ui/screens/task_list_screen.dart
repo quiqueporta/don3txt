@@ -231,9 +231,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     ),
                   ),
                 )
-              : ListView.builder(
+              : ListView.separated(
                   padding: const EdgeInsets.only(top: 8, bottom: 80),
                   itemCount: tasks.length,
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final item = tasks[index];
                     final originalIndex =

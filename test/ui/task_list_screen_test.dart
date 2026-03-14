@@ -98,6 +98,24 @@ void main() {
       expect(find.text('Task 2'), findsOneWidget);
     });
 
+    testWidgets('shows dividers between tasks', (tester) async {
+      final repo = InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Task 1'),
+          TodoItem(description: 'Task 2'),
+          TodoItem(description: 'Task 3'),
+        ]),
+      );
+      final notifier = TodoListNotifier(repo);
+      await notifier.loadTasks();
+      notifier.activeFilter = TaskFilter.inbox;
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.pump();
+
+      expect(find.byType(Divider), findsNWidgets(2));
+    });
+
     testWidgets('shows only pending tasks', (tester) async {
       final repo = InMemoryTodoRepository(
         TodoFile([
