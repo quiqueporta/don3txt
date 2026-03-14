@@ -12,7 +12,7 @@ class TodoListNotifier extends ChangeNotifier {
   TodoFile? _todoFile;
   bool _isLoading = false;
   String? _error;
-  TaskFilter _activeFilter = TaskFilter.inbox;
+  TaskFilter _activeFilter = TaskFilter.today;
   String? _selectedProject;
   String? _selectedContext;
   int _upcomingDays = 7;

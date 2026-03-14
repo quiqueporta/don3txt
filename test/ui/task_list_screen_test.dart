@@ -89,6 +89,7 @@ void main() {
       );
       final notifier = TodoListNotifier(repo);
       await notifier.loadTasks();
+      notifier.activeFilter = TaskFilter.inbox;
 
       await tester.pumpWidget(buildTestApp(notifier));
       await tester.pump();
@@ -106,6 +107,7 @@ void main() {
       );
       final notifier = TodoListNotifier(repo);
       await notifier.loadTasks();
+      notifier.activeFilter = TaskFilter.inbox;
 
       await tester.pumpWidget(buildTestApp(notifier));
       await tester.pump();
@@ -124,14 +126,14 @@ void main() {
       expect(find.byType(FloatingActionButton), findsOneWidget);
     });
 
-    testWidgets('has Inbox title', (tester) async {
+    testWidgets('has Today title by default', (tester) async {
       final notifier = TodoListNotifier(InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier));
       await tester.pump();
 
-      expect(find.text('Inbox'), findsOneWidget);
+      expect(find.text('Today'), findsOneWidget);
     });
 
     testWidgets('shows Today title when filter is today', (tester) async {
@@ -315,6 +317,7 @@ void main() {
           ]),
         ));
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -338,6 +341,7 @@ void main() {
           ]),
         ));
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -379,6 +383,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -396,6 +401,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();

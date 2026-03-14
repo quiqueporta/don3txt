@@ -160,21 +160,21 @@ void main() {
     });
 
     group('activeFilter', () {
-      test('defaults to inbox', () {
-        expect(notifier.activeFilter, TaskFilter.inbox);
+      test('defaults to today', () {
+        expect(notifier.activeFilter, TaskFilter.today);
       });
 
-      test('can be changed to today', () {
-        notifier.activeFilter = TaskFilter.today;
+      test('can be changed to inbox', () {
+        notifier.activeFilter = TaskFilter.inbox;
 
-        expect(notifier.activeFilter, TaskFilter.today);
+        expect(notifier.activeFilter, TaskFilter.inbox);
       });
 
       test('notifies listeners when changed', () {
         var notified = false;
         notifier.addListener(() => notified = true);
 
-        notifier.activeFilter = TaskFilter.today;
+        notifier.activeFilter = TaskFilter.inbox;
 
         expect(notified, true);
       });
@@ -183,7 +183,7 @@ void main() {
         var notifyCount = 0;
         notifier.addListener(() => notifyCount++);
 
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.activeFilter = TaskFilter.today;
 
         expect(notifyCount, 0);
       });
@@ -199,6 +199,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         final result = notifier.filteredTasks;
 
@@ -671,6 +672,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
       });
 
       test('empty filters do not alter results', () {
@@ -886,6 +888,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         notifier.setSearchQuery('buy');
 
@@ -906,6 +909,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         notifier.toggleFilterProject('+Home');
         notifier.setSearchQuery('buy');
@@ -917,6 +921,7 @@ void main() {
       });
 
       test('changing view clears search', () {
+        notifier.activeFilter = TaskFilter.inbox;
         notifier.setSearchQuery('milk');
         expect(notifier.hasActiveSearch, true);
 
@@ -1025,6 +1030,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         final result = notifier.filteredTasks;
 
@@ -1041,6 +1047,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         final result = notifier.filteredTasks;
 
@@ -1065,6 +1072,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         final result = notifier.filteredTasks;
 
@@ -1085,6 +1093,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         final result = notifier.filteredTasks;
 
@@ -1111,6 +1120,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         final result = notifier.filteredTasks;
 
@@ -1130,6 +1140,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         final result = notifier.filteredTasks;
 
@@ -1165,6 +1176,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository);
         await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
 
         final descriptions = notifier.filteredTasks
             .map((t) => t.description)
