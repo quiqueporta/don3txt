@@ -98,11 +98,10 @@ class SidebarDrawer extends StatelessWidget {
               Navigator.of(context).pop();
             },
           ),
-          if (notifier.allProjects.isNotEmpty) ...[
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
-              child: Text(
+          if (notifier.allProjects.isNotEmpty)
+            ExpansionTile(
+              leading: Icon(Icons.tag, color: Colors.teal.shade400),
+              title: Text(
                 'My Projects',
                 style: TextStyle(
                   fontSize: 13,
@@ -110,24 +109,26 @@ class SidebarDrawer extends StatelessWidget {
                   color: Colors.grey.shade600,
                 ),
               ),
+              initiallyExpanded: false,
+              children: [
+                for (final project in notifier.allProjects)
+                  ListTile(
+                    contentPadding: const EdgeInsets.only(left: 56),
+                    title: Text(project.replaceFirst('+', '')),
+                    selected: notifier.activeFilter == TaskFilter.project &&
+                        notifier.selectedProject == project,
+                    onTap: () {
+                      notifier.selectProject(project);
+                      Navigator.of(context).pop();
+                    },
+                  ),
+              ],
             ),
-            for (final project in notifier.allProjects)
-              ListTile(
-                leading: Icon(Icons.tag, color: Colors.teal.shade400),
-                title: Text(project.replaceFirst('+', '')),
-                selected: notifier.activeFilter == TaskFilter.project &&
-                    notifier.selectedProject == project,
-                onTap: () {
-                  notifier.selectProject(project);
-                  Navigator.of(context).pop();
-                },
-              ),
-          ],
-          if (notifier.allContexts.isNotEmpty) ...[
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
-              child: Text(
+          if (notifier.allContexts.isNotEmpty)
+            ExpansionTile(
+              leading: Icon(Icons.alternate_email,
+                  color: Colors.deepPurple.shade400),
+              title: Text(
                 'My Contexts',
                 style: TextStyle(
                   fontSize: 13,
@@ -135,22 +136,24 @@ class SidebarDrawer extends StatelessWidget {
                   color: Colors.grey.shade600,
                 ),
               ),
+              initiallyExpanded: false,
+              children: [
+                for (final ctx in notifier.allContexts)
+                  ListTile(
+                    contentPadding: const EdgeInsets.only(left: 56),
+                    title: Text(ctx.replaceFirst('@', '')),
+                    selected: notifier.activeFilter == TaskFilter.context &&
+                        notifier.selectedContext == ctx,
+                    onTap: () {
+                      notifier.selectContext(ctx);
+                      Navigator.of(context).pop();
+                    },
+                  ),
+              ],
             ),
-            for (final ctx in notifier.allContexts)
-              ListTile(
-                leading:
-                    Icon(Icons.alternate_email, color: Colors.deepPurple.shade400),
-                title: Text(ctx.replaceFirst('@', '')),
-                selected: notifier.activeFilter == TaskFilter.context &&
-                    notifier.selectedContext == ctx,
-                onTap: () {
-                  notifier.selectContext(ctx);
-                  Navigator.of(context).pop();
-                },
-              ),
-          ],
           if (notifier.hasRecurringTasks || notifier.hasCompletedTasks) ...[
-            const Divider(),
+            if (notifier.allProjects.isEmpty && notifier.allContexts.isEmpty)
+              const Divider(),
             if (notifier.hasRecurringTasks)
               ListTile(
                 leading: Icon(Icons.repeat, color: Colors.green.shade400),

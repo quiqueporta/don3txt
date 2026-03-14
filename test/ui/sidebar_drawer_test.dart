@@ -258,7 +258,7 @@ void main() {
       expect(find.byType(Badge), findsNothing);
     });
 
-    testWidgets('shows My Projects section with project list',
+    testWidgets('shows My Projects as collapsed section',
         (tester) async {
       notifier = TodoListNotifier(InMemoryTodoRepository(
         TodoFile([
@@ -273,8 +273,58 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('My Projects'), findsOneWidget);
+      expect(find.text('Home'), findsNothing);
+      expect(find.text('Work'), findsNothing);
+    });
+
+    testWidgets('expanding My Projects shows project list',
+        (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Task 1', projects: ['+Work']),
+          TodoItem(description: 'Task 2', projects: ['+Home']),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('My Projects'));
+      await tester.pumpAndSettle();
+
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Work'), findsOneWidget);
+    });
+
+    testWidgets('projects are sorted alphabetically', (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Task 1', projects: ['+Zebra']),
+          TodoItem(description: 'Task 2', projects: ['+Alpha']),
+          TodoItem(description: 'Task 3', projects: ['+Middle']),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('My Projects'));
+      await tester.pumpAndSettle();
+
+      final projectTexts = tester
+          .widgetList<Text>(find.descendant(
+            of: find.byType(ListTile),
+            matching: find.byType(Text),
+          ))
+          .map((t) => t.data)
+          .where((t) => t == 'Alpha' || t == 'Middle' || t == 'Zebra')
+          .toList();
+
+      expect(projectTexts, ['Alpha', 'Middle', 'Zebra']);
     });
 
     testWidgets('tapping project selects project filter', (tester) async {
@@ -287,6 +337,9 @@ void main() {
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
       await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('My Projects'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Work'));
@@ -311,7 +364,7 @@ void main() {
       expect(find.text('My Projects'), findsNothing);
     });
 
-    testWidgets('shows My Contexts section with context list',
+    testWidgets('shows My Contexts as collapsed section',
         (tester) async {
       notifier = TodoListNotifier(InMemoryTodoRepository(
         TodoFile([
@@ -326,8 +379,58 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('My Contexts'), findsOneWidget);
+      expect(find.text('home'), findsNothing);
+      expect(find.text('phone'), findsNothing);
+    });
+
+    testWidgets('expanding My Contexts shows context list',
+        (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Task 1', contexts: ['@phone']),
+          TodoItem(description: 'Task 2', contexts: ['@home']),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('My Contexts'));
+      await tester.pumpAndSettle();
+
       expect(find.text('home'), findsOneWidget);
       expect(find.text('phone'), findsOneWidget);
+    });
+
+    testWidgets('contexts are sorted alphabetically', (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Task 1', contexts: ['@work']),
+          TodoItem(description: 'Task 2', contexts: ['@alpha']),
+          TodoItem(description: 'Task 3', contexts: ['@mobile']),
+        ]),
+      ));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('My Contexts'));
+      await tester.pumpAndSettle();
+
+      final contextTexts = tester
+          .widgetList<Text>(find.descendant(
+            of: find.byType(ListTile),
+            matching: find.byType(Text),
+          ))
+          .map((t) => t.data)
+          .where((t) => t == 'alpha' || t == 'mobile' || t == 'work')
+          .toList();
+
+      expect(contextTexts, ['alpha', 'mobile', 'work']);
     });
 
     testWidgets('tapping context selects context filter', (tester) async {
@@ -340,6 +443,9 @@ void main() {
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
       await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('My Contexts'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('phone'));
