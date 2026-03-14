@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.3.0] - 2026-03-14
+
+### Added
+- Completed tasks view accessible from the sidebar
+- Completion snackbar with undo button when completing a task
+- Dividers between tasks in list views
+- Collapsible Projects and Contexts sections in the sidebar
+
+### Changed
+- Default view changed from Inbox to Today
+
 ## [1.2.0] - 2026-03-13
 
 ### Added
