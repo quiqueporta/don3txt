@@ -817,6 +817,127 @@ void main() {
         expect(result, isEmpty);
       });
     });
+    group('deleteTask', () {
+      test('removes item from the middle', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 1'),
+          TodoItem(description: 'Task 2'),
+          TodoItem(description: 'Task 3'),
+        ]);
+
+        final updated = file.deleteTask(1);
+
+        expect(updated.items.length, 2);
+        expect(updated.items[0].description, 'Task 1');
+        expect(updated.items[1].description, 'Task 3');
+      });
+
+      test('removes first item', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 1'),
+          TodoItem(description: 'Task 2'),
+        ]);
+
+        final updated = file.deleteTask(0);
+
+        expect(updated.items.length, 1);
+        expect(updated.items[0].description, 'Task 2');
+      });
+
+      test('removes last item', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 1'),
+          TodoItem(description: 'Task 2'),
+        ]);
+
+        final updated = file.deleteTask(1);
+
+        expect(updated.items.length, 1);
+        expect(updated.items[0].description, 'Task 1');
+      });
+
+      test('removes only item', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 1'),
+        ]);
+
+        final updated = file.deleteTask(0);
+
+        expect(updated.items, isEmpty);
+      });
+    });
+
+    group('insertTask', () {
+      test('inserts item in the middle', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 1'),
+          TodoItem(description: 'Task 3'),
+        ]);
+
+        final updated = file.insertTask(1, TodoItem(description: 'Task 2'));
+
+        expect(updated.items.length, 3);
+        expect(updated.items[0].description, 'Task 1');
+        expect(updated.items[1].description, 'Task 2');
+        expect(updated.items[2].description, 'Task 3');
+      });
+
+      test('inserts at the beginning', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 2'),
+        ]);
+
+        final updated = file.insertTask(0, TodoItem(description: 'Task 1'));
+
+        expect(updated.items.length, 2);
+        expect(updated.items[0].description, 'Task 1');
+        expect(updated.items[1].description, 'Task 2');
+      });
+
+      test('inserts at the end', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 1'),
+        ]);
+
+        final updated = file.insertTask(1, TodoItem(description: 'Task 2'));
+
+        expect(updated.items.length, 2);
+        expect(updated.items[0].description, 'Task 1');
+        expect(updated.items[1].description, 'Task 2');
+      });
+
+      test('inserts into empty list', () {
+        final file = TodoFile([]);
+
+        final updated = file.insertTask(0, TodoItem(description: 'Task 1'));
+
+        expect(updated.items.length, 1);
+        expect(updated.items[0].description, 'Task 1');
+      });
+
+      test('clamps index beyond list length', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 1'),
+        ]);
+
+        final updated = file.insertTask(99, TodoItem(description: 'Task 2'));
+
+        expect(updated.items.length, 2);
+        expect(updated.items[1].description, 'Task 2');
+      });
+
+      test('clamps negative index to zero', () {
+        final file = TodoFile([
+          TodoItem(description: 'Task 2'),
+        ]);
+
+        final updated = file.insertTask(-5, TodoItem(description: 'Task 1'));
+
+        expect(updated.items.length, 2);
+        expect(updated.items[0].description, 'Task 1');
+      });
+    });
+
     test('completedTasks returns only completed items', () {
       final file = TodoFile([
         TodoItem(description: 'Task 1'),

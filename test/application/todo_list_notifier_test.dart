@@ -532,6 +532,88 @@ void main() {
       });
     });
 
+    group('deleteTask', () {
+      test('removes task and persists', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task 1'),
+            TodoItem(description: 'Task 2'),
+            TodoItem(description: 'Task 3'),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        await notifier.deleteTask(1);
+
+        expect(notifier.todoFile!.items.length, 2);
+        expect(notifier.todoFile!.items[0].description, 'Task 1');
+        expect(notifier.todoFile!.items[1].description, 'Task 3');
+
+        final reloaded = await repository.load();
+        expect(reloaded.items.length, 2);
+      });
+
+      test('notifies listeners', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Task 1')]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        var notified = false;
+        notifier.addListener(() => notified = true);
+
+        await notifier.deleteTask(0);
+
+        expect(notified, true);
+      });
+
+      test('does nothing when no file loaded', () async {
+        await notifier.deleteTask(0);
+
+        expect(notifier.todoFile, isNull);
+      });
+    });
+
+    group('insertTask', () {
+      test('inserts task and persists', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Task 1'),
+            TodoItem(description: 'Task 3'),
+          ]),
+        );
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+
+        await notifier.insertTask(1, TodoItem(description: 'Task 2'));
+
+        expect(notifier.todoFile!.items.length, 3);
+        expect(notifier.todoFile!.items[1].description, 'Task 2');
+
+        final reloaded = await repository.load();
+        expect(reloaded.items.length, 3);
+      });
+
+      test('notifies listeners', () async {
+        repository = InMemoryTodoRepository(TodoFile([]));
+        notifier = TodoListNotifier(repository);
+        await notifier.loadTasks();
+        var notified = false;
+        notifier.addListener(() => notified = true);
+
+        await notifier.insertTask(0, TodoItem(description: 'Task 1'));
+
+        expect(notified, true);
+      });
+
+      test('does nothing when no file loaded', () async {
+        await notifier.insertTask(0, TodoItem(description: 'Should not crash'));
+
+        expect(notifier.todoFile, isNull);
+      });
+    });
+
     group('upcoming filter', () {
       test('filteredTasks returns upcoming tasks when filter is upcoming',
           () async {

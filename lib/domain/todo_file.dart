@@ -219,6 +219,21 @@ class TodoFile {
     );
   }
 
+  TodoFile deleteTask(int index) {
+    final updatedItems = List<TodoItem>.from(items);
+    updatedItems.removeAt(index);
+
+    return TodoFile(updatedItems);
+  }
+
+  TodoFile insertTask(int index, TodoItem item) {
+    final updatedItems = List<TodoItem>.from(items);
+    final clampedIndex = index.clamp(0, updatedItems.length);
+    updatedItems.insert(clampedIndex, item);
+
+    return TodoFile(updatedItems);
+  }
+
   TodoFile updateTask(int index, TodoItem newItem) {
     final updatedItems = List<TodoItem>.from(items);
     updatedItems[index] = newItem;

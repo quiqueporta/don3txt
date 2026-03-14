@@ -264,6 +264,25 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       },
                       onTap: () => _showEditTaskSheet(
                           context, notifier, originalIndex),
+                      onDelete: () {
+                        final deletedItem = item;
+                        final deletedIndex = originalIndex;
+                        notifier.deleteTask(deletedIndex);
+
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Task deleted'),
+                            action: SnackBarAction(
+                              label: 'Undo',
+                              onPressed: () {
+                                notifier.insertTask(
+                                    deletedIndex, deletedItem);
+                              },
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

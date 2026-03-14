@@ -5,12 +5,14 @@ class TaskTile extends StatelessWidget {
   final TodoItem item;
   final VoidCallback onToggle;
   final VoidCallback? onTap;
+  final VoidCallback? onDelete;
 
   const TaskTile({
     super.key,
     required this.item,
     required this.onToggle,
     this.onTap,
+    this.onDelete,
   });
 
   @override
@@ -109,6 +111,17 @@ class TaskTile extends StatelessWidget {
             ),
             ),
           ),
+          if (onDelete != null)
+            PopupMenuButton<String>(
+              icon: Icon(Icons.more_vert, color: Colors.grey.shade400, size: 20),
+              padding: EdgeInsets.zero,
+              onSelected: (value) {
+                if (value == 'delete') onDelete!();
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(value: 'delete', child: Text('Delete')),
+              ],
+            ),
         ],
       ),
     );
