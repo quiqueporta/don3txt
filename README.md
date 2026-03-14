@@ -12,6 +12,7 @@ A mobile application for managing tasks based on the [todo.txt](http://todotxt.o
 
 - **Create tasks** with automatic parsing of projects (`+name`), contexts (`@name`) and metadata (`key:value`)
 - **Complete/uncomplete** tasks with a single tap. The completion date is assigned automatically. A snackbar with **Undo** appears after completing a task
+- **Delete tasks** from the three-dot menu on each task, with a snackbar and **Undo** to restore
 - **Priorities** from `(A)` to `(Z)` following the todo.txt standard
 - **Creation dates** assigned automatically when a task is created
 - **Due dates** (`due:YYYY-MM-DD`) with a built-in calendar picker

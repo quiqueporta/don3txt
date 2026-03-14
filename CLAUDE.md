@@ -27,6 +27,7 @@ Clean Architecture con separación en capas:
 - Fechas de inicio/threshold (`t:`) con selector de calendario — oculta tareas con `t:` futuro de todas las vistas excepto Recurring
 - Tareas recurrentes (`rec:`) con modo flexible y estricto (`+`). Estricto requiere `t:` para calcular desde fecha original; sin `t:` cae a flexible
 - Vistas: Hoy (por defecto, con badges de atrasadas/hoy), Inbox, Upcoming (tareas de mañana a N días, periodo configurable), filtro por Proyecto (colapsable), filtro por Contexto (colapsable), Recurring (tareas con `rec:`, sin filtro threshold), Completed (tareas completadas, ordenadas por fecha de completitud descendente)
+- Eliminación de tareas desde menú de tres puntos con Snackbar y Undo
 - Snackbar con Undo al completar una tarea
 - Búsqueda por texto libre en la descripción de las tareas, disponible en todas las vistas
 - Selección de fichero todo.txt desde cualquier ubicación del dispositivo
