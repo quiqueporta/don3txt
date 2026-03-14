@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.4.0] - 2026-03-14
+
+### Added
+- Delete task with undo support via three-dot menu on each task
+
 ## [1.3.0] - 2026-03-14
 
 ### Added
