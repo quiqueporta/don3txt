@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
@@ -39,7 +40,7 @@ class SettingsScreen extends StatelessWidget {
                     onPressed: () => _resetToDefault(context),
                   )
                 : null,
-            onTap: () => _showFileOptions(context),
+            onTap: () => _selectFolder(context),
           ),
           const Divider(),
           const Padding(
@@ -116,47 +117,14 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showFileOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.file_open),
-              title: const Text('Select existing file'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickExistingFile(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.create_new_folder),
-              title: const Text('Create new file'),
-              onTap: () {
-                Navigator.pop(context);
-                _createNewFile(context);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _pickExistingFile(BuildContext context) async {
-    final result = await FilePicker.platform.pickFiles();
-    if (result == null || result.files.single.path == null) return;
+  Future<void> _selectFolder(BuildContext context) async {
+    if (!await Permission.manageExternalStorage.isGranted) {
+      final status = await Permission.manageExternalStorage.request();
+      if (!status.isGranted) return;
+    }
 
     if (!context.mounted) return;
 
-    final path = result.files.single.path!;
-
-    await _switchToFile(context, path);
-  }
-
-  Future<void> _createNewFile(BuildContext context) async {
     final directoryPath = await FilePicker.platform.getDirectoryPath();
     if (directoryPath == null) return;
 

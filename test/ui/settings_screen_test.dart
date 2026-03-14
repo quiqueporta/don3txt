@@ -162,5 +162,12 @@ void main() {
 
       expect(notifier.themeMode, AppThemeMode.dark);
     });
+
+    testWidgets('does not contain file selection options in UI', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier));
+
+      expect(find.text('Select existing file'), findsNothing);
+      expect(find.text('Create new file'), findsNothing);
+    });
   });
 }
