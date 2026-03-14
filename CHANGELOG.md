@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.0] - 2026-03-14
+
+### Fixed
+- File picker was copying files to app cache instead of working on the original
+- App could not access the selected file after restart due to missing storage permission
+
+### Changed
+- Unified file selection into a single "select folder" flow using the real directory path
+
 ## [1.4.0] - 2026-03-14
 
 ### Added
