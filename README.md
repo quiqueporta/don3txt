@@ -11,7 +11,7 @@ A mobile application for managing tasks based on the [todo.txt](http://todotxt.o
 ### Task management
 
 - **Create tasks** with automatic parsing of projects (`+name`), contexts (`@name`) and metadata (`key:value`)
-- **Complete/uncomplete** tasks with a single tap. The completion date is assigned automatically
+- **Complete/uncomplete** tasks with a single tap. The completion date is assigned automatically. A snackbar with **Undo** appears after completing a task
 - **Priorities** from `(A)` to `(Z)` following the todo.txt standard
 - **Creation dates** assigned automatically when a task is created
 - **Due dates** (`due:YYYY-MM-DD`) with a built-in calendar picker
@@ -28,11 +28,12 @@ A mobile application for managing tasks based on the [todo.txt](http://todotxt.o
 ### Views and filters
 
 - **Inbox**: shows all pending tasks
-- **Today**: shows tasks due today or earlier (overdue), with count badges in the sidebar
+- **Today** (default view): shows tasks due today or earlier (overdue), with count badges in the sidebar
 - **Upcoming**: shows tasks due from tomorrow up to N days ahead, with a count badge. The period is configurable in settings (3, 7, 14 or 30 days)
-- **My Projects**: filters by project (`+name`), generated dynamically from pending tasks
-- **My Contexts**: filters by context (`@name`), generated dynamically from pending tasks
+- **My Projects**: filters by project (`+name`), generated dynamically from pending tasks. Collapsible section in sidebar
+- **My Contexts**: filters by context (`@name`), generated dynamically from pending tasks. Collapsible section in sidebar
 - **Recurring**: shows all recurring tasks (with `rec:`), including those with a future threshold date
+- **Completed**: shows all completed tasks sorted by completion date (newest first)
 - **Search**: free-text search across tasks in any view, accessible from the AppBar search icon
 
 ### File management
