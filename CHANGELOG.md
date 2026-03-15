@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.6.1] - 2026-03-15
+
+### Fixed
+- Tag picker text field hidden behind keyboard when creating new projects or contexts
+
 ## [1.6.0] - 2026-03-15
 
 ### Added
