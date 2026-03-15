@@ -4,9 +4,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
+import 'package:don3txt/domain/todo_file.dart';
+import 'package:don3txt/domain/todo_item.dart';
+import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/settings_notifier.dart';
+import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/ui/widgets/add_task_field.dart';
+import 'package:don3txt/ui/widgets/tag_picker_sheet.dart';
 
 class InMemorySettingsRepository implements SettingsRepository {
   StartOfWeek _stored;
@@ -416,5 +421,334 @@ void main() {
 
       expect(find.byType(Chip), findsNothing);
     });
+
+    testWidgets('has project icon button', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
+      );
+
+      expect(find.byIcon(Icons.tag), findsOneWidget);
+    });
+
+    testWidgets('has context icon button', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
+      );
+
+      expect(find.byIcon(Icons.alternate_email), findsOneWidget);
+    });
+
+    testWidgets('opens TagPickerSheet when project icon is tapped',
+        (tester) async {
+      final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
+        TodoItem(description: 'Task', projects: ['+Casa']),
+      ])));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(
+        buildTestAppWithNotifier(
+          onSubmit: (_, {dueDate, startDate, recurrence, priority}) {},
+          todoListNotifier: notifier,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.tag));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Projects'), findsOneWidget);
+      expect(find.byType(TagPickerSheet), findsOneWidget);
+    });
+
+    testWidgets('opens TagPickerSheet when context icon is tapped',
+        (tester) async {
+      final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
+        TodoItem(description: 'Task', contexts: ['@oficina']),
+      ])));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(
+        buildTestAppWithNotifier(
+          onSubmit: (_, {dueDate, startDate, recurrence, priority}) {},
+          todoListNotifier: notifier,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.alternate_email));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Contexts'), findsOneWidget);
+      expect(find.byType(TagPickerSheet), findsOneWidget);
+    });
+
+    testWidgets('shows project chip after selecting project from picker',
+        (tester) async {
+      final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
+        TodoItem(description: 'Task', projects: ['+Casa']),
+      ])));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(
+        buildTestAppWithNotifier(
+          onSubmit: (_, {dueDate, startDate, recurrence, priority}) {},
+          todoListNotifier: notifier,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.tag));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('+Casa'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('+Casa'), findsOneWidget);
+    });
+
+    testWidgets('injects selected projects into submitted text',
+        (tester) async {
+      String? submittedText;
+
+      final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
+        TodoItem(description: 'Task', projects: ['+Casa']),
+      ])));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(
+        buildTestAppWithNotifier(
+          onSubmit: (text, {dueDate, startDate, recurrence, priority}) =>
+              submittedText = text,
+          todoListNotifier: notifier,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.tag));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('+Casa'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Buy milk');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(submittedText, 'Buy milk +Casa');
+    });
+
+    testWidgets('clears project chips after submit', (tester) async {
+      final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
+        TodoItem(description: 'Task', projects: ['+Casa']),
+      ])));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(
+        buildTestAppWithNotifier(
+          onSubmit: (_, {dueDate, startDate, recurrence, priority}) {},
+          todoListNotifier: notifier,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.tag));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('+Casa'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('+Casa'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), 'Task');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(find.text('+Casa'), findsNothing);
+    });
+
+    testWidgets(
+        'injects project when text contains a longer token with same prefix',
+        (tester) async {
+      String? submittedText;
+
+      final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
+        TodoItem(description: 'Task', projects: ['+Casa', '+Casanova']),
+      ])));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(
+        buildTestAppWithNotifier(
+          onSubmit: (text, {dueDate, startDate, recurrence, priority}) =>
+              submittedText = text,
+          todoListNotifier: notifier,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.tag));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('+Casa'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Ir a +Casanova hoy');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(submittedText, 'Ir a +Casanova hoy +Casa');
+    });
+
+    testWidgets('injects selected contexts into submitted text',
+        (tester) async {
+      String? submittedText;
+
+      final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
+        TodoItem(description: 'Task', contexts: ['@oficina']),
+      ])));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(
+        buildTestAppWithNotifier(
+          onSubmit: (text, {dueDate, startDate, recurrence, priority}) =>
+              submittedText = text,
+          todoListNotifier: notifier,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.alternate_email));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('@oficina'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Call mom');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(submittedText, 'Call mom @oficina');
+    });
+
+    testWidgets('injects both project and context into submitted text',
+        (tester) async {
+      String? submittedText;
+
+      final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
+        TodoItem(
+          description: 'Task',
+          projects: ['+Casa'],
+          contexts: ['@telefono'],
+        ),
+      ])));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(
+        buildTestAppWithNotifier(
+          onSubmit: (text, {dueDate, startDate, recurrence, priority}) =>
+              submittedText = text,
+          todoListNotifier: notifier,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.tag));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('+Casa'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.alternate_email));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('@telefono'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Call mom');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(submittedText, 'Call mom +Casa @telefono');
+    });
+
+    testWidgets('does not duplicate project if already in text',
+        (tester) async {
+      String? submittedText;
+
+      final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
+        TodoItem(description: 'Task', projects: ['+Casa']),
+      ])));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(
+        buildTestAppWithNotifier(
+          onSubmit: (text, {dueDate, startDate, recurrence, priority}) =>
+              submittedText = text,
+          todoListNotifier: notifier,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.tag));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('+Casa'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Buy milk +Casa');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(submittedText, 'Buy milk +Casa');
+    });
   });
+}
+
+class InMemoryTodoRepository implements TodoRepository {
+  final TodoFile _file;
+
+  InMemoryTodoRepository(this._file);
+
+  @override
+  Future<TodoFile> load() async => _file;
+
+  @override
+  Future<void> save(TodoFile todoFile) async {}
+}
+
+Widget buildTestAppWithNotifier({
+  required void Function(String text,
+      {DateTime? dueDate,
+      DateTime? startDate,
+      String? recurrence,
+      String? priority}) onSubmit,
+  required TodoListNotifier todoListNotifier,
+  SettingsNotifier? settingsNotifier,
+}) {
+  settingsNotifier ??= SettingsNotifier(InMemorySettingsRepository());
+
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider.value(value: settingsNotifier),
+      ChangeNotifierProvider.value(value: todoListNotifier),
+    ],
+    child: MaterialApp(
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('es'), Locale('en')],
+      home: Scaffold(
+        body: AddTaskField(onSubmit: onSubmit),
+      ),
+    ),
+  );
 }

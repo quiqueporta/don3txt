@@ -65,15 +65,18 @@ class _TaskListScreenState extends State<TaskListScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => AddTaskField(
-        onSubmit: (text, {dueDate, startDate, recurrence, priority}) {
-          notifier.addTask(text,
-              dueDate: dueDate,
-              startDate: startDate,
-              recurrence: recurrence,
-              priority: priority);
-          Navigator.of(context).pop();
-        },
+      builder: (_) => ChangeNotifierProvider.value(
+        value: notifier,
+        child: AddTaskField(
+          onSubmit: (text, {dueDate, startDate, recurrence, priority}) {
+            notifier.addTask(text,
+                dueDate: dueDate,
+                startDate: startDate,
+                recurrence: recurrence,
+                priority: priority);
+            Navigator.of(context).pop();
+          },
+        ),
       ),
     );
   }
@@ -85,12 +88,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => EditTaskField(
-        item: item,
-        onSave: (updatedItem) {
-          notifier.updateTask(originalIndex, updatedItem);
-          Navigator.of(context).pop();
-        },
+      builder: (_) => ChangeNotifierProvider.value(
+        value: notifier,
+        child: EditTaskField(
+          item: item,
+          onSave: (updatedItem) {
+            notifier.updateTask(originalIndex, updatedItem);
+            Navigator.of(context).pop();
+          },
+        ),
       ),
     );
   }

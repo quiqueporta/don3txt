@@ -17,7 +17,7 @@ Clean Architecture con separación en capas:
 - `lib/domain/` — Value Objects (`TodoItem`, `AppThemeMode`, `StartOfWeek`), Agregados (`TodoFile`), funciones puras de parsing (`todo_parser.dart`), lógica de recurrencia (`recurrence.dart`)
 - `lib/infrastructure/` — Repositorios (`FileTodoRepository`, `SharedPreferencesSettingsRepository`). Contiene también las interfaces de dominio (son solo abstracciones, no implementaciones concretas)
 - `lib/application/` — Estado reactivo (`TodoListNotifier`, `SettingsNotifier` con `ChangeNotifier`)
-- `lib/ui/` — Tema, pantallas (`TaskListScreen`, `SettingsScreen`) y widgets (`SidebarDrawer`, `TaskTile`, `AddTaskField`)
+- `lib/ui/` — Tema, pantallas (`TaskListScreen`, `SettingsScreen`) y widgets (`SidebarDrawer`, `TaskTile`, `AddTaskField`, `EditTaskField`, `TaskInputBar`, `TagPickerSheet`)
 
 ## Funcionalidades principales
 
@@ -26,6 +26,7 @@ Clean Architecture con separación en capas:
 - Fechas de vencimiento (`due:`) con selector de calendario
 - Fechas de inicio/threshold (`t:`) con selector de calendario — oculta tareas con `t:` futuro de todas las vistas excepto Recurring
 - Tareas recurrentes (`rec:`) con modo flexible y estricto (`+`). Estricto requiere `t:` para calcular desde fecha original; sin `t:` cae a flexible
+- Selectores visuales de proyectos y contextos: botones `@` y `+` en la barra de iconos del editor abren un `ModalBottomSheet` (`TagPickerSheet`) con los tags existentes como chips seleccionables y campo para crear nuevos. Los tags seleccionados se muestran como chips eliminables antes de guardar. Compatible con escritura manual: si el usuario escribe `@contexto` directamente en el texto, se combina sin duplicados con los seleccionados via UI.
 - Vistas: Hoy (por defecto, con badges de atrasadas/hoy), Inbox, Upcoming (tareas de mañana a N días, periodo configurable), filtro por Proyecto (colapsable), filtro por Contexto (colapsable), Recurring (tareas con `rec:`, sin filtro threshold), Completed (tareas completadas, ordenadas por fecha de completitud descendente)
 - Eliminación de tareas desde menú de tres puntos con Snackbar y Undo
 - Snackbar con Undo al completar una tarea

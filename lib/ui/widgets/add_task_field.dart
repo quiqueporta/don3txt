@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/application/settings_notifier.dart';
+import 'package:don3txt/application/todo_list_notifier.dart';
+import 'package:don3txt/ui/widgets/tag_picker_sheet.dart';
+import 'package:don3txt/ui/widgets/task_input_bar.dart';
 
 class AddTaskField extends StatefulWidget {
   final void Function(String text,
@@ -21,37 +24,46 @@ class _AddTaskFieldState extends State<AddTaskField> {
   DateTime? _selectedStartDate;
   String? _recurrence;
   String? _priority;
+  Set<String> _selectedProjects = {};
+  Set<String> _selectedContexts = {};
+
+  // Compara por token completo (split por espacios) en vez de subcadena para
+  // evitar falsos positivos: "+Casa" no debe considerarse presente si el texto
+  // contiene "+Casanova".
+  bool _containsToken(String text, String token) {
+    final words = text.split(' ');
+
+    return words.contains(token);
+  }
 
   void _handleSubmit(String value) {
     final text = value.trim();
     if (text.isEmpty) return;
 
-    widget.onSubmit(text,
+    final projectTokens = _selectedProjects
+        .where((p) => !_containsToken(text, p))
+        .toList();
+    final contextTokens = _selectedContexts
+        .where((c) => !_containsToken(text, c))
+        .toList();
+
+    final fullText = [text, ...projectTokens, ...contextTokens].join(' ');
+
+    widget.onSubmit(fullText,
         dueDate: _selectedDate,
         startDate: _selectedStartDate,
         recurrence: _recurrence,
         priority: _priority);
     _controller.clear();
+
     setState(() {
       _selectedDate = null;
       _selectedStartDate = null;
       _recurrence = null;
       _priority = null;
+      _selectedProjects = {};
+      _selectedContexts = {};
     });
-  }
-
-  String _recurrenceLabel(String rec) {
-    final strict = rec.startsWith('+');
-    final body = strict ? rec.substring(1) : rec;
-    final amount = body.substring(0, body.length - 1);
-    final unit = body[body.length - 1];
-
-    const unitLabels = {'d': 'day', 'w': 'week', 'm': 'month', 'y': 'year'};
-    final label = unitLabels[unit] ?? unit;
-    final plural = int.parse(amount) > 1 ? '${label}s' : label;
-    final prefix = strict ? '(strict) ' : '';
-
-    return '${prefix}Every $amount $plural';
   }
 
   Future<void> _pickRecurrence() async {
@@ -192,6 +204,40 @@ class _AddTaskFieldState extends State<AddTaskField> {
     }
   }
 
+  void _pickProjects() {
+    final notifier = context.read<TodoListNotifier>();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => TagPickerSheet(
+        title: 'Projects',
+        prefix: '+',
+        available: notifier.allProjects,
+        selected: _selectedProjects,
+        onChanged: (projects) {
+          setState(() => _selectedProjects = projects);
+        },
+      ),
+    );
+  }
+
+  void _pickContexts() {
+    final notifier = context.read<TodoListNotifier>();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => TagPickerSheet(
+        title: 'Contexts',
+        prefix: '@',
+        available: notifier.allContexts,
+        selected: _selectedContexts,
+        onChanged: (contexts) {
+          setState(() => _selectedContexts = contexts);
+        },
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -226,61 +272,29 @@ class _AddTaskFieldState extends State<AddTaskField> {
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.calendar_today),
-                onPressed: _pickDate,
-              ),
-              IconButton(
-                icon: const Icon(Icons.event_available),
-                onPressed: _pickStartDate,
-              ),
-              IconButton(
-                icon: const Icon(Icons.repeat),
-                onPressed: _pickRecurrence,
-              ),
-              IconButton(
-                icon: const Icon(Icons.flag),
-                onPressed: _pickPriority,
-              ),
             ],
           ),
-          Wrap(
-            spacing: 8,
-            children: [
-              if (_priority != null)
-                Chip(
-                  label: Text('($_priority)'),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: () => setState(() => _priority = null),
-                ),
-              if (_selectedDate != null)
-                Chip(
-                  label: Text(
-                    '${_selectedDate!.year}-'
-                    '${_selectedDate!.month.toString().padLeft(2, '0')}-'
-                    '${_selectedDate!.day.toString().padLeft(2, '0')}',
-                  ),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: () => setState(() => _selectedDate = null),
-                ),
-              if (_selectedStartDate != null)
-                Chip(
-                  label: Text(
-                    'Start: ${_selectedStartDate!.year}-'
-                    '${_selectedStartDate!.month.toString().padLeft(2, '0')}-'
-                    '${_selectedStartDate!.day.toString().padLeft(2, '0')}',
-                  ),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: () =>
-                      setState(() => _selectedStartDate = null),
-                ),
-              if (_recurrence != null)
-                Chip(
-                  label: Text(_recurrenceLabel(_recurrence!)),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: () => setState(() => _recurrence = null),
-                ),
-            ],
+          TaskInputBar(
+            onPickDate: _pickDate,
+            onPickStartDate: _pickStartDate,
+            onPickRecurrence: _pickRecurrence,
+            onPickPriority: _pickPriority,
+            onPickProjects: _pickProjects,
+            onPickContexts: _pickContexts,
+            selectedDate: _selectedDate,
+            selectedStartDate: _selectedStartDate,
+            recurrence: _recurrence,
+            priority: _priority,
+            selectedProjects: _selectedProjects,
+            selectedContexts: _selectedContexts,
+            onClearDate: () => setState(() => _selectedDate = null),
+            onClearStartDate: () => setState(() => _selectedStartDate = null),
+            onClearRecurrence: () => setState(() => _recurrence = null),
+            onClearPriority: () => setState(() => _priority = null),
+            onRemoveProject: (p) =>
+                setState(() => _selectedProjects.remove(p)),
+            onRemoveContext: (c) =>
+                setState(() => _selectedContexts.remove(c)),
           ),
         ],
       ),

@@ -4,10 +4,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
+import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
+import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/settings_notifier.dart';
+import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/ui/widgets/edit_task_field.dart';
+import 'package:don3txt/ui/widgets/tag_picker_sheet.dart';
 
 class InMemorySettingsRepository implements SettingsRepository {
   StartOfWeek _stored;
@@ -343,5 +347,258 @@ void main() {
 
       expect(saved!.priority, isNull);
     });
+
+    testWidgets('shows existing projects as chips', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(
+          item: TodoItem(
+            description: 'Task',
+            projects: ['+Casa', '+Trabajo'],
+          ),
+          onSave: (_) {},
+        ),
+      );
+
+      expect(find.text('+Casa'), findsOneWidget);
+      expect(find.text('+Trabajo'), findsOneWidget);
+    });
+
+    testWidgets('shows existing contexts as chips', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(
+          item: TodoItem(
+            description: 'Task',
+            contexts: ['@oficina', '@telefono'],
+          ),
+          onSave: (_) {},
+        ),
+      );
+
+      expect(find.text('@oficina'), findsOneWidget);
+      expect(find.text('@telefono'), findsOneWidget);
+    });
+
+    testWidgets('does not include projects in text field', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(
+          item: TodoItem(
+            description: 'Buy milk',
+            projects: ['+Casa'],
+          ),
+          onSave: (_) {},
+        ),
+      );
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+
+      expect(textField.controller!.text, 'Buy milk');
+    });
+
+    testWidgets('does not include contexts in text field', (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(
+          item: TodoItem(
+            description: 'Call mom',
+            contexts: ['@telefono'],
+          ),
+          onSave: (_) {},
+        ),
+      );
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+
+      expect(textField.controller!.text, 'Call mom');
+    });
+
+    testWidgets('saves projects from chips on submit', (tester) async {
+      TodoItem? saved;
+
+      await tester.pumpWidget(
+        buildTestApp(
+          item: TodoItem(
+            description: 'Task',
+            projects: ['+Casa'],
+          ),
+          onSave: (item) => saved = item,
+        ),
+      );
+
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(saved!.projects, contains('+Casa'));
+    });
+
+    testWidgets('saves contexts from chips on submit', (tester) async {
+      TodoItem? saved;
+
+      await tester.pumpWidget(
+        buildTestApp(
+          item: TodoItem(
+            description: 'Task',
+            contexts: ['@oficina'],
+          ),
+          onSave: (item) => saved = item,
+        ),
+      );
+
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(saved!.contexts, contains('@oficina'));
+    });
+
+    testWidgets('can remove project chip', (tester) async {
+      TodoItem? saved;
+
+      await tester.pumpWidget(
+        buildTestApp(
+          item: TodoItem(
+            description: 'Task',
+            projects: ['+Casa'],
+          ),
+          onSave: (item) => saved = item,
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.close).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('+Casa'), findsNothing);
+
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(saved!.projects, isEmpty);
+    });
+
+    testWidgets('can remove context chip and saved contexts is empty',
+        (tester) async {
+      TodoItem? saved;
+
+      await tester.pumpWidget(
+        buildTestApp(
+          item: TodoItem(
+            description: 'Task',
+            contexts: ['@oficina'],
+          ),
+          onSave: (item) => saved = item,
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.close).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('@oficina'), findsNothing);
+
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(saved!.contexts, isEmpty);
+    });
+
+    testWidgets('opens TagPickerSheet for projects', (tester) async {
+      final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
+        TodoItem(description: 'Task', projects: ['+Casa', '+Trabajo']),
+      ])));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(
+        buildTestAppWithNotifier(
+          item: TodoItem(description: 'Task', projects: ['+Casa']),
+          onSave: (_) {},
+          todoListNotifier: notifier,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.tag));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Projects'), findsOneWidget);
+      expect(find.byType(TagPickerSheet), findsOneWidget);
+    });
+
+    testWidgets('opens TagPickerSheet for contexts', (tester) async {
+      final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
+        TodoItem(description: 'Task', contexts: ['@oficina']),
+      ])));
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(
+        buildTestAppWithNotifier(
+          item: TodoItem(description: 'Task'),
+          onSave: (_) {},
+          todoListNotifier: notifier,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.alternate_email));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Contexts'), findsOneWidget);
+      expect(find.byType(TagPickerSheet), findsOneWidget);
+    });
+
+    testWidgets('combines picker projects with typed projects on save',
+        (tester) async {
+      TodoItem? saved;
+
+      await tester.pumpWidget(
+        buildTestApp(
+          item: TodoItem(
+            description: 'Task',
+            projects: ['+Casa'],
+          ),
+          onSave: (item) => saved = item,
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), 'Task +Trabajo');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(saved!.projects, containsAll(['+Casa', '+Trabajo']));
+    });
   });
+}
+
+class InMemoryTodoRepository implements TodoRepository {
+  final TodoFile _file;
+
+  InMemoryTodoRepository(this._file);
+
+  @override
+  Future<TodoFile> load() async => _file;
+
+  @override
+  Future<void> save(TodoFile todoFile) async {}
+}
+
+Widget buildTestAppWithNotifier({
+  required TodoItem item,
+  required void Function(TodoItem updatedItem) onSave,
+  required TodoListNotifier todoListNotifier,
+  SettingsNotifier? settingsNotifier,
+}) {
+  settingsNotifier ??= SettingsNotifier(InMemorySettingsRepository());
+
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider.value(value: settingsNotifier),
+      ChangeNotifierProvider.value(value: todoListNotifier),
+    ],
+    child: MaterialApp(
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('es'), Locale('en')],
+      home: Scaffold(
+        body: EditTaskField(item: item, onSave: onSave),
+      ),
+    ),
+  );
 }

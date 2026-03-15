@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/application/settings_notifier.dart';
+import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/domain/todo_parser.dart';
+import 'package:don3txt/ui/widgets/tag_picker_sheet.dart';
+import 'package:don3txt/ui/widgets/task_input_bar.dart';
 
 class EditTaskField extends StatefulWidget {
   final TodoItem item;
@@ -20,6 +23,8 @@ class _EditTaskFieldState extends State<EditTaskField> {
   DateTime? _selectedStartDate;
   String? _recurrence;
   String? _priority;
+  Set<String> _selectedProjects = {};
+  Set<String> _selectedContexts = {};
 
   @override
   void initState() {
@@ -40,18 +45,12 @@ class _EditTaskFieldState extends State<EditTaskField> {
 
     _recurrence = item.metadata['rec'];
     _priority = item.priority;
+    _selectedProjects = item.projects.toSet();
+    _selectedContexts = item.contexts.toSet();
   }
 
   String _buildEditableText(TodoItem item) {
     final parts = <String>[item.description];
-
-    for (final project in item.projects) {
-      parts.add(project);
-    }
-
-    for (final context in item.contexts) {
-      parts.add(context);
-    }
 
     for (final entry in item.metadata.entries) {
       if (entry.key == 'due' || entry.key == 't' || entry.key == 'rec') {
@@ -88,29 +87,22 @@ class _EditTaskFieldState extends State<EditTaskField> {
       metadata['rec'] = _recurrence!;
     }
 
+    final parsedProjects = parsed?.projects ?? [];
+    final parsedContexts = parsed?.contexts ?? [];
+    // La fusión via Set deduplicar automáticamente si el usuario escribe un
+    // token manualmente (+Trabajo) Y también lo tiene en el picker seleccionado.
+    final allProjects = {..._selectedProjects, ...parsedProjects}.toList();
+    final allContexts = {..._selectedContexts, ...parsedContexts}.toList();
+
     final updatedItem = widget.item.copyWith(
       description: parsed?.description ?? text,
       priority: _priority,
-      projects: parsed?.projects ?? [],
-      contexts: parsed?.contexts ?? [],
+      projects: allProjects,
+      contexts: allContexts,
       metadata: metadata,
     );
 
     widget.onSave(updatedItem);
-  }
-
-  String _recurrenceLabel(String rec) {
-    final strict = rec.startsWith('+');
-    final body = strict ? rec.substring(1) : rec;
-    final amount = body.substring(0, body.length - 1);
-    final unit = body[body.length - 1];
-
-    const unitLabels = {'d': 'day', 'w': 'week', 'm': 'month', 'y': 'year'};
-    final label = unitLabels[unit] ?? unit;
-    final plural = int.parse(amount) > 1 ? '${label}s' : label;
-    final prefix = strict ? '(strict) ' : '';
-
-    return '${prefix}Every $amount $plural';
   }
 
   Future<void> _pickRecurrence() async {
@@ -259,6 +251,40 @@ class _EditTaskFieldState extends State<EditTaskField> {
     }
   }
 
+  void _pickProjects() {
+    final notifier = context.read<TodoListNotifier>();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => TagPickerSheet(
+        title: 'Projects',
+        prefix: '+',
+        available: notifier.allProjects,
+        selected: _selectedProjects,
+        onChanged: (projects) {
+          setState(() => _selectedProjects = projects);
+        },
+      ),
+    );
+  }
+
+  void _pickContexts() {
+    final notifier = context.read<TodoListNotifier>();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => TagPickerSheet(
+        title: 'Contexts',
+        prefix: '@',
+        available: notifier.allContexts,
+        selected: _selectedContexts,
+        onChanged: (contexts) {
+          setState(() => _selectedContexts = contexts);
+        },
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -293,61 +319,29 @@ class _EditTaskFieldState extends State<EditTaskField> {
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.calendar_today),
-                onPressed: _pickDate,
-              ),
-              IconButton(
-                icon: const Icon(Icons.event_available),
-                onPressed: _pickStartDate,
-              ),
-              IconButton(
-                icon: const Icon(Icons.repeat),
-                onPressed: _pickRecurrence,
-              ),
-              IconButton(
-                icon: const Icon(Icons.flag),
-                onPressed: _pickPriority,
-              ),
             ],
           ),
-          Wrap(
-            spacing: 8,
-            children: [
-              if (_priority != null)
-                Chip(
-                  label: Text('($_priority)'),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: () => setState(() => _priority = null),
-                ),
-              if (_selectedDate != null)
-                Chip(
-                  label: Text(
-                    '${_selectedDate!.year}-'
-                    '${_selectedDate!.month.toString().padLeft(2, '0')}-'
-                    '${_selectedDate!.day.toString().padLeft(2, '0')}',
-                  ),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: () => setState(() => _selectedDate = null),
-                ),
-              if (_selectedStartDate != null)
-                Chip(
-                  label: Text(
-                    'Start: ${_selectedStartDate!.year}-'
-                    '${_selectedStartDate!.month.toString().padLeft(2, '0')}-'
-                    '${_selectedStartDate!.day.toString().padLeft(2, '0')}',
-                  ),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: () =>
-                      setState(() => _selectedStartDate = null),
-                ),
-              if (_recurrence != null)
-                Chip(
-                  label: Text(_recurrenceLabel(_recurrence!)),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: () => setState(() => _recurrence = null),
-                ),
-            ],
+          TaskInputBar(
+            onPickDate: _pickDate,
+            onPickStartDate: _pickStartDate,
+            onPickRecurrence: _pickRecurrence,
+            onPickPriority: _pickPriority,
+            onPickProjects: _pickProjects,
+            onPickContexts: _pickContexts,
+            selectedDate: _selectedDate,
+            selectedStartDate: _selectedStartDate,
+            recurrence: _recurrence,
+            priority: _priority,
+            selectedProjects: _selectedProjects,
+            selectedContexts: _selectedContexts,
+            onClearDate: () => setState(() => _selectedDate = null),
+            onClearStartDate: () => setState(() => _selectedStartDate = null),
+            onClearRecurrence: () => setState(() => _recurrence = null),
+            onClearPriority: () => setState(() => _priority = null),
+            onRemoveProject: (p) =>
+                setState(() => _selectedProjects.remove(p)),
+            onRemoveContext: (c) =>
+                setState(() => _selectedContexts.remove(c)),
           ),
         ],
       ),
