@@ -10,9 +10,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    /* =====================================================
-       CUSTOM PROPERTIES
-    ===================================================== */
     :root {
       --accent:        #f5a623;
       --accent-dim:    #c47d0e;
@@ -43,13 +40,13 @@
       --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-      --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3);
+      --shadow-card:  0 1px 3px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3);
       --shadow-phone: 0 40px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+
+      --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --nav-width: min(300px, 80vw);
     }
 
-    /* =====================================================
-       RESET & BASE
-    ===================================================== */
     *, *::before, *::after {
       margin: 0;
       padding: 0;
@@ -58,6 +55,7 @@
 
     html {
       scroll-behavior: smooth;
+      overflow-x: hidden;
     }
 
     body {
@@ -73,9 +71,6 @@
 
     a { color: inherit; text-decoration: none; }
 
-    /* =====================================================
-       UTILITY
-    ===================================================== */
     .container {
       max-width: 1100px;
       margin: 0 auto;
@@ -103,9 +98,6 @@
       border-radius: 2px;
     }
 
-    /* =====================================================
-       NOISE TEXTURE OVERLAY
-    ===================================================== */
     body::before {
       content: '';
       position: fixed;
@@ -116,9 +108,17 @@
       opacity: 0.4;
     }
 
-    /* =====================================================
-       NAV
-    ===================================================== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     nav {
       position: fixed;
       top: 0;
@@ -130,7 +130,7 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid transparent;
-      transition: border-color 0.3s;
+      transition: border-color var(--transition-base);
     }
 
     nav.scrolled {
@@ -195,17 +195,187 @@
       color: var(--accent);
     }
 
-    /* =====================================================
-       HERO
-    ===================================================== */
+    .nav-links .mobile-panel-cta {
+      display: none;
+    }
+
+    .nav-panel {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--nav-width);
+      z-index: 101;
+      background: var(--bg-raised);
+      border-right: 1px solid var(--bg-border);
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+      padding: 80px 0 32px;
+      transform: translateX(-100%);
+      transition: transform var(--transition-base);
+      overflow-y: auto;
+    }
+
+    .nav-panel.open {
+      transform: translateX(0);
+    }
+
+    .nav-panel a {
+      display: block;
+      width: 100%;
+      padding: 14px 28px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--bg-border);
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .nav-panel a:first-child {
+      border-top: 1px solid var(--bg-border);
+    }
+
+    .nav-panel a:hover {
+      color: var(--accent);
+      background: rgba(245, 166, 35, 0.05);
+    }
+
+    .nav-panel .mobile-panel-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 20px 28px 0;
+      background: var(--accent);
+      color: #000;
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      transition: background 0.2s;
+      width: auto;
+      border: none;
+      border-bottom: none;
+    }
+
+    .nav-panel .mobile-panel-cta:first-child {
+      border-top: none;
+    }
+
+    .nav-panel .mobile-panel-cta:hover {
+      background: #ffba45;
+      color: #000;
+    }
+
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      width: 40px;
+      height: 40px;
+      background: none;
+      border: 1px solid var(--bg-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      padding: 8px;
+      transition: border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .menu-toggle:hover {
+      border-color: var(--accent);
+    }
+
+    .menu-toggle .bar {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--text-primary);
+      border-radius: 2px;
+      transition: transform 0.25s ease, opacity 0.2s ease;
+      transform-origin: center;
+    }
+
+    .menu-toggle[aria-expanded="true"] .bar:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    .menu-toggle[aria-expanded="true"] .bar:nth-child(2) {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+
+    .menu-toggle[aria-expanded="true"] .bar:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    .nav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 98;
+      background: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+
+    .nav-overlay.open {
+      opacity: 1;
+    }
+
+    .scroll-spy {
+      position: fixed;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      opacity: 0;
+      transition: opacity var(--transition-base);
+      pointer-events: none;
+    }
+
+    .scroll-spy.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .spy-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--bg-border);
+      cursor: pointer;
+      transition: background var(--transition-base), transform var(--transition-base);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .spy-dot:hover {
+      background: var(--accent-dim);
+      transform: scale(1.3);
+    }
+
+    .spy-dot.active {
+      background: var(--accent);
+      transform: scale(1.2);
+    }
+
+    .spy-dot.next {
+      background: var(--accent-dim);
+    }
+
     .hero {
-      padding: 140px 24px 80px;
+      padding: 120px 24px 80px;
       text-align: center;
       position: relative;
       overflow: hidden;
     }
 
-    /* Radial gradient background glow */
     .hero::before {
       content: '';
       position: absolute;
@@ -250,7 +420,7 @@
     }
 
     .hero h1 {
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-size: clamp(2.2rem, 6vw, 4.5rem);
       font-weight: 800;
       letter-spacing: -0.03em;
       line-height: 1.05;
@@ -322,9 +492,6 @@
       flex-shrink: 0;
     }
 
-    /* =====================================================
-       HERO STATS
-    ===================================================== */
     .hero-stats {
       display: flex;
       gap: 0;
@@ -362,9 +529,6 @@
       font-weight: 500;
     }
 
-    /* =====================================================
-       SCREENSHOTS SECTION
-    ===================================================== */
     .screenshots-section {
       padding: 80px 0 100px;
       position: relative;
@@ -400,11 +564,10 @@
       display: flex;
       align-items: flex-end;
       justify-content: center;
-      gap: 28px;
+      gap: 12px;
       position: relative;
     }
 
-    /* Phone mockup wrapper */
     .phone-mockup {
       position: relative;
       display: flex;
@@ -426,15 +589,14 @@
       transform: scale(1.06) translateY(-8px);
     }
 
-    /* The actual phone frame */
     .phone-frame {
       position: relative;
-      border-radius: 40px;
+      border-radius: 24px;
       background: #1a1a1e;
-      padding: 14px 10px;
+      padding: 10px 7px;
       box-shadow: var(--shadow-phone);
       border: 1px solid rgba(255,255,255,0.08);
-      width: 220px;
+      width: min(28vw, 110px);
     }
 
     .phone-frame::before {
@@ -443,31 +605,30 @@
       top: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 80px;
-      height: 24px;
+      width: 56px;
+      height: 18px;
       background: #1a1a1e;
-      border-radius: 0 0 16px 16px;
+      border-radius: 0 0 12px 12px;
       z-index: 2;
       border: 1px solid rgba(255,255,255,0.06);
       border-top: none;
     }
 
-    /* Dynamic island style notch */
     .phone-frame::after {
       content: '';
       position: absolute;
-      top: 6px;
+      top: 5px;
       left: 50%;
       transform: translateX(-50%);
-      width: 50px;
-      height: 12px;
+      width: 36px;
+      height: 9px;
       background: #0a0a0b;
       border-radius: 20px;
       z-index: 3;
     }
 
     .phone-screen {
-      border-radius: 28px;
+      border-radius: 16px;
       overflow: hidden;
       background: #0a0a0b;
       aspect-ratio: 9/19;
@@ -481,7 +642,6 @@
       object-position: top;
     }
 
-    /* Side buttons */
     .phone-btn-right {
       position: absolute;
       right: -3px;
@@ -513,8 +673,8 @@
     }
 
     .phone-caption {
-      margin-top: 20px;
-      font-size: 0.8rem;
+      margin-top: 12px;
+      font-size: 0.7rem;
       font-weight: 600;
       color: var(--text-muted);
       text-align: center;
@@ -522,9 +682,6 @@
       text-transform: uppercase;
     }
 
-    /* =====================================================
-       FEATURES SECTION
-    ===================================================== */
     .features-section {
       padding: 100px 0;
     }
@@ -550,7 +707,7 @@
 
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: 1fr;
       gap: 16px;
     }
 
@@ -612,9 +769,7 @@
       line-height: 1.65;
     }
 
-    /* Featured card — wider */
     .feature-card.featured {
-      grid-column: span 2;
       background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(245,166,35,0.05) 100%);
       border-color: rgba(245, 166, 35, 0.15);
     }
@@ -624,9 +779,6 @@
       border-color: rgba(245, 166, 35, 0.3);
     }
 
-    /* =====================================================
-       TODO FORMAT SECTION
-    ===================================================== */
     .format-section {
       padding: 100px 0;
       background: var(--bg-raised);
@@ -636,9 +788,8 @@
 
     .format-inner {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 64px;
-      align-items: center;
+      grid-template-columns: 1fr;
+      gap: 40px;
     }
 
     .format-text h2 {
@@ -670,6 +821,8 @@
 
     .format-code-wrapper {
       position: relative;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .format-code-header {
@@ -712,19 +865,15 @@
       line-height: 2;
     }
 
-    /* Syntax highlight colors */
-    .todo-done      { color: var(--text-muted); text-decoration: line-through; }
+    .todo-done       { color: var(--text-muted); text-decoration: line-through; }
     .todo-priority-a { color: var(--priority-a); font-weight: 600; }
     .todo-priority-b { color: var(--priority-b); font-weight: 600; }
     .todo-priority-c { color: var(--priority-c); font-weight: 600; }
-    .todo-project   { color: var(--project-color); }
-    .todo-context   { color: var(--context-color); }
-    .todo-meta      { color: var(--accent); opacity: 0.85; }
-    .todo-date      { color: var(--text-muted); }
+    .todo-project    { color: var(--project-color); }
+    .todo-context    { color: var(--context-color); }
+    .todo-meta       { color: var(--accent); opacity: 0.85; }
+    .todo-date       { color: var(--text-muted); }
 
-    /* =====================================================
-       PRINCIPLES ROW
-    ===================================================== */
     .principles-section {
       padding: 100px 0;
     }
@@ -742,7 +891,7 @@
 
     .principles-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1fr;
       gap: 20px;
     }
 
@@ -775,9 +924,6 @@
       line-height: 1.65;
     }
 
-    /* =====================================================
-       CTA SECTION
-    ===================================================== */
     .cta-section {
       padding: 80px 0 100px;
     }
@@ -786,7 +932,7 @@
       background: var(--bg-raised);
       border: 1px solid var(--bg-border);
       border-radius: var(--radius-xl);
-      padding: 64px 40px;
+      padding: 48px 24px;
       text-align: center;
       position: relative;
       overflow: hidden;
@@ -821,6 +967,14 @@
       position: relative;
     }
 
+    .cta-version {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-dim);
+      margin-bottom: 28px;
+      position: relative;
+    }
+
     .cta-actions {
       display: flex;
       gap: 14px;
@@ -829,9 +983,6 @@
       position: relative;
     }
 
-    /* =====================================================
-       FOOTER
-    ===================================================== */
     footer {
       border-top: 1px solid var(--bg-border);
       padding: 40px 24px;
@@ -900,98 +1051,94 @@
       opacity: 0.6;
     }
 
-    /* =====================================================
-       ANIMATIONS
-    ===================================================== */
-    @keyframes fade-up {
-      from {
-        opacity: 0;
-        transform: translateY(24px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .animate-in {
-      opacity: 0;
-      animation: fade-up 0.6s ease forwards;
-    }
-
-    .delay-1 { animation-delay: 0.1s; }
-    .delay-2 { animation-delay: 0.2s; }
-    .delay-3 { animation-delay: 0.3s; }
-    .delay-4 { animation-delay: 0.4s; }
-
-    /* =====================================================
-       RESPONSIVE
-    ===================================================== */
-    @media (max-width: 900px) {
-      nav .nav-cta,
-      nav .nav-links {
-        display: none;
+    @media (min-width: 768px) {
+      .hero {
+        padding: 140px 24px 80px;
       }
 
-      .format-inner {
-        grid-template-columns: 1fr;
-        gap: 40px;
-      }
-
-      .principles-row {
-        grid-template-columns: 1fr;
-      }
-
-      .feature-card.featured {
-        grid-column: span 1;
-      }
-    }
-
-    @media (max-width: 700px) {
       .phones-row {
-        gap: 16px;
+        gap: 28px;
       }
 
       .phone-frame {
-        width: 130px;
-        border-radius: 28px;
-        padding: 10px 7px;
+        width: 220px;
+        border-radius: 40px;
+        padding: 14px 10px;
       }
 
       .phone-frame::before {
-        width: 56px;
-        height: 18px;
+        width: 80px;
+        height: 24px;
+        border-radius: 0 0 16px 16px;
       }
 
       .phone-frame::after {
-        width: 36px;
-        height: 9px;
+        top: 6px;
+        width: 50px;
+        height: 12px;
       }
 
       .phone-screen {
-        border-radius: 20px;
+        border-radius: 28px;
       }
 
       .phone-caption {
-        font-size: 0.7rem;
-        margin-top: 12px;
+        font-size: 0.8rem;
+        margin-top: 20px;
       }
 
       .cta-box {
-        padding: 48px 24px;
+        padding: 64px 40px;
       }
 
       .features-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       }
 
+      .feature-card.featured {
+        grid-column: span 2;
+      }
+
+      .format-inner {
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: center;
+      }
+
+      .principles-row {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .scroll-spy {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .menu-toggle {
+        display: flex;
+      }
+
+      .nav-cta {
+        display: none !important;
+      }
+
+      .nav-links--desktop {
+        display: none;
+      }
+
+      .nav-panel {
+        display: flex;
+      }
+
+      .nav-overlay {
+        display: block;
+      }
     }
 
     @media (max-width: 480px) {
-      .hero {
-        padding: 110px 20px 60px;
-      }
-
       .hero-stats {
         flex-direction: column;
       }
@@ -1002,49 +1149,74 @@
       }
 
       .stat:last-child { border-bottom: none; }
+    }
 
-      .phone-frame {
-        width: 110px;
-        border-radius: 24px;
+    @media (max-width: 1023px) {
+      .scroll-spy {
+        display: none;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- ===================================================
-       NAV
-  =================================================== -->
+  <div class="nav-overlay" id="nav-overlay" aria-hidden="true"></div>
+
+  <div class="scroll-spy" id="scroll-spy" aria-hidden="true">
+    <div class="spy-dot" data-target="hero" title="Home"></div>
+    <div class="spy-dot" data-target="screenshots" title="Screenshots"></div>
+    <div class="spy-dot" data-target="features" title="Features"></div>
+    <div class="spy-dot" data-target="format" title="Format"></div>
+    <div class="spy-dot" data-target="philosophy" title="Philosophy"></div>
+    <div class="spy-dot" data-target="download" title="Download"></div>
+  </div>
+
   <nav id="main-nav">
     <div class="nav-inner">
       <a href="#hero" class="nav-brand">
         <img src="don3txt_logo.png" alt="don3txt logo">
-        don<span>3</span>txt
       </a>
-      <nav class="nav-links" aria-label="Page sections">
+      <div class="nav-links nav-links--desktop">
         <a href="#hero">Home</a>
         <a href="#screenshots">Screenshots</a>
         <a href="#features">Features</a>
         <a href="#format">Format</a>
         <a href="#philosophy">Philosophy</a>
         <a href="#download">Download</a>
-      </nav>
+      </div>
       <a href="https://github.com/quiqueporta/don3txt" class="nav-cta" target="_blank" rel="noopener">
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-          </svg>
-          GitHub
-        </a>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+        </svg>
+        GitHub
+      </a>
+      <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="nav-panel">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
     </div>
   </nav>
 
-  <!-- ===================================================
-       HERO
-  =================================================== -->
+  <div class="nav-panel" id="nav-panel" role="navigation" aria-label="Page sections">
+    <a href="#hero">Home</a>
+    <a href="#screenshots">Screenshots</a>
+    <a href="#features">Features</a>
+    <a href="#format">Format</a>
+    <a href="#philosophy">Philosophy</a>
+    <a href="#download">Download</a>
+    <a href="https://github.com/quiqueporta/don3txt" class="mobile-panel-cta" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+      </svg>
+      GitHub
+    </a>
+  </div>
+
   <section class="hero" id="hero">
     <div class="hero-inner">
 
-      <div class="hero-badge animate-in">
+      <div class="hero-badge fade-in" data-delay="0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="9 11 12 14 22 4"></polyline>
           <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
@@ -1052,20 +1224,20 @@
         todo.txt open standard &middot; Open source &middot; MIT
       </div>
 
-      <img src="don3txt_logo.png" alt="don3txt logo" class="hero-logo animate-in delay-1">
+      <img src="don3txt_logo.png" alt="don3txt logo" class="hero-logo fade-in" data-delay="80">
 
-      <h1 class="animate-in delay-1">
+      <h1 class="fade-in" data-delay="160">
         Manage your tasks.<br>
         <span class="name">No cloud. No accounts.</span>
       </h1>
 
-      <p class="hero-tagline animate-in delay-2">
+      <p class="hero-tagline fade-in" data-delay="240">
         <strong>don3txt</strong> is an Android task manager based on the open
         <a href="http://todotxt.org/" class="format-link" target="_blank" rel="noopener">todo.txt</a>
         format. Plain text, local, no external dependencies. Your data is yours.
       </p>
 
-      <div class="hero-actions animate-in delay-3">
+      <div class="hero-actions fade-in" data-delay="320">
         <a href="https://github.com/quiqueporta/don3txt/releases" class="btn-primary" target="_blank" rel="noopener">
           <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -1082,7 +1254,7 @@
         </a>
       </div>
 
-      <div class="hero-stats animate-in delay-4">
+      <div class="hero-stats fade-in" data-delay="400">
         <div class="stat">
           <div class="stat-value">MIT</div>
           <div class="stat-label">Free license</div>
@@ -1100,9 +1272,6 @@
     </div>
   </section>
 
-  <!-- ===================================================
-       SCREENSHOTS
-  =================================================== -->
   <section class="screenshots-section" id="screenshots">
     <div class="container">
       <div class="screenshots-header">
@@ -1113,8 +1282,7 @@
 
       <div class="phones-row">
 
-        <!-- Phone 1: Sidebar -->
-        <div class="phone-mockup">
+        <div class="phone-mockup fade-in" data-delay="0">
           <div class="phone-frame">
             <div class="phone-btn-right"></div>
             <div class="phone-btn-left-1"></div>
@@ -1126,8 +1294,7 @@
           <p class="phone-caption">Navigation</p>
         </div>
 
-        <!-- Phone 2: Inbox (center, bigger) -->
-        <div class="phone-mockup center-phone">
+        <div class="phone-mockup center-phone fade-in" data-delay="80">
           <div class="phone-frame">
             <div class="phone-btn-right"></div>
             <div class="phone-btn-left-1"></div>
@@ -1139,8 +1306,7 @@
           <p class="phone-caption">Inbox</p>
         </div>
 
-        <!-- Phone 3: Settings -->
-        <div class="phone-mockup">
+        <div class="phone-mockup fade-in" data-delay="160">
           <div class="phone-frame">
             <div class="phone-btn-right"></div>
             <div class="phone-btn-left-1"></div>
@@ -1156,13 +1322,10 @@
     </div>
   </section>
 
-  <!-- ===================================================
-       FEATURES
-  =================================================== -->
   <section class="features-section" id="features">
     <div class="container">
 
-      <div class="features-header">
+      <div class="features-header fade-in" data-delay="0">
         <span class="section-label">Features</span>
         <h2>Powerful inside,<br>simple outside</h2>
         <p>Everything a serious productivity system needs</p>
@@ -1170,7 +1333,7 @@
 
       <div class="features-grid">
 
-        <div class="feature-card featured">
+        <div class="feature-card featured fade-in" data-delay="0">
           <div class="feature-icon">&#128270;</div>
           <h3>Smart views</h3>
           <p>
@@ -1183,49 +1346,49 @@
           </p>
         </div>
 
-        <div class="feature-card">
+        <div class="feature-card fade-in" data-delay="80">
           <div class="feature-icon">&#128203;</div>
           <h3>Standard todo.txt format</h3>
           <p>Full compatibility with the open standard. Priorities <code style="color:var(--accent);font-family:var(--font-mono);">(A)-(Z)</code>, projects <code style="color:var(--project-color);font-family:var(--font-mono);">+name</code>, contexts <code style="color:var(--context-color);font-family:var(--font-mono);">@name</code> and metadata <code style="color:var(--accent);font-family:var(--font-mono);opacity:.8">key:value</code>. Complete or delete tasks with <strong>Undo</strong> support.</p>
         </div>
 
-        <div class="feature-card">
+        <div class="feature-card fade-in" data-delay="160">
           <div class="feature-icon">&#128260;</div>
           <h3>Recurring tasks</h3>
           <p>Flexible recurrence with <code style="color:var(--accent);font-family:var(--font-mono);">rec:1m</code> (from completion) or strict with <code style="color:var(--accent);font-family:var(--font-mono);">rec:+1m</code> (from original date). Supports days, weeks, months and years.</p>
         </div>
 
-        <div class="feature-card">
+        <div class="feature-card fade-in" data-delay="0">
           <div class="feature-icon">&#128336;</div>
           <h3>Threshold date</h3>
           <p>With <code style="color:var(--accent);font-family:var(--font-mono);">t:2024-02-25</code> the task stays hidden until its time comes. It appears in all views except Upcoming when relevant.</p>
         </div>
 
-        <div class="feature-card">
+        <div class="feature-card fade-in" data-delay="80">
           <div class="feature-icon">&#128197;</div>
           <h3>Due dates</h3>
           <p>Add <code style="color:var(--accent);font-family:var(--font-mono);">due:YYYY-MM-DD</code> with the built-in calendar picker. Overdue tasks are visually highlighted in the Today view.</p>
         </div>
 
-        <div class="feature-card">
+        <div class="feature-card fade-in" data-delay="160">
           <div class="feature-icon">&#128193;</div>
           <h3>Choose your file</h3>
           <p>Pick any <code style="color:var(--accent);font-family:var(--font-mono);">todo.txt</code> from your device. Compatible with <strong>Syncthing</strong> for cross-device sync without intermediaries.</p>
         </div>
 
-        <div class="feature-card">
+        <div class="feature-card fade-in" data-delay="0">
           <div class="feature-icon">&#127763;</div>
           <h3>Light, dark and system theme</h3>
           <p>Three theme options applied instantly. System mode follows your Android configuration automatically.</p>
         </div>
 
-        <div class="feature-card">
+        <div class="feature-card fade-in" data-delay="80">
           <div class="feature-icon">&#9881;</div>
           <h3>Fully configurable</h3>
           <p>First day of the week (Monday or Sunday), Upcoming period (3, 7 or 14 days) and file path. All from Settings.</p>
         </div>
 
-        <div class="feature-card">
+        <div class="feature-card fade-in" data-delay="160">
           <div class="feature-icon">&#128274;</div>
           <h3>No external dependencies</h3>
           <p>No internet required. No account needed. No server. Your tasks live exclusively on your device, in plain text.</p>
@@ -1235,14 +1398,11 @@
     </div>
   </section>
 
-  <!-- ===================================================
-       TODO FORMAT
-  =================================================== -->
   <section class="format-section" id="format">
     <div class="container">
       <div class="format-inner">
 
-        <div class="format-text">
+        <div class="format-text fade-in" data-delay="0">
           <span class="section-label">Open format</span>
           <h2>Plain text.<br>Forever.</h2>
           <p>
@@ -1256,7 +1416,7 @@
           </p>
         </div>
 
-        <div class="format-code-wrapper">
+        <div class="format-code-wrapper fade-in" data-delay="80">
           <div class="format-code-header">
             <span class="code-dot code-dot-red"></span>
             <span class="code-dot code-dot-yellow"></span>
@@ -1276,32 +1436,29 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
     </div>
   </section>
 
-  <!-- ===================================================
-       PRINCIPLES
-  =================================================== -->
   <section class="principles-section" id="philosophy">
     <div class="container">
 
-      <div class="principles-header">
+      <div class="principles-header fade-in" data-delay="0">
         <span class="section-label">Philosophy</span>
         <h2>Why don3txt</h2>
       </div>
 
       <div class="principles-row">
 
-        <div class="principle-card">
+        <div class="principle-card fade-in" data-delay="0">
           <div class="principle-number">01</div>
           <h3>Privacy by design</h3>
           <p>No server receives your tasks. No account to create. No telemetry. Your data never leaves your device unless you choose so.</p>
         </div>
 
-        <div class="principle-card">
+        <div class="principle-card fade-in" data-delay="80">
           <div class="principle-number">02</div>
           <h3>Full interoperability</h3>
           <p>The todo.txt format has dozens of implementations on iOS, macOS, Linux and Windows. Switch apps whenever you want. Your file always works.</p>
         </div>
 
-        <div class="principle-card">
+        <div class="principle-card fade-in" data-delay="160">
           <div class="principle-number">03</div>
           <h3>Free software</h3>
           <p>Open source under the MIT license. You can read it, modify it, contribute or fork it. No restrictions, no surprises.</p>
@@ -1312,14 +1469,12 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
     </div>
   </section>
 
-  <!-- ===================================================
-       CTA FINAL
-  =================================================== -->
   <section class="cta-section" id="download">
     <div class="container">
-      <div class="cta-box">
+      <div class="cta-box fade-in" data-delay="0">
         <h2>Get started today</h2>
         <p>Download the APK, pick your todo.txt file and start managing your tasks with no strings attached.</p>
+        <p class="cta-version">Current version: v1.5.0</p>
         <div class="cta-actions">
           <a href="https://github.com/quiqueporta/don3txt/releases" class="btn-primary" target="_blank" rel="noopener">
             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -1340,32 +1495,143 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
     </div>
   </section>
 
-  <!-- ===================================================
-       FOOTER
-  =================================================== -->
   <footer>
     <div class="footer-inner">
       <a href="#hero" class="footer-brand">
         <img src="don3txt_logo.png" alt="don3txt logo">
       </a>
-      <nav class="footer-nav" aria-label="Page sections">
+      <div class="footer-nav">
         <a href="#screenshots">Screenshots</a>
         <a href="#features">Features</a>
         <a href="#format">Format</a>
         <a href="#philosophy">Philosophy</a>
         <a href="#download">Download</a>
-      </nav>
+      </div>
       <div class="footer-divider"></div>
       <p class="footer-copy">MIT License &middot; Built with Flutter</p>
     </div>
   </footer>
 
   <script>
-    /* Nav scroll effect */
     const nav = document.getElementById('main-nav');
+
     window.addEventListener('scroll', () => {
       nav.classList.toggle('scrolled', window.scrollY > 10);
     }, { passive: true });
+
+    const toggle = document.getElementById('menu-toggle');
+    const navLinks = document.getElementById('nav-panel');
+    const overlay = document.getElementById('nav-overlay');
+
+    function openMenu() {
+      navLinks.classList.add('open');
+      overlay.classList.add('open');
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-label', 'Cerrar menú de navegación');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMenu() {
+      navLinks.classList.remove('open');
+      overlay.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', 'Abrir menú de navegación');
+      document.body.style.overflow = '';
+    }
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (navLinks.classList.contains('open')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    overlay.addEventListener('click', closeMenu);
+
+    navLinks.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', closeMenu);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && navLinks.classList.contains('open')) {
+        closeMenu();
+      }
+    });
+
+    const spyPanel = document.getElementById('scroll-spy');
+    const spyDots = spyPanel.querySelectorAll('.spy-dot');
+    const sectionIds = ['hero', 'screenshots', 'features', 'format', 'philosophy', 'download'];
+    const sections = sectionIds.map((id) => document.getElementById(id));
+
+    spyDots.forEach((dot, i) => {
+      dot.addEventListener('click', () => {
+        sections[i].scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    let activeIndex = -1;
+
+    const spyObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const idx = sectionIds.indexOf(entry.target.id);
+
+          if (idx !== -1) {
+            activeIndex = idx;
+          }
+        }
+      });
+
+      spyDots.forEach((dot, i) => {
+        dot.classList.remove('active', 'next');
+
+        if (i === activeIndex) {
+          dot.classList.add('active');
+        } else if (i === activeIndex + 1) {
+          dot.classList.add('next');
+        }
+      });
+    }, { rootMargin: '-20% 0px -60% 0px' });
+
+    sections.forEach((section) => {
+      if (section) spyObserver.observe(section);
+    });
+
+    const scrollHandler = () => {
+      const scrollY = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const nearTop = scrollY < 100;
+      const nearBottom = docHeight > 0 && scrollY > docHeight - 100;
+
+      if (nearTop || nearBottom) {
+        spyPanel.classList.remove('visible');
+      } else {
+        spyPanel.classList.add('visible');
+      }
+    };
+
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+    scrollHandler();
+
+    const fadeEls = document.querySelectorAll('.fade-in');
+
+    const fadeObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const delay = parseInt(entry.target.dataset.delay || '0', 10);
+
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, delay);
+
+          fadeObserver.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px' });
+
+    fadeEls.forEach((el) => fadeObserver.observe(el));
   </script>
 
 </body>
