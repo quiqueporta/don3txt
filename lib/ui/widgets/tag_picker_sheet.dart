@@ -130,8 +130,10 @@ class _TagPickerSheetState extends State<TagPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + keyboardHeight),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

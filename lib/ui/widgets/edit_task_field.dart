@@ -256,6 +256,7 @@ class _EditTaskFieldState extends State<EditTaskField> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (_) => TagPickerSheet(
         title: 'Projects',
         prefix: '+',
@@ -273,6 +274,7 @@ class _EditTaskFieldState extends State<EditTaskField> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (_) => TagPickerSheet(
         title: 'Contexts',
         prefix: '@',

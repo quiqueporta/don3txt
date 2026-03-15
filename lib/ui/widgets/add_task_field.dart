@@ -209,6 +209,7 @@ class _AddTaskFieldState extends State<AddTaskField> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (_) => TagPickerSheet(
         title: 'Projects',
         prefix: '+',
@@ -226,6 +227,7 @@ class _AddTaskFieldState extends State<AddTaskField> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (_) => TagPickerSheet(
         title: 'Contexts',
         prefix: '@',

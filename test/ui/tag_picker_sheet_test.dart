@@ -350,6 +350,32 @@ void main() {
       expect(find.byType(TagPickerSheet), findsNothing);
     });
 
+    testWidgets('adds bottom padding for keyboard insets', (tester) async {
+      const fakeInsets = EdgeInsets.only(bottom: 300);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: MediaQuery(
+            data: const MediaQueryData(viewInsets: fakeInsets),
+            child: TagPickerSheet(
+              title: 'Projects',
+              prefix: '+',
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      ));
+
+      final padding = tester.widget<Padding>(
+        find.byType(Padding).first,
+      );
+
+      expect(
+        (padding.padding as EdgeInsets).bottom,
+        greaterThanOrEqualTo(300),
+      );
+    });
+
     testWidgets('detects duplicate with different case', (tester) async {
       Set<String>? result;
 
