@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.6.0] - 2026-03-15
+
+### Added
+- Visual project and context tag pickers in task editor with `@` and `+` buttons
+- TagPickerSheet with selectable chips for existing tags and field to create new ones
+- Selected tags shown as removable chips before saving, compatible with manual typing
+
+### Changed
+- Redesigned landing page with mobile-first CSS, scroll spy and fade-in animations
+
 ## [1.5.0] - 2026-03-14
 
 ### Fixed
