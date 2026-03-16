@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.7.0] - 2026-03-16
+
+### Added
+- Pull-to-refresh to reload tasks from disk by swiping down
+- Archive completed tasks to `done.txt` in the same directory as the active `todo.txt`
+- Upcoming period indicator in sidebar (e.g. "Upcoming · 7d")
+
+### Fixed
+- setState called during build when syncing upcoming days in the sidebar
+
 ## [1.6.1] - 2026-03-15
 
 ### Fixed
