@@ -3,61 +3,73 @@
 ## [1.7.0] - 2026-03-16
 
 ### Added
+
 - Pull-to-refresh to reload tasks from disk by swiping down
 - Archive completed tasks to `done.txt` in the same directory as the active `todo.txt`
 - Upcoming period indicator in sidebar (e.g. "Upcoming · 7d")
 
 ### Fixed
+
 - setState called during build when syncing upcoming days in the sidebar
 
 ## [1.6.1] - 2026-03-15
 
 ### Fixed
+
 - Tag picker text field hidden behind keyboard when creating new projects or contexts
 
 ## [1.6.0] - 2026-03-15
 
 ### Added
+
 - Visual project and context tag pickers in task editor with `@` and `+` buttons
 - TagPickerSheet with selectable chips for existing tags and field to create new ones
 - Selected tags shown as removable chips before saving, compatible with manual typing
 
 ### Changed
+
 - Redesigned landing page with mobile-first CSS, scroll spy and fade-in animations
 
 ## [1.5.0] - 2026-03-14
 
 ### Fixed
+
 - File picker was copying files to app cache instead of working on the original
 - App could not access the selected file after restart due to missing storage permission
 
 ### Changed
+
 - Unified file selection into a single "select folder" flow using the real directory path
 
 ## [1.4.0] - 2026-03-14
 
 ### Added
+
 - Delete task with undo support via three-dot menu on each task
 
 ## [1.3.0] - 2026-03-14
 
 ### Added
+
 - Completed tasks view accessible from the sidebar
 - Completion snackbar with undo button when completing a task
 - Dividers between tasks in list views
 - Collapsible Projects and Contexts sections in the sidebar
 
 ### Changed
+
 - Default view changed from Inbox to Today
 
 ## [1.2.0] - 2026-03-13
 
 ### Added
+
 - Free-text search across tasks in any view, accessible from the AppBar search icon
 
 ## [1.1.1] - 2026-03-13
 
 ### Changed
+
 - Update file_picker 8.3.7 → 10.3.10
 - Update google_fonts 6.3.3 → 8.0.2
 - Update flutter_lints 5.0.0 → 6.0.0
@@ -65,16 +77,19 @@
 ## [1.1.0] - 2026-03-13
 
 ### Added
+
 - About dialog with author, version, repository link and license information
 - Task ordering with priority selector and priority display in task list
 - Filtering by project, context and priority in Inbox, Today and Upcoming views
 
 ### Fixed
+
 - Bottom padding in task list to prevent last item from being cut off
 
 ## [1.0.0] - 2025-12-22
 
 ### Added
+
 - Upcoming view with configurable days setting
 - Task editing with bottom sheet UI
 - Debug screen to edit todo.txt as raw text
@@ -94,6 +109,7 @@
 - GitHub Actions workflow for tests with badge in README
 
 ### Fixed
+
 - URLs being stripped from task description
 
 ### Initial features
