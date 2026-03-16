@@ -463,6 +463,63 @@ void main() {
       });
     });
 
+    group('pull-to-refresh', () {
+      testWidgets('RefreshIndicator is present with tasks loaded', (tester) async {
+        final repo = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Task 1')]),
+        );
+        final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byType(RefreshIndicator), findsOneWidget);
+      });
+
+      testWidgets('RefreshIndicator is present on empty list', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
+        await notifier.loadTasks();
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byType(RefreshIndicator), findsOneWidget);
+      });
+
+      testWidgets('empty list is scrollable for pull-to-refresh', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
+        await notifier.loadTasks();
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.byType(CustomScrollView), findsOneWidget);
+      });
+
+      testWidgets('pull-to-refresh triggers loadTasks', (tester) async {
+        final repo = _CountingRepository(
+          TodoFile([TodoItem(description: 'Task 1')]),
+        );
+        final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        final initialLoadCount = repo.loadCallCount;
+
+        await tester.fling(find.text('Task 1'), const Offset(0, 300), 1000);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pumpAndSettle();
+
+        expect(repo.loadCallCount, greaterThan(initialLoadCount));
+      });
+    });
+
     group('filter chips', () {
       testWidgets('shows chips when filters are active', (tester) async {
         final notifier = TodoListNotifier(InMemoryTodoRepository(
@@ -524,4 +581,23 @@ void main() {
       });
     });
   });
+}
+
+class _CountingRepository implements TodoRepository {
+  TodoFile _stored;
+  int loadCallCount = 0;
+
+  _CountingRepository(this._stored);
+
+  @override
+  Future<TodoFile> load() async {
+    loadCallCount++;
+
+    return _stored;
+  }
+
+  @override
+  Future<void> save(TodoFile todoFile) async {
+    _stored = todoFile;
+  }
 }

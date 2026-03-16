@@ -329,6 +329,8 @@ class TodoListNotifier extends ChangeNotifier {
   }
 
   Future<void> loadTasks() async {
+    if (_isLoading) return;
+
     _isLoading = true;
     _error = null;
     notifyListeners();

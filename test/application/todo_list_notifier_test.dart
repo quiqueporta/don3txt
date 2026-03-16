@@ -1411,6 +1411,33 @@ void main() {
         expect(result[1].description, 'Low priority');
       });
     });
+
+    group('loadTasks concurrency guard', () {
+      test('does not reload if already loading', () async {
+        final slowRepository = _SlowRepository();
+        final doneRepository = InMemoryTodoRepository();
+        final notifier = TodoListNotifier(slowRepository, doneRepository);
+
+        final firstLoad = notifier.loadTasks();
+        final secondLoad = notifier.loadTasks();
+
+        await firstLoad;
+        await secondLoad;
+
+        expect(slowRepository.loadCallCount, 1);
+      });
+
+      test('allows reload after first load completes', () async {
+        final slowRepository = _SlowRepository();
+        final doneRepository = InMemoryTodoRepository();
+        final notifier = TodoListNotifier(slowRepository, doneRepository);
+
+        await notifier.loadTasks();
+        await notifier.loadTasks();
+
+        expect(slowRepository.loadCallCount, 2);
+      });
+    });
   });
 }
 
@@ -1424,4 +1451,19 @@ class _FailingRepository implements TodoRepository {
 
   @override
   Future<void> save(TodoFile todoFile) async => throw Exception('disk error');
+}
+
+class _SlowRepository implements TodoRepository {
+  int loadCallCount = 0;
+
+  @override
+  Future<TodoFile> load() async {
+    loadCallCount++;
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    return TodoFile([TodoItem(description: 'Slow task')]);
+  }
+
+  @override
+  Future<void> save(TodoFile todoFile) async {}
 }

@@ -204,6 +204,35 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
+  Future<void> _onRefresh(TodoListNotifier notifier) async {
+    await notifier.loadTasks();
+
+    if (notifier.error != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(notifier.error!)),
+      );
+    }
+  }
+
+  Widget _buildScrollableEmptyState() {
+    return CustomScrollView(
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Text(
+              'No pending tasks',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade400,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildBody(TodoListNotifier notifier) {
     if (notifier.todoFile == null) {
       return const Center(child: CircularProgressIndicator());
@@ -212,14 +241,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
     final tasks = notifier.filteredTasks;
 
     if (tasks.isEmpty && !notifier.hasActiveFilters && !notifier.hasActiveSearch) {
-      return Center(
-        child: Text(
-          'No pending tasks',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey.shade400,
-          ),
-        ),
+      return RefreshIndicator(
+        onRefresh: () => _onRefresh(notifier),
+        child: _buildScrollableEmptyState(),
       );
     }
 
@@ -227,80 +251,76 @@ class _TaskListScreenState extends State<TaskListScreen> {
       children: [
         if (notifier.hasActiveFilters) _buildFilterChips(notifier),
         Expanded(
-          child: tasks.isEmpty
-              ? Center(
-                  child: Text(
-                    'No pending tasks',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey.shade400,
-                    ),
-                  ),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.only(top: 8, bottom: 80),
-                  itemCount: tasks.length,
-                  separatorBuilder: (context, index) =>
-                      const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final item = tasks[index];
-                    final isCompletedView =
-                        notifier.activeFilter == TaskFilter.completed;
-                    final originalIndex = isCompletedView
-                        ? notifier.doneFile!.items.indexOf(item)
-                        : notifier.todoFile!.items.indexOf(item);
+          child: RefreshIndicator(
+            onRefresh: () => _onRefresh(notifier),
+            child: tasks.isEmpty
+                ? _buildScrollableEmptyState()
+                : ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(top: 8, bottom: 80),
+                    itemCount: tasks.length,
+                    separatorBuilder: (context, index) =>
+                        const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final item = tasks[index];
+                      final isCompletedView =
+                          notifier.activeFilter == TaskFilter.completed;
+                      final originalIndex = isCompletedView
+                          ? notifier.doneFile!.items.indexOf(item)
+                          : notifier.todoFile!.items.indexOf(item);
 
-                    return TaskTile(
-                      item: item,
-                      onToggle: () {
-                        if (isCompletedView) {
-                          notifier.uncompleteTask(originalIndex);
-                        } else {
-                          notifier.toggleTask(originalIndex);
+                      return TaskTile(
+                        item: item,
+                        onToggle: () {
+                          if (isCompletedView) {
+                            notifier.uncompleteTask(originalIndex);
+                          } else {
+                            notifier.toggleTask(originalIndex);
+
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Task completed'),
+                                action: SnackBarAction(
+                                  label: 'Undo',
+                                  onPressed: () {
+                                    final doneItems = notifier.doneFile?.items ?? [];
+                                    if (doneItems.isNotEmpty) {
+                                      notifier.uncompleteTask(doneItems.length - 1);
+                                    }
+                                  },
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        onTap: isCompletedView
+                            ? null
+                            : () => _showEditTaskSheet(
+                                context, notifier, originalIndex),
+                        onDelete: () {
+                          final deletedItem = item;
+                          final deletedIndex = originalIndex;
+                          notifier.deleteTask(deletedIndex);
 
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: const Text('Task completed'),
+                              content: const Text('Task deleted'),
                               action: SnackBarAction(
                                 label: 'Undo',
                                 onPressed: () {
-                                  final doneItems = notifier.doneFile?.items ?? [];
-                                  if (doneItems.isNotEmpty) {
-                                    notifier.uncompleteTask(doneItems.length - 1);
-                                  }
+                                  notifier.insertTask(
+                                      deletedIndex, deletedItem);
                                 },
                               ),
                             ),
                           );
-                        }
-                      },
-                      onTap: isCompletedView
-                          ? null
-                          : () => _showEditTaskSheet(
-                              context, notifier, originalIndex),
-                      onDelete: () {
-                        final deletedItem = item;
-                        final deletedIndex = originalIndex;
-                        notifier.deleteTask(deletedIndex);
-
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text('Task deleted'),
-                            action: SnackBarAction(
-                              label: 'Undo',
-                              onPressed: () {
-                                notifier.insertTask(
-                                    deletedIndex, deletedItem);
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
+                        },
+                      );
+                    },
+                  ),
+          ),
         ),
       ],
     );
