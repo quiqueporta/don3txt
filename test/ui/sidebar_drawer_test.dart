@@ -555,6 +555,27 @@ void main() {
       expect(inkWell, findsOneWidget);
     });
 
+    testWidgets('shows upcoming days in Upcoming title', (tester) async {
+      await settingsNotifier.load();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Upcoming · 7d'), findsOneWidget);
+    });
+
+    testWidgets('shows updated upcoming days after settings change', (tester) async {
+      await settingsNotifier.load();
+      await settingsNotifier.setUpcomingDays(3);
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Upcoming · 3d'), findsOneWidget);
+    });
+
     testWidgets('does not show My Contexts when no contexts', (tester) async {
       notifier = TodoListNotifier(InMemoryTodoRepository(
         TodoFile([

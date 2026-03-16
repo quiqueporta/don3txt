@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
+import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/ui/widgets/task_tile.dart';
 import 'package:don3txt/ui/widgets/add_task_field.dart';
 import 'package:don3txt/ui/widgets/edit_task_field.dart';
@@ -17,9 +18,29 @@ class TaskListScreen extends StatefulWidget {
 class _TaskListScreenState extends State<TaskListScreen> {
   bool _isSearching = false;
   final _searchController = TextEditingController();
+  SettingsNotifier? _settings;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final settings = context.read<SettingsNotifier>();
+    if (_settings != settings) {
+      _settings?.removeListener(_syncUpcomingDays);
+      _settings = settings;
+      _settings!.addListener(_syncUpcomingDays);
+      _syncUpcomingDays();
+    }
+  }
+
+  void _syncUpcomingDays() {
+    final notifier = context.read<TodoListNotifier>();
+    notifier.upcomingDays = _settings!.upcomingDays;
+  }
 
   @override
   void dispose() {
+    _settings?.removeListener(_syncUpcomingDays);
     _searchController.dispose();
     super.dispose();
   }

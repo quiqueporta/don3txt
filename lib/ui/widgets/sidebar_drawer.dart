@@ -17,8 +17,6 @@ class SidebarDrawer extends StatelessWidget {
     final overdueCount = notifier.overdueTaskCount;
     final hasBadges = todayOnlyCount > 0 || overdueCount > 0;
     final upcomingCount = notifier.upcomingTaskCount;
-    notifier.upcomingDays = settings.upcomingDays;
-
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -85,7 +83,7 @@ class SidebarDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.calendar_month, color: Colors.orange),
-            title: const Text('Upcoming'),
+            title: Text('Upcoming · ${settings.upcomingDays}d'),
             trailing: upcomingCount > 0
                 ? Badge(
                     backgroundColor: Colors.grey,
