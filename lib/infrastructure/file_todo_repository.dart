@@ -14,6 +14,14 @@ class FileTodoRepository implements TodoRepository {
 
   FileTodoRepository(this._filePath);
 
+  static String donePathFor(String todoPath) {
+    final lastSlash = todoPath.lastIndexOf('/');
+
+    return lastSlash >= 0
+        ? '${todoPath.substring(0, lastSlash)}/done.txt'
+        : 'done.txt';
+  }
+
   @override
   Future<TodoFile> load() async {
     final file = File(_filePath);

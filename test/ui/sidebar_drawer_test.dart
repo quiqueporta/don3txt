@@ -88,7 +88,7 @@ void main() {
   late SettingsNotifier settingsNotifier;
 
   setUp(() {
-    notifier = TodoListNotifier(InMemoryTodoRepository());
+    notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
     settingsNotifier = SettingsNotifier(InMemorySettingsRepository());
   });
 
@@ -184,7 +184,7 @@ void main() {
           TodoItem(description: 'Task 1', metadata: {'due': todayStr}),
           TodoItem(description: 'Task 2', metadata: {'due': todayStr}),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -208,7 +208,7 @@ void main() {
           TodoItem(description: 'Today', metadata: {'due': todayStr}),
           TodoItem(description: 'Overdue', metadata: {'due': yesterdayStr}),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -230,7 +230,7 @@ void main() {
         TodoFile([
           TodoItem(description: 'Overdue', metadata: {'due': yesterdayStr}),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -248,7 +248,7 @@ void main() {
         TodoFile([
           TodoItem(description: 'No due'),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -265,7 +265,7 @@ void main() {
           TodoItem(description: 'Task 1', projects: ['+Work']),
           TodoItem(description: 'Task 2', projects: ['+Home']),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -284,7 +284,7 @@ void main() {
           TodoItem(description: 'Task 1', projects: ['+Work']),
           TodoItem(description: 'Task 2', projects: ['+Home']),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -305,7 +305,7 @@ void main() {
           TodoItem(description: 'Task 2', projects: ['+Alpha']),
           TodoItem(description: 'Task 3', projects: ['+Middle']),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -332,7 +332,7 @@ void main() {
         TodoFile([
           TodoItem(description: 'Task 1', projects: ['+Work']),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -354,7 +354,7 @@ void main() {
         TodoFile([
           TodoItem(description: 'No project'),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -371,7 +371,7 @@ void main() {
           TodoItem(description: 'Task 1', contexts: ['@phone']),
           TodoItem(description: 'Task 2', contexts: ['@home']),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -390,7 +390,7 @@ void main() {
           TodoItem(description: 'Task 1', contexts: ['@phone']),
           TodoItem(description: 'Task 2', contexts: ['@home']),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -411,7 +411,7 @@ void main() {
           TodoItem(description: 'Task 2', contexts: ['@alpha']),
           TodoItem(description: 'Task 3', contexts: ['@mobile']),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -438,7 +438,7 @@ void main() {
         TodoFile([
           TodoItem(description: 'Task 1', contexts: ['@phone']),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -461,7 +461,7 @@ void main() {
         TodoFile([
           TodoItem(description: 'Weekly', metadata: {'rec': '1w'}),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -477,7 +477,7 @@ void main() {
         TodoFile([
           TodoItem(description: 'Weekly', metadata: {'rec': '1w'}),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -496,7 +496,7 @@ void main() {
         TodoFile([
           TodoItem(description: 'Normal task'),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
@@ -560,7 +560,7 @@ void main() {
         TodoFile([
           TodoItem(description: 'No context'),
         ]),
-      ));
+      ), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));

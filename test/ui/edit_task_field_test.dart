@@ -500,7 +500,7 @@ void main() {
     testWidgets('opens TagPickerSheet for projects', (tester) async {
       final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
         TodoItem(description: 'Task', projects: ['+Casa', '+Trabajo']),
-      ])));
+      ])), InMemoryTodoRepository(TodoFile([])));
       await notifier.loadTasks();
 
       await tester.pumpWidget(
@@ -522,7 +522,7 @@ void main() {
     testWidgets('opens TagPickerSheet for contexts', (tester) async {
       final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
         TodoItem(description: 'Task', contexts: ['@oficina']),
-      ])));
+      ])), InMemoryTodoRepository(TodoFile([])));
       await notifier.loadTasks();
 
       await tester.pumpWidget(

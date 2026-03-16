@@ -65,7 +65,7 @@ Widget buildTestApp(SettingsNotifier notifier) {
       providers: [
         ChangeNotifierProvider.value(value: notifier),
         ChangeNotifierProvider(
-          create: (_) => TodoListNotifier(InMemoryTodoRepository()),
+          create: (_) => TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository()),
         ),
         Provider<String>.value(value: '/default/todo.txt'),
       ],

@@ -22,11 +22,13 @@ class InMemoryTodoRepository implements TodoRepository {
 
 void main() {
   late InMemoryTodoRepository repository;
+  late InMemoryTodoRepository doneRepository;
   late TodoListNotifier notifier;
 
   setUp(() {
     repository = InMemoryTodoRepository();
-    notifier = TodoListNotifier(repository);
+    doneRepository = InMemoryTodoRepository();
+    notifier = TodoListNotifier(repository, doneRepository);
   });
 
   group('TodoListNotifier', () {
@@ -40,7 +42,7 @@ void main() {
       repository = InMemoryTodoRepository(
         TodoFile([TodoItem(description: 'Task 1')]),
       );
-      notifier = TodoListNotifier(repository);
+      notifier = TodoListNotifier(repository, InMemoryTodoRepository());
 
       await notifier.loadTasks();
 
@@ -51,7 +53,7 @@ void main() {
     });
 
     test('loadTasks sets error on failure', () async {
-      notifier = TodoListNotifier(_FailingRepository());
+      notifier = TodoListNotifier(_FailingRepository(), InMemoryTodoRepository());
 
       await notifier.loadTasks();
 
@@ -87,23 +89,51 @@ void main() {
       expect(notifier.todoFile!.items, isEmpty);
     });
 
-    test('toggleTask completes and persists', () async {
+    test('toggleTask archives completed task to done file', () async {
       repository = InMemoryTodoRepository(
         TodoFile([TodoItem(description: 'Task 1')]),
       );
-      notifier = TodoListNotifier(repository);
+      doneRepository = InMemoryTodoRepository();
+      notifier = TodoListNotifier(repository, doneRepository);
       await notifier.loadTasks();
 
       await notifier.toggleTask(0);
 
-      expect(notifier.todoFile!.items[0].isCompleted, true);
+      expect(notifier.todoFile!.items, isEmpty);
+      expect(notifier.doneFile!.items.length, 1);
+      expect(notifier.doneFile!.items[0].isCompleted, true);
+      expect(notifier.doneFile!.items[0].description, 'Task 1');
 
-      final reloaded = await repository.load();
-      expect(reloaded.items[0].isCompleted, true);
+      final reloadedTodo = await repository.load();
+      expect(reloadedTodo.items, isEmpty);
+      final reloadedDone = await doneRepository.load();
+      expect(reloadedDone.items[0].isCompleted, true);
     });
 
-    test('toggleTask uncompletes completed task', () async {
+    test('toggleTask with recurring task keeps new task in todo', () async {
       repository = InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(
+            description: 'Recurring task',
+            metadata: {'rec': '1w', 'due': '2026-03-16'},
+          ),
+        ]),
+      );
+      doneRepository = InMemoryTodoRepository();
+      notifier = TodoListNotifier(repository, doneRepository);
+      await notifier.loadTasks();
+
+      await notifier.toggleTask(0);
+
+      expect(notifier.todoFile!.items.length, 1);
+      expect(notifier.todoFile!.items[0].isCompleted, false);
+      expect(notifier.doneFile!.items.length, 1);
+      expect(notifier.doneFile!.items[0].isCompleted, true);
+      expect(notifier.doneFile!.items[0].description, 'Recurring task');
+    });
+
+    test('uncompleteTask restores task from done to todo', () async {
+      doneRepository = InMemoryTodoRepository(
         TodoFile([
           TodoItem(
             description: 'Task 1',
@@ -112,12 +142,37 @@ void main() {
           ),
         ]),
       );
-      notifier = TodoListNotifier(repository);
+      notifier = TodoListNotifier(repository, doneRepository);
       await notifier.loadTasks();
 
-      await notifier.toggleTask(0);
+      await notifier.uncompleteTask(0);
 
+      expect(notifier.doneFile!.items, isEmpty);
+      expect(notifier.todoFile!.items.length, 1);
       expect(notifier.todoFile!.items[0].isCompleted, false);
+      expect(notifier.todoFile!.items[0].completionDate, isNull);
+    });
+
+    test('uncompleteTask persists both files', () async {
+      doneRepository = InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(
+            description: 'Task 1',
+            isCompleted: true,
+            completionDate: DateTime(2026, 3, 10),
+          ),
+        ]),
+      );
+      notifier = TodoListNotifier(repository, doneRepository);
+      await notifier.loadTasks();
+
+      await notifier.uncompleteTask(0);
+
+      final reloadedTodo = await repository.load();
+      expect(reloadedTodo.items.length, 1);
+      expect(reloadedTodo.items[0].isCompleted, false);
+      final reloadedDone = await doneRepository.load();
+      expect(reloadedDone.items, isEmpty);
     });
 
     test('notifies listeners on state changes', () async {
@@ -138,7 +193,7 @@ void main() {
           TodoFile([TodoItem(description: 'New task')]),
         );
 
-        await notifier.switchRepository(newRepository);
+        await notifier.switchRepository(newRepository, InMemoryTodoRepository());
 
         expect(notifier.todoFile!.items.length, 1);
         expect(notifier.todoFile!.items[0].description, 'New task');
@@ -153,7 +208,7 @@ void main() {
           TodoFile([TodoItem(description: 'New task')]),
         );
 
-        await notifier.switchRepository(newRepository);
+        await notifier.switchRepository(newRepository, InMemoryTodoRepository());
 
         expect(notified, true);
       });
@@ -197,7 +252,7 @@ void main() {
             TodoItem(description: 'Task 2', metadata: {'due': '2026-03-12'}),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -222,7 +277,7 @@ void main() {
                 metadata: {'due': tomorrowStr}),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.today;
 
@@ -251,7 +306,7 @@ void main() {
                 description: 'Due tomorrow', metadata: {'due': tomorrowStr}),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.today;
 
@@ -275,7 +330,7 @@ void main() {
                 description: 'Due today', metadata: {'due': todayStr}),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
         expect(notifier.todayTaskCount, 2);
@@ -299,7 +354,7 @@ void main() {
                 description: 'Due today', metadata: {'due': todayStr}),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
         expect(notifier.overdueTaskCount, 1);
@@ -318,7 +373,7 @@ void main() {
             TodoItem(description: 'Task 2', projects: ['+Home']),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
         expect(notifier.allProjects, ['+Home', '+Work']);
@@ -338,7 +393,7 @@ void main() {
             TodoItem(description: 'Task 3', projects: ['+Work']),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.selectProject('+Work');
 
@@ -355,7 +410,7 @@ void main() {
             TodoItem(description: 'Task', projects: ['+Work']),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.selectProject('+Work');
 
@@ -371,7 +426,7 @@ void main() {
             TodoItem(description: 'Task 2', contexts: ['@home']),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
         expect(notifier.allContexts, ['@home', '@phone']);
@@ -395,7 +450,7 @@ void main() {
             ),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.recurring;
 
@@ -415,7 +470,7 @@ void main() {
             TodoItem(description: 'Task 2'),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
         expect(notifier.rawContent, 'Task 1\nTask 2\n');
@@ -476,7 +531,7 @@ void main() {
             TodoItem(description: 'Original task'),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
         await notifier.updateTask(
@@ -492,7 +547,7 @@ void main() {
         repository = InMemoryTodoRepository(
           TodoFile([TodoItem(description: 'Task')]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         var notified = false;
         notifier.addListener(() => notified = true);
@@ -516,7 +571,7 @@ void main() {
             TodoItem(description: 'My task next: important'),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
         await notifier.updateTask(
@@ -541,7 +596,7 @@ void main() {
             TodoItem(description: 'Task 3'),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
         await notifier.deleteTask(1);
@@ -558,7 +613,7 @@ void main() {
         repository = InMemoryTodoRepository(
           TodoFile([TodoItem(description: 'Task 1')]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         var notified = false;
         notifier.addListener(() => notified = true);
@@ -583,7 +638,7 @@ void main() {
             TodoItem(description: 'Task 3'),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
         await notifier.insertTask(1, TodoItem(description: 'Task 2'));
@@ -597,7 +652,7 @@ void main() {
 
       test('notifies listeners', () async {
         repository = InMemoryTodoRepository(TodoFile([]));
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         var notified = false;
         notifier.addListener(() => notified = true);
@@ -631,7 +686,7 @@ void main() {
             TodoItem(description: 'No due'),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.upcoming;
 
@@ -653,7 +708,7 @@ void main() {
             TodoItem(description: 'No due'),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
         expect(notifier.upcomingTaskCount, 2);
@@ -673,7 +728,7 @@ void main() {
             TodoItem(description: 'In 5 days', metadata: {'due': in5DaysStr}),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.upcomingDays = 3;
         notifier.activeFilter = TaskFilter.upcoming;
@@ -694,7 +749,7 @@ void main() {
             TodoItem(description: 'Task 3', contexts: ['@phone']),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.selectContext('@phone');
 
@@ -752,7 +807,7 @@ void main() {
             ),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
       });
@@ -968,7 +1023,7 @@ void main() {
             TodoItem(description: 'Buy BREAD'),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -989,7 +1044,7 @@ void main() {
             TodoItem(description: 'Call mom', projects: ['+Home']),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -1015,11 +1070,13 @@ void main() {
     });
 
     group('completed filter', () {
-      test('filteredTasks returns completed tasks when filter is completed',
+      test('filteredTasks returns completed tasks from done file',
           () async {
         repository = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Pending task')]),
+        );
+        doneRepository = InMemoryTodoRepository(
           TodoFile([
-            TodoItem(description: 'Pending task'),
             TodoItem(
               description: 'Done task',
               isCompleted: true,
@@ -1032,7 +1089,7 @@ void main() {
             ),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, doneRepository);
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.completed;
 
@@ -1043,7 +1100,7 @@ void main() {
       });
 
       test('completed tasks sorted by completion date descending', () async {
-        repository = InMemoryTodoRepository(
+        doneRepository = InMemoryTodoRepository(
           TodoFile([
             TodoItem(
               description: 'Oldest',
@@ -1062,7 +1119,7 @@ void main() {
             ),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, doneRepository);
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.completed;
 
@@ -1073,25 +1130,25 @@ void main() {
         expect(result[2].description, 'Oldest');
       });
 
-      test('hasCompletedTasks returns true when completed tasks exist',
+      test('hasCompletedTasks returns true when done file has items',
           () async {
-        repository = InMemoryTodoRepository(
+        doneRepository = InMemoryTodoRepository(
           TodoFile([
-            TodoItem(description: 'Pending'),
-            TodoItem(description: 'Done', isCompleted: true),
+            TodoItem(
+              description: 'Done',
+              isCompleted: true,
+              completionDate: DateTime(2026, 3, 10),
+            ),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, doneRepository);
         await notifier.loadTasks();
 
         expect(notifier.hasCompletedTasks, true);
       });
 
-      test('hasCompletedTasks returns false when no completed tasks', () async {
-        repository = InMemoryTodoRepository(
-          TodoFile([TodoItem(description: 'Pending')]),
-        );
-        notifier = TodoListNotifier(repository);
+      test('hasCompletedTasks returns false when done file is empty', () async {
+        notifier = TodoListNotifier(repository, doneRepository);
         await notifier.loadTasks();
 
         expect(notifier.hasCompletedTasks, false);
@@ -1099,6 +1156,32 @@ void main() {
 
       test('hasCompletedTasks returns false when no file loaded', () {
         expect(notifier.hasCompletedTasks, false);
+      });
+
+      test('loadTasks migrates completed tasks from todo to done', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Pending'),
+            TodoItem(
+              description: 'Already done',
+              isCompleted: true,
+              completionDate: DateTime(2026, 3, 10),
+            ),
+          ]),
+        );
+        doneRepository = InMemoryTodoRepository();
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+
+        expect(notifier.todoFile!.items.length, 1);
+        expect(notifier.todoFile!.items[0].description, 'Pending');
+        expect(notifier.doneFile!.items.length, 1);
+        expect(notifier.doneFile!.items[0].description, 'Already done');
+
+        final reloadedTodo = await repository.load();
+        expect(reloadedTodo.items.length, 1);
+        final reloadedDone = await doneRepository.load();
+        expect(reloadedDone.items.length, 1);
       });
     });
 
@@ -1110,7 +1193,7 @@ void main() {
             TodoItem(description: 'High', priority: 'A'),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -1127,7 +1210,7 @@ void main() {
             TodoItem(description: 'Has priority', priority: 'C'),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -1152,7 +1235,7 @@ void main() {
             ),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -1173,7 +1256,7 @@ void main() {
             ),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -1200,7 +1283,7 @@ void main() {
             ),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -1220,7 +1303,7 @@ void main() {
             ),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -1256,7 +1339,7 @@ void main() {
             ),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -1291,7 +1374,7 @@ void main() {
             ),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.today;
 
@@ -1318,7 +1401,7 @@ void main() {
             ),
           ]),
         );
-        notifier = TodoListNotifier(repository);
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.upcoming;
 

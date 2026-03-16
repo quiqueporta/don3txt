@@ -159,8 +159,10 @@ class SettingsScreen extends StatelessWidget {
     await settings.setTodoFilePath(savePath == _sentinel ? path : savePath as String?);
 
     final newRepository = FileTodoRepository(path);
+    final newDoneRepository = FileTodoRepository(
+        FileTodoRepository.donePathFor(path));
 
-    await todoList.switchRepository(newRepository);
+    await todoList.switchRepository(newRepository, newDoneRepository);
   }
 }
 

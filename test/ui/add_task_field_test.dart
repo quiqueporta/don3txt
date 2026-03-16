@@ -442,7 +442,7 @@ void main() {
         (tester) async {
       final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
         TodoItem(description: 'Task', projects: ['+Casa']),
-      ])));
+      ])), InMemoryTodoRepository(TodoFile([])));
       await notifier.loadTasks();
 
       await tester.pumpWidget(
@@ -464,7 +464,7 @@ void main() {
         (tester) async {
       final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
         TodoItem(description: 'Task', contexts: ['@oficina']),
-      ])));
+      ])), InMemoryTodoRepository(TodoFile([])));
       await notifier.loadTasks();
 
       await tester.pumpWidget(
@@ -486,7 +486,7 @@ void main() {
         (tester) async {
       final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
         TodoItem(description: 'Task', projects: ['+Casa']),
-      ])));
+      ])), InMemoryTodoRepository(TodoFile([])));
       await notifier.loadTasks();
 
       await tester.pumpWidget(
@@ -514,7 +514,7 @@ void main() {
 
       final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
         TodoItem(description: 'Task', projects: ['+Casa']),
-      ])));
+      ])), InMemoryTodoRepository(TodoFile([])));
       await notifier.loadTasks();
 
       await tester.pumpWidget(
@@ -544,7 +544,7 @@ void main() {
     testWidgets('clears project chips after submit', (tester) async {
       final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
         TodoItem(description: 'Task', projects: ['+Casa']),
-      ])));
+      ])), InMemoryTodoRepository(TodoFile([])));
       await notifier.loadTasks();
 
       await tester.pumpWidget(
@@ -579,7 +579,7 @@ void main() {
 
       final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
         TodoItem(description: 'Task', projects: ['+Casa', '+Casanova']),
-      ])));
+      ])), InMemoryTodoRepository(TodoFile([])));
       await notifier.loadTasks();
 
       await tester.pumpWidget(
@@ -610,7 +610,7 @@ void main() {
 
       final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
         TodoItem(description: 'Task', contexts: ['@oficina']),
-      ])));
+      ])), InMemoryTodoRepository(TodoFile([])));
       await notifier.loadTasks();
 
       await tester.pumpWidget(
@@ -645,7 +645,7 @@ void main() {
           projects: ['+Casa'],
           contexts: ['@telefono'],
         ),
-      ])));
+      ])), InMemoryTodoRepository(TodoFile([])));
       await notifier.loadTasks();
 
       await tester.pumpWidget(
@@ -682,7 +682,7 @@ void main() {
 
       final notifier = TodoListNotifier(InMemoryTodoRepository(TodoFile([
         TodoItem(description: 'Task', projects: ['+Casa']),
-      ])));
+      ])), InMemoryTodoRepository(TodoFile([])));
       await notifier.loadTasks();
 
       await tester.pumpWidget(

@@ -7,9 +7,11 @@ import 'package:don3txt/infrastructure/file_todo_repository.dart';
 enum TaskFilter { inbox, today, upcoming, project, context, recurring, completed }
 
 class TodoListNotifier extends ChangeNotifier {
-  TodoRepository _repository;
+  TodoRepository _todoRepository;
+  TodoRepository _doneRepository;
 
   TodoFile? _todoFile;
+  TodoFile? _doneFile;
   bool _isLoading = false;
   String? _error;
   TaskFilter _activeFilter = TaskFilter.today;
@@ -23,9 +25,10 @@ class TodoListNotifier extends ChangeNotifier {
   Set<String> _filterContexts = {};
   Set<String> _filterPriorities = {};
 
-  TodoListNotifier(this._repository);
+  TodoListNotifier(this._todoRepository, this._doneRepository);
 
   TodoFile? get todoFile => _todoFile;
+  TodoFile? get doneFile => _doneFile;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -110,9 +113,9 @@ class TodoListNotifier extends ChangeNotifier {
   }
 
   bool get hasCompletedTasks {
-    if (_todoFile == null) return false;
+    if (_doneFile == null) return false;
 
-    return _todoFile!.completedTasks.isNotEmpty;
+    return _doneFile!.items.isNotEmpty;
   }
 
   int get todayTaskCount {
@@ -150,7 +153,7 @@ class TodoListNotifier extends ChangeNotifier {
       case TaskFilter.recurring:
         return _todoFile!.recurringTasks;
       case TaskFilter.completed:
-        return _todoFile!.completedTasks;
+        return _doneFile?.items ?? [];
     }
   }
 
@@ -317,8 +320,10 @@ class TodoListNotifier extends ChangeNotifier {
     _filterPriorities = {};
   }
 
-  Future<void> switchRepository(TodoRepository repository) async {
-    _repository = repository;
+  Future<void> switchRepository(
+      TodoRepository todoRepository, TodoRepository doneRepository) async {
+    _todoRepository = todoRepository;
+    _doneRepository = doneRepository;
 
     await loadTasks();
   }
@@ -329,7 +334,10 @@ class TodoListNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _todoFile = await _repository.load();
+      _todoFile = await _todoRepository.load();
+      _doneFile = await _doneRepository.load();
+
+      _migrateCompletedToDone();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -353,7 +361,7 @@ class TodoListNotifier extends ChangeNotifier {
         priority: priority);
     notifyListeners();
 
-    await _repository.save(_todoFile!);
+    await _todoRepository.save(_todoFile!);
   }
 
   String get rawContent => _todoFile?.serialize() ?? '';
@@ -372,7 +380,7 @@ class TodoListNotifier extends ChangeNotifier {
     _todoFile = TodoFile(items);
     notifyListeners();
 
-    await _repository.save(_todoFile!);
+    await _todoRepository.save(_todoFile!);
   }
 
   Future<void> updateTask(int index, TodoItem newItem) async {
@@ -381,7 +389,7 @@ class TodoListNotifier extends ChangeNotifier {
     _todoFile = _todoFile!.updateTask(index, newItem);
     notifyListeners();
 
-    await _repository.save(_todoFile!);
+    await _todoRepository.save(_todoFile!);
   }
 
   Future<void> deleteTask(int index) async {
@@ -390,7 +398,7 @@ class TodoListNotifier extends ChangeNotifier {
     _todoFile = _todoFile!.deleteTask(index);
     notifyListeners();
 
-    await _repository.save(_todoFile!);
+    await _todoRepository.save(_todoFile!);
   }
 
   Future<void> insertTask(int index, TodoItem item) async {
@@ -399,15 +407,52 @@ class TodoListNotifier extends ChangeNotifier {
     _todoFile = _todoFile!.insertTask(index, item);
     notifyListeners();
 
-    await _repository.save(_todoFile!);
+    await _todoRepository.save(_todoFile!);
   }
 
   Future<void> toggleTask(int index) async {
-    if (_todoFile == null) return;
+    if (_todoFile == null || _doneFile == null) return;
 
-    _todoFile = _todoFile!.completeTask(index);
+    final result = _todoFile!.completeTask(index);
+
+    final completedItems = result.items.where((i) => i.isCompleted).toList();
+    final pendingItems = result.items.where((i) => !i.isCompleted).toList();
+
+    _todoFile = TodoFile(pendingItems);
+    _doneFile = TodoFile([..._doneFile!.items, ...completedItems]);
     notifyListeners();
 
-    await _repository.save(_todoFile!);
+    await _todoRepository.save(_todoFile!);
+    await _doneRepository.save(_doneFile!);
+  }
+
+  Future<void> uncompleteTask(int doneIndex) async {
+    if (_todoFile == null || _doneFile == null) return;
+
+    final item = _doneFile!.items[doneIndex];
+    final restoredItem = item.copyWith(
+      isCompleted: false,
+      completionDate: null,
+    );
+
+    _doneFile = _doneFile!.deleteTask(doneIndex);
+    _todoFile = TodoFile([..._todoFile!.items, restoredItem]);
+    notifyListeners();
+
+    await _todoRepository.save(_todoFile!);
+    await _doneRepository.save(_doneFile!);
+  }
+
+  void _migrateCompletedToDone() {
+    if (_todoFile == null || _doneFile == null) return;
+
+    final completed = _todoFile!.completedTasks;
+    if (completed.isEmpty) return;
+
+    _todoFile = TodoFile(_todoFile!.pendingTasks);
+    _doneFile = TodoFile([..._doneFile!.items, ...completed]);
+
+    _todoRepository.save(_todoFile!);
+    _doneRepository.save(_doneFile!);
   }
 }

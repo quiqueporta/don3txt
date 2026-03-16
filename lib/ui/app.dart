@@ -11,12 +11,14 @@ import 'package:don3txt/ui/screens/task_list_screen.dart';
 
 class Don3txtApp extends StatelessWidget {
   final TodoRepository repository;
+  final TodoRepository doneRepository;
   final SettingsRepository settingsRepository;
   final String defaultFilePath;
 
   const Don3txtApp({
     super.key,
     required this.repository,
+    required this.doneRepository,
     required this.settingsRepository,
     required this.defaultFilePath,
   });
@@ -26,7 +28,7 @@ class Don3txtApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => TodoListNotifier(repository)..loadTasks(),
+          create: (_) => TodoListNotifier(repository, doneRepository)..loadTasks(),
         ),
         ChangeNotifierProvider(
           create: (_) => SettingsNotifier(settingsRepository)..load(),

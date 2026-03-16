@@ -43,7 +43,7 @@ void main() {
         TodoItem(description: 'Task 2'),
       ]),
     );
-    notifier = TodoListNotifier(repository);
+    notifier = TodoListNotifier(repository, InMemoryTodoRepository());
   });
 
   group('DebugScreen', () {

@@ -18,6 +18,22 @@ void main() {
     tempDir.deleteSync(recursive: true);
   });
 
+  group('donePathFor', () {
+    test('derives done.txt in same directory as todo.txt', () {
+      expect(
+        FileTodoRepository.donePathFor('/path/to/todo.txt'),
+        '/path/to/done.txt',
+      );
+    });
+
+    test('works with custom todo filename', () {
+      expect(
+        FileTodoRepository.donePathFor('/storage/my-tasks.txt'),
+        '/storage/done.txt',
+      );
+    });
+  });
+
   group('FileTodoRepository', () {
     test('load returns empty TodoFile when file does not exist', () async {
       final todoFile = await repository.load();

@@ -244,16 +244,20 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final item = tasks[index];
-                    final originalIndex =
-                        notifier.todoFile!.items.indexOf(item);
+                    final isCompletedView =
+                        notifier.activeFilter == TaskFilter.completed;
+                    final originalIndex = isCompletedView
+                        ? notifier.doneFile!.items.indexOf(item)
+                        : notifier.todoFile!.items.indexOf(item);
 
                     return TaskTile(
                       item: item,
                       onToggle: () {
-                        final wasCompleted = item.isCompleted;
-                        notifier.toggleTask(originalIndex);
+                        if (isCompletedView) {
+                          notifier.uncompleteTask(originalIndex);
+                        } else {
+                          notifier.toggleTask(originalIndex);
 
-                        if (!wasCompleted) {
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -261,15 +265,20 @@ class _TaskListScreenState extends State<TaskListScreen> {
                               action: SnackBarAction(
                                 label: 'Undo',
                                 onPressed: () {
-                                  notifier.toggleTask(originalIndex);
+                                  final doneItems = notifier.doneFile?.items ?? [];
+                                  if (doneItems.isNotEmpty) {
+                                    notifier.uncompleteTask(doneItems.length - 1);
+                                  }
                                 },
                               ),
                             ),
                           );
                         }
                       },
-                      onTap: () => _showEditTaskSheet(
-                          context, notifier, originalIndex),
+                      onTap: isCompletedView
+                          ? null
+                          : () => _showEditTaskSheet(
+                              context, notifier, originalIndex),
                       onDelete: () {
                         final deletedItem = item;
                         final deletedIndex = originalIndex;

@@ -18,10 +18,14 @@ void main() async {
     await _requestStoragePermission();
   }
 
-  final repository = FileTodoRepository(savedPath ?? defaultFilePath);
+  final todoPath = savedPath ?? defaultFilePath;
+  final repository = FileTodoRepository(todoPath);
+  final doneRepository = FileTodoRepository(
+      FileTodoRepository.donePathFor(todoPath));
 
   runApp(Don3txtApp(
     repository: repository,
+    doneRepository: doneRepository,
     settingsRepository: settingsRepository,
     defaultFilePath: defaultFilePath,
   ));

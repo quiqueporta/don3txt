@@ -63,7 +63,7 @@ Widget buildTestApp(TodoListNotifier notifier) {
 void main() {
   group('TaskListScreen', () {
     testWidgets('shows loading indicator when not yet loaded', (tester) async {
-      final notifier = TodoListNotifier(InMemoryTodoRepository());
+      final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
 
       await tester.pumpWidget(buildTestApp(notifier));
 
@@ -71,7 +71,7 @@ void main() {
     });
 
     testWidgets('shows empty state when no tasks', (tester) async {
-      final notifier = TodoListNotifier(InMemoryTodoRepository());
+      final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier));
@@ -87,7 +87,7 @@ void main() {
           TodoItem(description: 'Task 2'),
         ]),
       );
-      final notifier = TodoListNotifier(repo);
+      final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
       await notifier.loadTasks();
       notifier.activeFilter = TaskFilter.inbox;
 
@@ -106,7 +106,7 @@ void main() {
           TodoItem(description: 'Task 3'),
         ]),
       );
-      final notifier = TodoListNotifier(repo);
+      final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
       await notifier.loadTasks();
       notifier.activeFilter = TaskFilter.inbox;
 
@@ -123,7 +123,7 @@ void main() {
           TodoItem(description: 'Done', isCompleted: true),
         ]),
       );
-      final notifier = TodoListNotifier(repo);
+      final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
       await notifier.loadTasks();
       notifier.activeFilter = TaskFilter.inbox;
 
@@ -135,7 +135,7 @@ void main() {
     });
 
     testWidgets('has FAB', (tester) async {
-      final notifier = TodoListNotifier(InMemoryTodoRepository());
+      final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier));
@@ -145,7 +145,7 @@ void main() {
     });
 
     testWidgets('has Today title by default', (tester) async {
-      final notifier = TodoListNotifier(InMemoryTodoRepository());
+      final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier));
@@ -155,7 +155,7 @@ void main() {
     });
 
     testWidgets('shows Today title when filter is today', (tester) async {
-      final notifier = TodoListNotifier(InMemoryTodoRepository());
+      final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
       await notifier.loadTasks();
       notifier.activeFilter = TaskFilter.today;
 
@@ -166,7 +166,7 @@ void main() {
     });
 
     testWidgets('has a drawer', (tester) async {
-      final notifier = TodoListNotifier(InMemoryTodoRepository());
+      final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
       await notifier.loadTasks();
 
       await tester.pumpWidget(buildTestApp(notifier));
@@ -188,7 +188,7 @@ void main() {
           TodoItem(description: 'Due today', metadata: {'due': todayStr}),
         ]),
       );
-      final notifier = TodoListNotifier(repo);
+      final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
       await notifier.loadTasks();
       notifier.activeFilter = TaskFilter.today;
 
@@ -203,7 +203,7 @@ void main() {
       testWidgets('shows filter icon in Inbox view', (tester) async {
         final notifier = TodoListNotifier(InMemoryTodoRepository(
           TodoFile([TodoItem(description: 'Task', projects: ['+Work'])]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
 
         await tester.pumpWidget(buildTestApp(notifier));
@@ -220,7 +220,7 @@ void main() {
           TodoFile([
             TodoItem(description: 'Task', metadata: {'due': todayStr}),
           ]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.today;
 
@@ -231,7 +231,7 @@ void main() {
       });
 
       testWidgets('shows filter icon in Upcoming view', (tester) async {
-        final notifier = TodoListNotifier(InMemoryTodoRepository());
+        final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.upcoming;
 
@@ -244,7 +244,7 @@ void main() {
       testWidgets('does NOT show filter icon in Project view', (tester) async {
         final notifier = TodoListNotifier(InMemoryTodoRepository(
           TodoFile([TodoItem(description: 'Task', projects: ['+Work'])]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.selectProject('+Work');
 
@@ -258,7 +258,7 @@ void main() {
       testWidgets('does NOT show filter icon in Context view', (tester) async {
         final notifier = TodoListNotifier(InMemoryTodoRepository(
           TodoFile([TodoItem(description: 'Task', contexts: ['@home'])]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.selectContext('@home');
 
@@ -270,7 +270,7 @@ void main() {
       });
 
       testWidgets('does NOT show filter icon in Recurring view', (tester) async {
-        final notifier = TodoListNotifier(InMemoryTodoRepository());
+        final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.recurring;
 
@@ -287,7 +287,7 @@ void main() {
             TodoItem(description: 'Task 1', projects: ['+Work']),
             TodoItem(description: 'Task 2', projects: ['+Home']),
           ]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.toggleFilterProject('+Work');
 
@@ -302,7 +302,7 @@ void main() {
       testWidgets('shows search icon in AppBar', (tester) async {
         final notifier = TodoListNotifier(InMemoryTodoRepository(
           TodoFile([TodoItem(description: 'Task 1')]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
 
         await tester.pumpWidget(buildTestApp(notifier));
@@ -314,7 +314,7 @@ void main() {
       testWidgets('tapping search icon shows TextField', (tester) async {
         final notifier = TodoListNotifier(InMemoryTodoRepository(
           TodoFile([TodoItem(description: 'Task 1')]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
 
         await tester.pumpWidget(buildTestApp(notifier));
@@ -333,7 +333,7 @@ void main() {
             TodoItem(description: 'Buy milk'),
             TodoItem(description: 'Call mom'),
           ]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -357,7 +357,7 @@ void main() {
             TodoItem(description: 'Buy milk'),
             TodoItem(description: 'Call mom'),
           ]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -382,7 +382,7 @@ void main() {
       testWidgets('search icon is available in all views', (tester) async {
         final notifier = TodoListNotifier(InMemoryTodoRepository(
           TodoFile([TodoItem(description: 'Task', projects: ['+Work'])]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.selectProject('+Work');
 
@@ -399,7 +399,7 @@ void main() {
         final repo = InMemoryTodoRepository(
           TodoFile([TodoItem(description: 'Buy milk')]),
         );
-        final notifier = TodoListNotifier(repo);
+        final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -417,7 +417,7 @@ void main() {
         final repo = InMemoryTodoRepository(
           TodoFile([TodoItem(description: 'Buy milk')]),
         );
-        final notifier = TodoListNotifier(repo);
+        final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.inbox;
 
@@ -449,7 +449,7 @@ void main() {
             ),
           ]),
         );
-        final notifier = TodoListNotifier(repo);
+        final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.activeFilter = TaskFilter.completed;
 
@@ -470,7 +470,7 @@ void main() {
             TodoItem(description: 'Task 1', projects: ['+Work']),
             TodoItem(description: 'Task 2', projects: ['+Home']),
           ]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.toggleFilterProject('+Work');
 
@@ -487,7 +487,7 @@ void main() {
             TodoItem(description: 'Task 1', projects: ['+Work']),
             TodoItem(description: 'Task 2', projects: ['+Home']),
           ]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.toggleFilterProject('+Work');
 
@@ -511,7 +511,7 @@ void main() {
               priority: 'A',
             ),
           ]),
-        ));
+        ), InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.toggleFilterProject('+Work');
         notifier.toggleFilterContext('@email');
