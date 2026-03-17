@@ -319,11 +319,13 @@
       z-index: 98;
       background: rgba(0, 0, 0, 0.5);
       opacity: 0;
+      pointer-events: none;
       transition: opacity var(--transition-base);
     }
 
     .nav-overlay.open {
       opacity: 1;
+      pointer-events: auto;
     }
 
     .scroll-spy {
