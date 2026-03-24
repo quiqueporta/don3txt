@@ -88,7 +88,6 @@ class TodoFile {
     return items
         .where((item) =>
             !item.isCompleted &&
-            _isVisible(item, today) &&
             item.metadata['due'] != null &&
             item.metadata['due']!.compareTo(tomorrowString) >= 0 &&
             item.metadata['due']!.compareTo(limitString) <= 0)

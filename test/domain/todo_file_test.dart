@@ -804,17 +804,32 @@ void main() {
         expect(result, isEmpty);
       });
 
-      test('excludes task with future threshold', () {
+      test('includes task with future threshold when due is in range', () {
         final file = TodoFile([
           TodoItem(
-            description: 'Hidden',
+            description: 'Future threshold',
             metadata: {'due': '2026-03-15', 't': '2026-03-14'},
           ),
         ]);
 
         final result = file.upcomingTasks(today, 7);
 
-        expect(result, isEmpty);
+        expect(result.length, 1);
+        expect(result[0].description, 'Future threshold');
+      });
+
+      test('includes task with threshold equal to due in range', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Same day',
+            metadata: {'due': '2026-03-20', 't': '2026-03-20'},
+          ),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Same day');
       });
     });
     group('deleteTask', () {

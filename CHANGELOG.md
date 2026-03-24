@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.7.1] - 2026-03-24
+
+### Fixed
+
+- Upcoming view now shows tasks with future threshold dates when due date is in range, matching standard behavior of apps like Todoist
+
 ## [1.7.0] - 2026-03-16
 
 ### Added

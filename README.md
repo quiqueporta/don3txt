@@ -18,7 +18,7 @@ A mobile application for managing tasks based on the [todo.txt](http://todotxt.o
 - **Priorities** from `(A)` to `(Z)` following the todo.txt standard
 - **Creation dates** assigned automatically when a task is created
 - **Due dates** (`due:YYYY-MM-DD`) with a built-in calendar picker
-- **Threshold dates** (`t:YYYY-MM-DD`) with a calendar picker — tasks with a future threshold date are automatically hidden from all views except Recurring
+- **Threshold dates** (`t:YYYY-MM-DD`) with a calendar picker — tasks with a future threshold date are hidden from action views (Today, Inbox) but remain visible in Upcoming and Recurring
 - **Visual tag pickers** for projects (`+name`) and contexts (`@name`) — tap `+` or `@` in the editor to browse existing tags as selectable chips, or create new ones. Compatible with manual typing: tags entered in the text field merge with those selected via UI without duplicates
 
 ### Recurring tasks
