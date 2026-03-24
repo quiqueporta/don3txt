@@ -1,86 +1,86 @@
 # don3txt
 
-Gestor de tareas basado en el formato estándar abierto [todo.txt](http://todotxt.org/), construido con Flutter para Android.
+Task manager based on the open standard [todo.txt](http://todotxt.org/) format, built with Flutter for Android.
 
-## Stack tecnológico
+## Tech stack
 
-- **Flutter** (Dart) con Material Design 3
-- **Provider** para state management (`ChangeNotifier`)
-- **path_provider** + **file_picker** para acceso al sistema de ficheros
-- **shared_preferences** para persistencia de ajustes
+- **Flutter** (Dart) with Material Design 3
+- **Provider** for state management (`ChangeNotifier`)
+- **path_provider** + **file_picker** for filesystem access
+- **shared_preferences** for settings persistence
 - **google_fonts** (Inter)
 
-## Arquitectura
+## Architecture
 
-Clean Architecture con separación en capas:
+Clean Architecture with layer separation:
 
-- `lib/domain/` — Value Objects (`TodoItem`, `AppThemeMode`, `StartOfWeek`), Agregados (`TodoFile`), funciones puras de parsing (`todo_parser.dart`), lógica de recurrencia (`recurrence.dart`)
-- `lib/infrastructure/` — Repositorios (`FileTodoRepository`, `SharedPreferencesSettingsRepository`). Contiene también las interfaces de dominio (son solo abstracciones, no implementaciones concretas)
-- `lib/application/` — Estado reactivo (`TodoListNotifier`, `SettingsNotifier` con `ChangeNotifier`)
-- `lib/ui/` — Tema, pantallas (`TaskListScreen`, `SettingsScreen`) y widgets (`SidebarDrawer`, `TaskTile`, `AddTaskField`, `EditTaskField`, `TaskInputBar`, `TagPickerSheet`)
+- `lib/domain/` — Value Objects (`TodoItem`, `AppThemeMode`, `StartOfWeek`), Aggregates (`TodoFile`), pure parsing functions (`todo_parser.dart`), recurrence logic (`recurrence.dart`)
+- `lib/infrastructure/` — Repositories (`FileTodoRepository`, `SharedPreferencesSettingsRepository`). Also contains domain interfaces (abstractions only, no concrete implementations)
+- `lib/application/` — Reactive state (`TodoListNotifier`, `SettingsNotifier` with `ChangeNotifier`)
+- `lib/ui/` — Theme, screens (`TaskListScreen`, `SettingsScreen`) and widgets (`SidebarDrawer`, `TaskTile`, `AddTaskField`, `EditTaskField`, `TaskInputBar`, `TagPickerSheet`)
 
-## Funcionalidades principales
+## Main features
 
-- Gestión CRUD de tareas con formato todo.txt estándar
-- Prioridades `(A)`-`(Z)`, proyectos (`+nombre`), contextos (`@nombre`), metadata (`clave:valor`)
-- Fechas de vencimiento (`due:`) con selector de calendario
-- Fechas de inicio/threshold (`t:`) con selector de calendario — oculta tareas con `t:` futuro de las vistas de acción (Hoy, Inbox), pero se muestran en Upcoming y Recurring
-- Tareas recurrentes (`rec:`) con modo flexible y estricto (`+`). Estricto requiere `t:` para calcular desde fecha original; sin `t:` cae a flexible
-- Selectores visuales de proyectos y contextos: botones `@` y `+` en la barra de iconos del editor abren un `ModalBottomSheet` (`TagPickerSheet`) con los tags existentes como chips seleccionables y campo para crear nuevos. Los tags seleccionados se muestran como chips eliminables antes de guardar. Compatible con escritura manual: si el usuario escribe `@contexto` directamente en el texto, se combina sin duplicados con los seleccionados via UI.
-- Vistas: Hoy (por defecto, con badges de atrasadas/hoy), Inbox, Upcoming (tareas de mañana a N días, periodo configurable), filtro por Proyecto (colapsable), filtro por Contexto (colapsable), Recurring (tareas con `rec:`, sin filtro threshold), Completed (tareas completadas, ordenadas por fecha de completitud descendente)
-- Eliminación de tareas desde menú de tres puntos con Snackbar y Undo
-- Snackbar con Undo al completar una tarea
-- Búsqueda por texto libre en la descripción de las tareas, disponible en todas las vistas
-- Selección de fichero todo.txt desde cualquier ubicación del dispositivo
-- Tema claro/oscuro/sistema, primer día de la semana configurable, periodo upcoming configurable
+- CRUD task management with standard todo.txt format
+- Priorities `(A)`-`(Z)`, projects (`+name`), contexts (`@name`), metadata (`key:value`)
+- Due dates (`due:`) with calendar picker
+- Threshold dates (`t:`) with calendar picker — hides tasks with future `t:` from action views (Today, Inbox), but they remain visible in Upcoming and Recurring
+- Recurring tasks (`rec:`) with flexible and strict (`+`) modes. Strict requires `t:` to calculate from original date; without `t:` falls back to flexible
+- Visual project and context pickers: `@` and `+` buttons in the editor icon bar open a `ModalBottomSheet` (`TagPickerSheet`) with existing tags as selectable chips and a field to create new ones. Selected tags are shown as removable chips before saving. Compatible with manual typing: if the user types `@context` directly in the text, it merges without duplicates with those selected via UI
+- Views: Today (default, with overdue/today badges), Inbox, Upcoming (tasks from tomorrow to N days, configurable period), filter by Project (collapsible), filter by Context (collapsible), Recurring (tasks with `rec:`, no threshold filter), Completed (completed tasks, sorted by completion date descending)
+- Task deletion from three-dot menu with Snackbar and Undo
+- Snackbar with Undo when completing a task
+- Free-text search across task descriptions, available in all views
+- Select todo.txt file from any location on the device
+- Light/dark/system theme, configurable first day of the week, configurable upcoming period
 
-## Comandos
+## Commands
 
 ```bash
-# Dependencias
+# Dependencies
 flutter pub get
 
 # Tests
 flutter test
 
-# Ejecutar
+# Run
 flutter run
 
-# Compilar APK
+# Build APK
 flutter build apk --release
 ```
 
 ## Tests
 
-Organizados por capa en `test/`:
+Organized by layer in `test/`:
 
-- `test/domain/` — Tests unitarios de modelos, parsing y recurrencia
-- `test/infrastructure/` — Tests de integración del repositorio (directorio temporal)
-- `test/application/` — Tests del notifier con `InMemoryTodoRepository`
-- `test/ui/` — Tests de widgets
+- `test/domain/` — Unit tests for models, parsing and recurrence
+- `test/infrastructure/` — Integration tests for the repository (temporary directory)
+- `test/application/` — Notifier tests with `InMemoryTodoRepository`
+- `test/ui/` — Widget tests
 
-## Formato todo.txt
+## todo.txt format
 
 ```
-(A) 2024-01-15 Llamar a mamá +Familia @teléfono due:2024-01-20
-x 2024-01-16 2024-01-15 Revisar PR +Proyecto @github
-Pagar alquiler due:2024-02-01 rec:1m
-Revisar informe due:2024-03-01 t:2024-02-25 rec:+1m
+(A) 2024-01-15 Call Mom +Family @phone due:2024-01-20
+x 2024-01-16 2024-01-15 Review PR +Project @github
+Pay rent due:2024-02-01 rec:1m
+Review report due:2024-03-01 t:2024-02-25 rec:+1m
 ```
 
-Componentes: completitud (`x`), prioridad (`(A)`-`(Z)`), fechas (`YYYY-MM-DD`), proyectos (`+nombre`), contextos (`@nombre`), metadata (`clave:valor`), recurrencia (`rec:[+]Nu`), fecha de inicio (`t:YYYY-MM-DD`).
+Components: completion (`x`), priority (`(A)`-`(Z)`), dates (`YYYY-MM-DD`), projects (`+name`), contexts (`@name`), metadata (`key:value`), recurrence (`rec:[+]Nu`), threshold date (`t:YYYY-MM-DD`).
 
-## Proceso de release
+## Release process
 
-Cuando sea conveniente subir versión, seguir estos pasos en orden:
+When it's time to bump the version, follow these steps in order:
 
-1. **Actualizar versión** en estos dos ficheros:
-   - `pubspec.yaml` → campo `version:`
-   - `lib/ui/widgets/sidebar_drawer.dart` → campo `applicationVersion:`
-2. **Actualizar `CHANGELOG.md`** — añadir nueva entrada al principio con fecha y cambios (secciones Added/Changed/Fixed según corresponda)
-3. **Ejecutar tests** — `flutter test` y confirmar que todos pasan
-4. **Commit** con mensaje `Bump version to X.Y.Z`
-5. **Crear tag** — `git tag vX.Y.Z`
+1. **Update version** in these two files:
+   - `pubspec.yaml` → `version:` field
+   - `lib/ui/widgets/sidebar_drawer.dart` → `applicationVersion:` field
+2. **Update `CHANGELOG.md`** — add a new entry at the top with date and changes (Added/Changed/Fixed sections as appropriate)
+3. **Run tests** — `flutter test` and confirm all pass
+4. **Commit** with message `Bump version to X.Y.Z`
+5. **Create tag** — `git tag vX.Y.Z`
 6. **Push** — `git push origin main && git push origin vX.Y.Z`
-7. **Compilar APK** — `flutter build apk --release`
-8. **Crear GitHub Release** — `gh release create vX.Y.Z build/app/outputs/flutter-apk/app-release.apk#don3txt-vX.Y.Z.apk --title "vX.Y.Z"` con las notas del changelog
+7. **Build APK** — `flutter build apk --release`
+8. **Create GitHub Release** — `gh release create vX.Y.Z build/app/outputs/flutter-apk/app-release.apk#don3txt-vX.Y.Z.apk --title "vX.Y.Z"` with changelog notes
