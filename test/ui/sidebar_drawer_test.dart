@@ -5,7 +5,6 @@ import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
-import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
@@ -32,16 +31,7 @@ class InMemoryTodoRepository implements TodoRepository {
 }
 
 class InMemorySettingsRepository implements SettingsRepository {
-  StartOfWeek _stored = StartOfWeek.monday;
   String? _todoFilePath;
-
-  @override
-  Future<StartOfWeek> loadStartOfWeek() async => _stored;
-
-  @override
-  Future<void> saveStartOfWeek(StartOfWeek value) async {
-    _stored = value;
-  }
 
   @override
   Future<String?> loadTodoFilePath() async => _todoFilePath;

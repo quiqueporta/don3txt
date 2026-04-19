@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
-import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
@@ -15,18 +14,7 @@ import 'package:don3txt/ui/widgets/add_task_field.dart';
 import 'package:don3txt/ui/widgets/tag_picker_sheet.dart';
 
 class InMemorySettingsRepository implements SettingsRepository {
-  StartOfWeek _stored;
   String? _todoFilePath;
-
-  InMemorySettingsRepository([this._stored = StartOfWeek.monday]);
-
-  @override
-  Future<StartOfWeek> loadStartOfWeek() async => _stored;
-
-  @override
-  Future<void> saveStartOfWeek(StartOfWeek value) async {
-    _stored = value;
-  }
 
   @override
   Future<String?> loadTodoFilePath() async => _todoFilePath;
@@ -214,12 +202,9 @@ void main() {
       expect(find.byType(Chip), findsNothing);
     });
 
-    testWidgets('DatePicker uses monday locale when startOfWeek is monday', (tester) async {
-      final settings = SettingsNotifier(InMemorySettingsRepository());
-      await settings.load();
-
+    testWidgets('DatePicker inherits locale from MaterialApp', (tester) async {
       await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}, settingsNotifier: settings),
+        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}),
       );
       await tester.pumpAndSettle();
 
@@ -230,27 +215,7 @@ void main() {
         tester.element(find.byType(DatePickerDialog)),
       );
 
-      expect(localizations.firstDayOfWeekIndex, 1);
-    });
-
-    testWidgets('DatePicker uses sunday locale when startOfWeek is sunday', (tester) async {
-      final settings = SettingsNotifier(
-        InMemorySettingsRepository(StartOfWeek.sunday),
-      );
-      await settings.load();
-
-      await tester.pumpWidget(
-        buildTestApp(onSubmit: (_, {dueDate, startDate, recurrence, priority}) {}, settingsNotifier: settings),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byIcon(Icons.calendar_today));
-      await tester.pumpAndSettle();
-
-      final localizations = MaterialLocalizations.of(
-        tester.element(find.byType(DatePickerDialog)),
-      );
-
+      // buildTestApp sets locale to 'en' (en-US convention: Sunday = 0).
       expect(localizations.firstDayOfWeekIndex, 0);
     });
 

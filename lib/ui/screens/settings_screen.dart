@@ -6,7 +6,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
-import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
@@ -93,20 +92,6 @@ class SettingsScreen extends StatelessWidget {
             value: AppLanguage.portuguese,
             groupValue: settings.language,
             onChanged: (value) => settings.setLanguage(value!),
-          ),
-          const Divider(),
-          _SectionHeader(title: loc.sectionFirstDayOfWeek),
-          RadioListTile<StartOfWeek>(
-            title: Text(loc.dayMonday),
-            value: StartOfWeek.monday,
-            groupValue: settings.startOfWeek,
-            onChanged: (value) => settings.setStartOfWeek(value!),
-          ),
-          RadioListTile<StartOfWeek>(
-            title: Text(loc.daySunday),
-            value: StartOfWeek.sunday,
-            groupValue: settings.startOfWeek,
-            onChanged: (value) => settings.setStartOfWeek(value!),
           ),
           const Divider(),
           _SectionHeader(title: loc.sectionUpcomingDays),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/domain/todo_parser.dart';
@@ -143,14 +142,12 @@ class _EditTaskFieldState extends State<EditTaskField> {
 
   Future<void> _pickStartDate() async {
     final now = DateTime.now();
-    final settings = context.read<SettingsNotifier>();
 
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedStartDate ?? now,
       firstDate: DateTime(2000),
       lastDate: DateTime(now.year + 5),
-      locale: settings.startOfWeek.datePickerLocale,
     );
 
     if (picked != null) {
@@ -160,14 +157,12 @@ class _EditTaskFieldState extends State<EditTaskField> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
-    final settings = context.read<SettingsNotifier>();
 
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? now,
       firstDate: DateTime(2000),
       lastDate: DateTime(now.year + 5),
-      locale: settings.startOfWeek.datePickerLocale,
     );
 
     if (picked != null) {

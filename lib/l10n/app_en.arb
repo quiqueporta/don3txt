@@ -24,9 +24,6 @@
   "themeSystem": "System",
   "themeLight": "Light",
   "themeDark": "Dark",
-  "sectionFirstDayOfWeek": "First day of the week",
-  "dayMonday": "Monday",
-  "daySunday": "Sunday",
   "sectionUpcomingDays": "Upcoming days",
   "daysCount": "{count} days",
   "@daysCount": {
