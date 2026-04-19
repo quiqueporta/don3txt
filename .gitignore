@@ -44,6 +44,9 @@ analysis_benchmark.json
 .pub-preload-cache/
 .pub/
 build/
+
+# Generated l10n localization classes (regenerated on build via gen-l10n)
+/lib/l10n/generated/
 flutter_*.png
 linked_*.ds
 unlinked.ds

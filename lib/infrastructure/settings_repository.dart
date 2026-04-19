@@ -1,3 +1,4 @@
+import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 
@@ -10,4 +11,6 @@ abstract class SettingsRepository {
   Future<void> saveThemeMode(AppThemeMode value);
   Future<int> loadUpcomingDays();
   Future<void> saveUpcomingDays(int value);
+  Future<AppLanguage> loadLanguage();
+  Future<void> saveLanguage(AppLanguage value);
 }

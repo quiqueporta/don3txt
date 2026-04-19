@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/domain/todo_file.dart';
@@ -8,6 +9,7 @@ import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/settings_notifier.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/screens/settings_screen.dart';
 
 class InMemorySettingsRepository implements SettingsRepository {
@@ -49,6 +51,16 @@ class InMemorySettingsRepository implements SettingsRepository {
 
   @override
   Future<void> saveUpcomingDays(int value) async {}
+
+  AppLanguage _language = AppLanguage.system;
+
+  @override
+  Future<AppLanguage> loadLanguage() async => _language;
+
+  @override
+  Future<void> saveLanguage(AppLanguage value) async {
+    _language = value;
+  }
 }
 
 class InMemoryTodoRepository implements TodoRepository {
@@ -61,6 +73,9 @@ class InMemoryTodoRepository implements TodoRepository {
 
 Widget buildTestApp(SettingsNotifier notifier) {
   return MaterialApp(
+    locale: const Locale('en'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
     home: MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: notifier),
@@ -84,6 +99,8 @@ void main() {
   group('SettingsScreen', () {
     testWidgets('shows Monday and Sunday options', (tester) async {
       await tester.pumpWidget(buildTestApp(notifier));
+      await tester.scrollUntilVisible(find.text('Sunday'), 200,
+          scrollable: find.byType(Scrollable).first);
 
       expect(find.text('Monday'), findsOneWidget);
       expect(find.text('Sunday'), findsOneWidget);
@@ -91,6 +108,8 @@ void main() {
 
     testWidgets('Monday is selected by default', (tester) async {
       await tester.pumpWidget(buildTestApp(notifier));
+      await tester.scrollUntilVisible(find.text('Monday'), 200,
+          scrollable: find.byType(Scrollable).first);
 
       final mondayRadio = tester.widget<RadioListTile<StartOfWeek>>(
         find.byWidgetPredicate(
@@ -103,6 +122,8 @@ void main() {
 
     testWidgets('tapping Sunday changes selection', (tester) async {
       await tester.pumpWidget(buildTestApp(notifier));
+      await tester.scrollUntilVisible(find.text('Sunday'), 200,
+          scrollable: find.byType(Scrollable).first);
 
       await tester.tap(find.text('Sunday'));
       await tester.pumpAndSettle();
@@ -168,6 +189,43 @@ void main() {
 
       expect(find.text('Select existing file'), findsNothing);
       expect(find.text('Create new file'), findsNothing);
+    });
+
+    testWidgets('shows language options', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.scrollUntilVisible(find.text('Português'), 200,
+          scrollable: find.byType(Scrollable).first);
+
+      expect(find.text('Language'), findsOneWidget);
+      expect(find.text('System default'), findsOneWidget);
+      expect(find.text('Español'), findsOneWidget);
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('Français'), findsOneWidget);
+      expect(find.text('Italiano'), findsOneWidget);
+      expect(find.text('Português'), findsOneWidget);
+    });
+
+    testWidgets('System language is selected by default', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier));
+
+      final systemRadio = tester.widget<RadioListTile<AppLanguage>>(
+        find.byWidgetPredicate(
+          (w) => w is RadioListTile<AppLanguage> && w.value == AppLanguage.system,
+        ),
+      );
+
+      expect(systemRadio.groupValue, AppLanguage.system);
+    });
+
+    testWidgets('tapping French updates language selection', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.scrollUntilVisible(find.text('Français'), 200,
+          scrollable: find.byType(Scrollable).first);
+
+      await tester.tap(find.text('Français'));
+      await tester.pumpAndSettle();
+
+      expect(notifier.language, AppLanguage.french);
     });
   });
 }

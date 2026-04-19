@@ -1,0 +1,103 @@
+{
+  "@@locale": "en",
+  "inbox": "Inbox",
+  "today": "Today",
+  "upcoming": "Upcoming",
+  "upcomingWithDays": "Upcoming · {days}d",
+  "@upcomingWithDays": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "recurring": "Recurring",
+  "completed": "Completed",
+  "settings": "Settings",
+  "debug": "Debug",
+  "about": "About",
+  "myProjects": "My Projects",
+  "myContexts": "My Contexts",
+  "aboutAuthor": "Author: Quique Porta",
+  "aboutLicense": "License: MIT",
+  "sectionTodoFile": "Todo file",
+  "defaultFile": "Default",
+  "sectionTheme": "Theme",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "sectionFirstDayOfWeek": "First day of the week",
+  "dayMonday": "Monday",
+  "daySunday": "Sunday",
+  "sectionUpcomingDays": "Upcoming days",
+  "daysCount": "{count} days",
+  "@daysCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "sectionLanguage": "Language",
+  "languageSystem": "System default",
+  "languageSpanish": "Español",
+  "languageEnglish": "English",
+  "languageFrench": "Français",
+  "languageItalian": "Italiano",
+  "languagePortuguese": "Português",
+  "searchHint": "Search...",
+  "noPendingTasks": "No pending tasks",
+  "taskCompletedSnack": "Task completed",
+  "taskDeletedSnack": "Task deleted",
+  "undo": "Undo",
+  "menuDelete": "Delete",
+  "filterProject": "Project",
+  "filterContext": "Context",
+  "filterPriority": "Priority",
+  "projectsTitle": "Projects",
+  "contextsTitle": "Contexts",
+  "newProjectHint": "New project...",
+  "newContextHint": "New context...",
+  "errorTagEmpty": "Cannot be empty",
+  "errorTagSpaces": "Cannot contain spaces",
+  "errorTagMaxChars": "Maximum 100 characters",
+  "errorTagAlreadyExists": "Already exists",
+  "newTaskHint": "New task...",
+  "editTaskHint": "Edit task...",
+  "recurrenceTitle": "Recurrence",
+  "every": "Every",
+  "unitDays": "days",
+  "unitWeeks": "weeks",
+  "unitMonths": "months",
+  "unitYears": "years",
+  "strictFromStart": "Strict (from start date)",
+  "cancel": "Cancel",
+  "ok": "OK",
+  "startChipPrefix": "Start: {date}",
+  "@startChipPrefix": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "recurrenceEveryDays": "{count, plural, =1{Every {count} day} other{Every {count} days}}",
+  "@recurrenceEveryDays": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "recurrenceEveryWeeks": "{count, plural, =1{Every {count} week} other{Every {count} weeks}}",
+  "@recurrenceEveryWeeks": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "recurrenceEveryMonths": "{count, plural, =1{Every {count} month} other{Every {count} months}}",
+  "@recurrenceEveryMonths": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "recurrenceEveryYears": "{count, plural, =1{Every {count} year} other{Every {count} years}}",
+  "@recurrenceEveryYears": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "recurrenceStrictPrefix": "(strict) "
+}

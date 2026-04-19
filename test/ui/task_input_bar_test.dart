@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/widgets/task_input_bar.dart';
 
 Widget buildTestApp({
@@ -23,6 +24,9 @@ Widget buildTestApp({
   ValueChanged<String>? onRemoveContext,
 }) {
   return MaterialApp(
+    locale: const Locale('en'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(
       body: TaskInputBar(
         onPickDate: onPickDate ?? () {},

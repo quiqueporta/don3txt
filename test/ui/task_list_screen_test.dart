@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/domain/todo_file.dart';
@@ -9,6 +10,7 @@ import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/todo_list_notifier.dart' show TodoListNotifier, TaskFilter;
 import 'package:don3txt/application/settings_notifier.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/screens/task_list_screen.dart';
 
 class InMemoryTodoRepository implements TodoRepository {
@@ -44,10 +46,17 @@ class InMemorySettingsRepository implements SettingsRepository {
   Future<int> loadUpcomingDays() async => 7;
   @override
   Future<void> saveUpcomingDays(int value) async {}
+  @override
+  Future<AppLanguage> loadLanguage() async => AppLanguage.system;
+  @override
+  Future<void> saveLanguage(AppLanguage value) async {}
 }
 
 Widget buildTestApp(TodoListNotifier notifier) {
   return MaterialApp(
+    locale: const Locale('en'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
     home: MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: notifier),

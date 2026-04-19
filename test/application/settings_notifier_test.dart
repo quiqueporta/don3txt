@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
@@ -9,17 +10,20 @@ class InMemorySettingsRepository implements SettingsRepository {
   String? _todoFilePath;
   AppThemeMode _themeMode = AppThemeMode.system;
   int _upcomingDays = 7;
+  AppLanguage _language = AppLanguage.system;
 
   InMemorySettingsRepository({
     StartOfWeek? startOfWeek,
     String? todoFilePath,
     AppThemeMode? themeMode,
     int? upcomingDays,
+    AppLanguage? language,
   }) {
     if (startOfWeek != null) _stored = startOfWeek;
     _todoFilePath = todoFilePath;
     if (themeMode != null) _themeMode = themeMode;
     if (upcomingDays != null) _upcomingDays = upcomingDays;
+    if (language != null) _language = language;
   }
 
   @override
@@ -52,6 +56,14 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> saveUpcomingDays(int value) async {
     _upcomingDays = value;
+  }
+
+  @override
+  Future<AppLanguage> loadLanguage() async => _language;
+
+  @override
+  Future<void> saveLanguage(AppLanguage value) async {
+    _language = value;
   }
 }
 
@@ -194,6 +206,37 @@ void main() {
       notifier.addListener(() => notified = true);
 
       await notifier.setUpcomingDays(14);
+
+      expect(notified, true);
+    });
+
+    test('language defaults to system', () {
+      expect(notifier.language, AppLanguage.system);
+    });
+
+    test('load reads language from repository', () async {
+      repository = InMemorySettingsRepository(language: AppLanguage.french);
+      notifier = SettingsNotifier(repository);
+
+      await notifier.load();
+
+      expect(notifier.language, AppLanguage.french);
+    });
+
+    test('setLanguage updates and persists', () async {
+      await notifier.setLanguage(AppLanguage.italian);
+
+      expect(notifier.language, AppLanguage.italian);
+
+      final persisted = await repository.loadLanguage();
+      expect(persisted, AppLanguage.italian);
+    });
+
+    test('setLanguage notifies listeners', () async {
+      var notified = false;
+      notifier.addListener(() => notified = true);
+
+      await notifier.setLanguage(AppLanguage.portuguese);
 
       expect(notified, true);
     });

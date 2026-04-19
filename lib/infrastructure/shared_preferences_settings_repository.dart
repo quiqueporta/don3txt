@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
@@ -8,6 +9,7 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
   static const _todoFilePathKey = 'todo_file_path';
   static const _themeModeKey = 'theme_mode';
   static const _upcomingDaysKey = 'upcoming_days';
+  static const _languageKey = 'language';
 
   @override
   Future<StartOfWeek> loadStartOfWeek() async {
@@ -74,5 +76,20 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setInt(_upcomingDaysKey, value);
+  }
+
+  @override
+  Future<AppLanguage> loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getString(_languageKey);
+
+    return AppLanguage.fromName(value);
+  }
+
+  @override
+  Future<void> saveLanguage(AppLanguage value) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString(_languageKey, value.name);
   }
 }

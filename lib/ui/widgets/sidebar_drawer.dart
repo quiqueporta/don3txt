@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/application/settings_notifier.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/screens/settings_screen.dart';
 import 'package:don3txt/ui/screens/debug_screen.dart';
 
@@ -13,6 +14,7 @@ class SidebarDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final notifier = context.watch<TodoListNotifier>();
     final settings = context.watch<SettingsNotifier>();
+    final loc = AppLocalizations.of(context);
     final todayOnlyCount = notifier.todayOnlyTaskCount;
     final overdueCount = notifier.overdueTaskCount;
     final hasBadges = todayOnlyCount > 0 || overdueCount > 0;
@@ -46,7 +48,7 @@ class SidebarDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.inbox, color: Colors.blue),
-            title: const Text('Inbox'),
+            title: Text(loc.inbox),
             selected: notifier.activeFilter == TaskFilter.inbox,
             onTap: () {
               notifier.activeFilter = TaskFilter.inbox;
@@ -55,7 +57,7 @@ class SidebarDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.today, color: Colors.amber),
-            title: const Text('Today'),
+            title: Text(loc.today),
             trailing: hasBadges
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
@@ -83,7 +85,7 @@ class SidebarDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.calendar_month, color: Colors.orange),
-            title: Text('Upcoming · ${settings.upcomingDays}d'),
+            title: Text(loc.upcomingWithDays(settings.upcomingDays)),
             trailing: upcomingCount > 0
                 ? Badge(
                     backgroundColor: Colors.grey,
@@ -100,7 +102,7 @@ class SidebarDrawer extends StatelessWidget {
             ExpansionTile(
               leading: Icon(Icons.tag, color: Colors.teal.shade400),
               title: Text(
-                'My Projects',
+                loc.myProjects,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -127,7 +129,7 @@ class SidebarDrawer extends StatelessWidget {
               leading: Icon(Icons.alternate_email,
                   color: Colors.deepPurple.shade400),
               title: Text(
-                'My Contexts',
+                loc.myContexts,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -155,7 +157,7 @@ class SidebarDrawer extends StatelessWidget {
             if (notifier.hasRecurringTasks)
               ListTile(
                 leading: Icon(Icons.repeat, color: Colors.green.shade400),
-                title: const Text('Recurring'),
+                title: Text(loc.recurring),
                 selected: notifier.activeFilter == TaskFilter.recurring,
                 onTap: () {
                   notifier.activeFilter = TaskFilter.recurring;
@@ -166,7 +168,7 @@ class SidebarDrawer extends StatelessWidget {
               ListTile(
                 leading: Icon(Icons.check_circle_outline,
                     color: Colors.grey.shade500),
-                title: const Text('Completed'),
+                title: Text(loc.completed),
                 selected: notifier.activeFilter == TaskFilter.completed,
                 onTap: () {
                   notifier.activeFilter = TaskFilter.completed;
@@ -177,7 +179,7 @@ class SidebarDrawer extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            title: Text(loc.settings),
             onTap: () {
               Navigator.of(context).pop();
               Navigator.of(context).push(
@@ -187,7 +189,7 @@ class SidebarDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.bug_report),
-            title: const Text('Debug'),
+            title: Text(loc.debug),
             onTap: () {
               Navigator.of(context).pop();
               Navigator.of(context).push(
@@ -197,7 +199,7 @@ class SidebarDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('About'),
+            title: Text(loc.about),
             onTap: () {
               Navigator.of(context).pop();
 
@@ -206,7 +208,7 @@ class SidebarDrawer extends StatelessWidget {
                 applicationName: 'don3txt',
                 applicationVersion: '1.7.1',
                 children: [
-                  const Text('Author: Quique Porta'),
+                  Text(loc.aboutAuthor),
                   const SizedBox(height: 8),
                   InkWell(
                     onTap: () => launchUrl(
@@ -222,7 +224,7 @@ class SidebarDrawer extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text('License: MIT'),
+                  Text(loc.aboutLicense),
                 ],
               );
             },

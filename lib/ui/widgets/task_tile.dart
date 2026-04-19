@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:don3txt/domain/todo_item.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 
 class TaskTile extends StatelessWidget {
   final TodoItem item;
@@ -119,7 +120,10 @@ class TaskTile extends StatelessWidget {
                 if (value == 'delete') onDelete!();
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Text(AppLocalizations.of(context).menuDelete),
+                ),
               ],
             ),
         ],

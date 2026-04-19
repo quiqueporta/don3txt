@@ -24,9 +24,11 @@
 /// );
 /// ```
 import 'package:flutter/material.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 
 class TagPickerSheet extends StatefulWidget {
   final String title;
+  final String hint;
   final String prefix;
   final List<String> available;
   final Set<String> selected;
@@ -35,6 +37,7 @@ class TagPickerSheet extends StatefulWidget {
   const TagPickerSheet({
     super.key,
     required this.title,
+    required this.hint,
     required this.prefix,
     this.available = const [],
     this.selected = const {},
@@ -74,6 +77,7 @@ class _TagPickerSheetState extends State<TagPickerSheet> {
 
   void _addNewItem() {
     var input = _newItemController.text.trim();
+    final loc = AppLocalizations.of(context);
 
     // Permite que el usuario escriba "+Trabajo" o "Trabajo" indistintamente;
     // en ambos casos el resultado es el mismo tag "+Trabajo". Eliminar el
@@ -83,19 +87,19 @@ class _TagPickerSheetState extends State<TagPickerSheet> {
     }
 
     if (input.isEmpty) {
-      setState(() => _errorText = 'Cannot be empty');
+      setState(() => _errorText = loc.errorTagEmpty);
 
       return;
     }
 
     if (input.contains(' ')) {
-      setState(() => _errorText = 'Cannot contain spaces');
+      setState(() => _errorText = loc.errorTagSpaces);
 
       return;
     }
 
     if (input.length > 100) {
-      setState(() => _errorText = 'Maximum 100 characters');
+      setState(() => _errorText = loc.errorTagMaxChars);
 
       return;
     }
@@ -106,7 +110,7 @@ class _TagPickerSheetState extends State<TagPickerSheet> {
 
     if (_currentAvailable.any((e) => e.toLowerCase() == lowerFullName) ||
         _currentSelection.any((e) => e.toLowerCase() == lowerFullName)) {
-      setState(() => _errorText = 'Already exists');
+      setState(() => _errorText = loc.errorTagAlreadyExists);
 
       return;
     }
@@ -162,7 +166,7 @@ class _TagPickerSheetState extends State<TagPickerSheet> {
                 child: TextField(
                   controller: _newItemController,
                   decoration: InputDecoration(
-                    hintText: 'New ${widget.title.toLowerCase()}...',
+                    hintText: widget.hint,
                     errorText: _errorText,
                     border: const OutlineInputBorder(),
                     isDense: true,

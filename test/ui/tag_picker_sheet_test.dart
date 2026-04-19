@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/widgets/tag_picker_sheet.dart';
 
 Widget buildTestApp({
   required String title,
   required String prefix,
+  String hint = 'New item...',
   List<String> available = const [],
   Set<String> selected = const {},
   ValueChanged<Set<String>>? onChanged,
 }) {
   return MaterialApp(
+    locale: const Locale('en'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
     home: Scaffold(
       body: TagPickerSheet(
         title: title,
+        hint: hint,
         prefix: prefix,
         available: available,
         selected: selected,
@@ -286,6 +292,9 @@ void main() {
     testWidgets('closes sheet when selecting an existing item',
         (tester) async {
       await tester.pumpWidget(MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: Builder(
             builder: (context) => ElevatedButton(
@@ -294,6 +303,7 @@ void main() {
                   context: context,
                   builder: (_) => TagPickerSheet(
                     title: 'Projects',
+                    hint: 'New project...',
                     prefix: '+',
                     available: ['+Casa'],
                     onChanged: (_) {},
@@ -319,6 +329,9 @@ void main() {
 
     testWidgets('closes sheet when creating a new item', (tester) async {
       await tester.pumpWidget(MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: Builder(
             builder: (context) => ElevatedButton(
@@ -327,6 +340,7 @@ void main() {
                   context: context,
                   builder: (_) => TagPickerSheet(
                     title: 'Projects',
+                    hint: 'New project...',
                     prefix: '+',
                     onChanged: (_) {},
                   ),
@@ -354,11 +368,15 @@ void main() {
       const fakeInsets = EdgeInsets.only(bottom: 300);
 
       await tester.pumpWidget(MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: MediaQuery(
             data: const MediaQueryData(viewInsets: fakeInsets),
             child: TagPickerSheet(
               title: 'Projects',
+              hint: 'New project...',
               prefix: '+',
               onChanged: (_) {},
             ),

@@ -5,6 +5,7 @@ import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/screens/debug_screen.dart';
 
 class InMemoryTodoRepository implements TodoRepository {
@@ -26,8 +27,11 @@ class InMemoryTodoRepository implements TodoRepository {
 Widget buildTestApp(TodoListNotifier notifier) {
   return ChangeNotifierProvider.value(
     value: notifier,
-    child: const MaterialApp(
-      home: DebugScreen(),
+    child: MaterialApp(
+      locale: const Locale('en'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const DebugScreen(),
     ),
   );
 }
@@ -78,6 +82,9 @@ void main() {
         ChangeNotifierProvider.value(
           value: notifier,
           child: MaterialApp(
+            locale: const Locale('en'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Builder(
               builder: (context) => Scaffold(
                 body: ElevatedButton(

@@ -19,6 +19,7 @@
 /// )
 /// ```
 import 'package:flutter/material.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 
 class TaskInputBar extends StatelessWidget {
   final VoidCallback onPickDate;
@@ -64,7 +65,8 @@ class TaskInputBar extends StatelessWidget {
     required this.onRemoveContext,
   });
 
-  /// Convierte una cadena de recurrencia en formato todo.txt a texto legible.
+  /// Convierte una cadena de recurrencia en formato todo.txt a texto legible
+  /// y localizado.
   ///
   /// El formato de entrada es `[+]Nu` donde `+` indica modo estricto, `N` es
   /// un entero positivo y `u` es la unidad (`d`, `w`, `m`, `y`).
@@ -72,12 +74,7 @@ class TaskInputBar extends StatelessWidget {
   /// Si la cadena está malformada (longitud insuficiente o parte numérica no
   /// parseable), devuelve [rec] sin modificar como fallback seguro para no
   /// romper el build.
-  ///
-  /// Ejemplos:
-  /// - `'1d'` -> `'Every 1 day'`
-  /// - `'3w'` -> `'Every 3 weeks'`
-  /// - `'+1m'` -> `'(strict) Every 1 month'`
-  String _recurrenceLabel(String rec) {
+  String _recurrenceLabel(String rec, AppLocalizations loc) {
     final strict = rec.startsWith('+');
     final body = strict ? rec.substring(1) : rec;
 
@@ -85,20 +82,24 @@ class TaskInputBar extends StatelessWidget {
       return rec;
     }
 
-    final amount = body.substring(0, body.length - 1);
-    final parsedAmount = int.tryParse(amount);
+    final parsedAmount = int.tryParse(body.substring(0, body.length - 1));
 
     if (parsedAmount == null) {
       return rec;
     }
 
     final unit = body[body.length - 1];
-    const unitLabels = {'d': 'day', 'w': 'week', 'm': 'month', 'y': 'year'};
-    final label = unitLabels[unit] ?? unit;
-    final plural = parsedAmount > 1 ? '${label}s' : label;
-    final prefix = strict ? '(strict) ' : '';
+    final label = switch (unit) {
+      'd' => loc.recurrenceEveryDays(parsedAmount),
+      'w' => loc.recurrenceEveryWeeks(parsedAmount),
+      'm' => loc.recurrenceEveryMonths(parsedAmount),
+      'y' => loc.recurrenceEveryYears(parsedAmount),
+      _ => rec,
+    };
 
-    return '${prefix}Every $amount $plural';
+    final prefix = strict ? loc.recurrenceStrictPrefix : '';
+
+    return '$prefix$label';
   }
 
   String _formatDate(DateTime date) {
@@ -109,6 +110,8 @@ class TaskInputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,13 +164,14 @@ class TaskInputBar extends StatelessWidget {
               ),
             if (selectedStartDate != null)
               Chip(
-                label: Text('Start: ${_formatDate(selectedStartDate!)}'),
+                label: Text(
+                    loc.startChipPrefix(_formatDate(selectedStartDate!))),
                 deleteIcon: const Icon(Icons.close, size: 18),
                 onDeleted: onClearStartDate,
               ),
             if (recurrence != null)
               Chip(
-                label: Text(_recurrenceLabel(recurrence!)),
+                label: Text(_recurrenceLabel(recurrence!, loc)),
                 deleteIcon: const Icon(Icons.close, size: 18),
                 onDeleted: onClearRecurrence,
               ),

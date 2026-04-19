@@ -3,12 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
+import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/application/settings_notifier.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/widgets/sidebar_drawer.dart';
 import 'package:don3txt/ui/screens/settings_screen.dart';
 import 'package:don3txt/ui/screens/debug_screen.dart';
@@ -64,6 +66,16 @@ class InMemorySettingsRepository implements SettingsRepository {
 
   @override
   Future<void> saveUpcomingDays(int value) async {}
+
+  AppLanguage _language = AppLanguage.system;
+
+  @override
+  Future<AppLanguage> loadLanguage() async => _language;
+
+  @override
+  Future<void> saveLanguage(AppLanguage value) async {
+    _language = value;
+  }
 }
 
 Widget buildTestApp(TodoListNotifier notifier, SettingsNotifier settingsNotifier) {
@@ -74,6 +86,9 @@ Widget buildTestApp(TodoListNotifier notifier, SettingsNotifier settingsNotifier
       Provider<String>.value(value: '/default/todo.txt'),
     ],
     child: MaterialApp(
+      locale: const Locale('en'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         appBar: AppBar(),
         drawer: const SidebarDrawer(),

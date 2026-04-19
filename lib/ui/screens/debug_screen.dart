@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 
 class DebugScreen extends StatefulWidget {
   const DebugScreen({super.key});
@@ -31,7 +32,7 @@ class _DebugScreenState extends State<DebugScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Debug'),
+        title: Text(AppLocalizations.of(context).debug),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),

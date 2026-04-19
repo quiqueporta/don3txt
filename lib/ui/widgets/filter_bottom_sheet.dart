@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 
 class FilterBottomSheet extends StatelessWidget {
   const FilterBottomSheet({super.key});
@@ -8,6 +9,7 @@ class FilterBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<TodoListNotifier>();
+    final loc = AppLocalizations.of(context);
     final projects = notifier.availableProjectsForView;
     final contexts = notifier.availableContextsForView;
     final priorities = notifier.availablePrioritiesForView;
@@ -20,7 +22,7 @@ class FilterBottomSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (projects.isNotEmpty) ...[
-              _SectionHeader(title: 'Project'),
+              _SectionHeader(title: loc.filterProject),
               Wrap(
                 spacing: 8,
                 children: projects.map((p) {
@@ -36,7 +38,7 @@ class FilterBottomSheet extends StatelessWidget {
               const SizedBox(height: 12),
             ],
             if (contexts.isNotEmpty) ...[
-              _SectionHeader(title: 'Context'),
+              _SectionHeader(title: loc.filterContext),
               Wrap(
                 spacing: 8,
                 children: contexts.map((c) {
@@ -52,7 +54,7 @@ class FilterBottomSheet extends StatelessWidget {
               const SizedBox(height: 12),
             ],
             if (priorities.isNotEmpty) ...[
-              _SectionHeader(title: 'Priority'),
+              _SectionHeader(title: loc.filterPriority),
               Wrap(
                 spacing: 8,
                 children: priorities.map((p) {

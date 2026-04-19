@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/domain/todo_file.dart';
@@ -10,6 +10,7 @@ import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/widgets/edit_task_field.dart';
 import 'package:don3txt/ui/widgets/tag_picker_sheet.dart';
 
@@ -50,6 +51,16 @@ class InMemorySettingsRepository implements SettingsRepository {
 
   @override
   Future<void> saveUpcomingDays(int value) async {}
+
+  AppLanguage _language = AppLanguage.system;
+
+  @override
+  Future<AppLanguage> loadLanguage() async => _language;
+
+  @override
+  Future<void> saveLanguage(AppLanguage value) async {
+    _language = value;
+  }
 }
 
 Widget buildTestApp({
@@ -61,12 +72,9 @@ Widget buildTestApp({
   return ChangeNotifierProvider.value(
     value: settingsNotifier,
     child: MaterialApp(
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('es'), Locale('en')],
+      locale: const Locale('en'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: EditTaskField(item: item, onSave: onSave),
       ),
@@ -590,12 +598,9 @@ Widget buildTestAppWithNotifier({
       ChangeNotifierProvider.value(value: todoListNotifier),
     ],
     child: MaterialApp(
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('es'), Locale('en')],
+      locale: const Locale('en'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: EditTaskField(item: item, onSave: onSave),
       ),

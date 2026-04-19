@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/start_of_week.dart';
 import 'package:don3txt/infrastructure/shared_preferences_settings_repository.dart';
@@ -92,6 +93,28 @@ void main() {
       final result = await repository.loadUpcomingDays();
 
       expect(result, 14);
+    });
+
+    test('loadLanguage returns system by default', () async {
+      final result = await repository.loadLanguage();
+
+      expect(result, AppLanguage.system);
+    });
+
+    test('saveLanguage persists french', () async {
+      await repository.saveLanguage(AppLanguage.french);
+
+      final result = await repository.loadLanguage();
+
+      expect(result, AppLanguage.french);
+    });
+
+    test('saveLanguage persists portuguese', () async {
+      await repository.saveLanguage(AppLanguage.portuguese);
+
+      final result = await repository.loadLanguage();
+
+      expect(result, AppLanguage.portuguese);
     });
   });
 }

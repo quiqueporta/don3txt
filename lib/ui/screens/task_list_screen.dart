@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/application/settings_notifier.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/widgets/task_tile.dart';
 import 'package:don3txt/ui/widgets/add_task_field.dart';
 import 'package:don3txt/ui/widgets/edit_task_field.dart';
@@ -45,22 +46,22 @@ class _TaskListScreenState extends State<TaskListScreen> {
     super.dispose();
   }
 
-  String _titleFor(TodoListNotifier notifier) {
+  String _titleFor(TodoListNotifier notifier, AppLocalizations loc) {
     switch (notifier.activeFilter) {
       case TaskFilter.inbox:
-        return 'Inbox';
+        return loc.inbox;
       case TaskFilter.today:
-        return 'Today';
+        return loc.today;
       case TaskFilter.upcoming:
-        return 'Upcoming';
+        return loc.upcoming;
       case TaskFilter.project:
         return notifier.selectedProject?.replaceFirst('+', '') ?? '';
       case TaskFilter.context:
         return notifier.selectedContext?.replaceFirst('@', '') ?? '';
       case TaskFilter.recurring:
-        return 'Recurring';
+        return loc.recurring;
       case TaskFilter.completed:
-        return 'Completed';
+        return loc.completed;
     }
   }
 
@@ -140,6 +141,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<TodoListNotifier>();
+    final loc = AppLocalizations.of(context);
 
     if (_isSearching && !notifier.hasActiveSearch && _searchController.text.isNotEmpty) {
       _isSearching = false;
@@ -154,13 +156,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Search...',
+                decoration: InputDecoration(
+                  hintText: loc.searchHint,
                   border: InputBorder.none,
                 ),
                 onChanged: (text) => notifier.setSearchQuery(text),
               )
-            : Text(_titleFor(notifier)),
+            : Text(_titleFor(notifier, loc)),
         actions: [
           if (!_isSearching)
             IconButton(
@@ -236,13 +238,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   Widget _buildScrollableEmptyState() {
+    final loc = AppLocalizations.of(context);
+
     return CustomScrollView(
       slivers: [
         SliverFillRemaining(
           hasScrollBody: false,
           child: Center(
             child: Text(
-              'No pending tasks',
+              loc.noPendingTasks,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey.shade400,
@@ -298,12 +302,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           } else {
                             notifier.toggleTask(originalIndex);
 
+                            final loc = AppLocalizations.of(context);
+
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: const Text('Task completed'),
+                                content: Text(loc.taskCompletedSnack),
                                 action: SnackBarAction(
-                                  label: 'Undo',
+                                  label: loc.undo,
                                   onPressed: () {
                                     final doneItems = notifier.doneFile?.items ?? [];
                                     if (doneItems.isNotEmpty) {
@@ -324,12 +330,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           final deletedIndex = originalIndex;
                           notifier.deleteTask(deletedIndex);
 
+                          final loc = AppLocalizations.of(context);
+
                           ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: const Text('Task deleted'),
+                              content: Text(loc.taskDeletedSnack),
                               action: SnackBarAction(
-                                label: 'Undo',
+                                label: loc.undo,
                                 onPressed: () {
                                   notifier.insertTask(
                                       deletedIndex, deletedItem);

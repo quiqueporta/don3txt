@@ -4,6 +4,8 @@ import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/domain/todo_parser.dart';
+import 'package:don3txt/l10n/generated/app_localizations.dart';
+import 'package:don3txt/ui/widgets/recurrence_dialog.dart';
 import 'package:don3txt/ui/widgets/tag_picker_sheet.dart';
 import 'package:don3txt/ui/widgets/task_input_bar.dart';
 
@@ -106,85 +108,7 @@ class _EditTaskFieldState extends State<EditTaskField> {
   }
 
   Future<void> _pickRecurrence() async {
-    int amount = 1;
-    String unit = 'd';
-    bool strict = false;
-
-    if (_recurrence != null) {
-      final rec = _recurrence!;
-      strict = rec.startsWith('+');
-      final body = strict ? rec.substring(1) : rec;
-      amount = int.tryParse(body.substring(0, body.length - 1)) ?? 1;
-      unit = body[body.length - 1];
-    }
-
-    final result = await showDialog<String>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Recurrence'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  const Text('Every'),
-                  const SizedBox(width: 12),
-                  SizedBox(
-                    width: 60,
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      controller: TextEditingController(text: '$amount'),
-                      onChanged: (v) {
-                        final parsed = int.tryParse(v);
-                        if (parsed != null && parsed > 0) {
-                          amount = parsed;
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  DropdownButton<String>(
-                    value: unit,
-                    items: const [
-                      DropdownMenuItem(value: 'd', child: Text('days')),
-                      DropdownMenuItem(value: 'w', child: Text('weeks')),
-                      DropdownMenuItem(value: 'm', child: Text('months')),
-                      DropdownMenuItem(value: 'y', child: Text('years')),
-                    ],
-                    onChanged: (v) => setDialogState(() => unit = v!),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Checkbox(
-                    value: strict,
-                    onChanged: (v) => setDialogState(() => strict = v!),
-                  ),
-                  const Text('Strict (from start date)'),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                final prefix = strict ? '+' : '';
-                Navigator.pop(context, '$prefix$amount$unit');
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      ),
-    );
+    final result = await showRecurrenceDialog(context, initial: _recurrence);
 
     if (result != null) {
       setState(() => _recurrence = result);
@@ -253,12 +177,14 @@ class _EditTaskFieldState extends State<EditTaskField> {
 
   void _pickProjects() {
     final notifier = context.read<TodoListNotifier>();
+    final loc = AppLocalizations.of(context);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (_) => TagPickerSheet(
-        title: 'Projects',
+        title: loc.projectsTitle,
+        hint: loc.newProjectHint,
         prefix: '+',
         available: notifier.allProjects,
         selected: _selectedProjects,
@@ -271,12 +197,14 @@ class _EditTaskFieldState extends State<EditTaskField> {
 
   void _pickContexts() {
     final notifier = context.read<TodoListNotifier>();
+    final loc = AppLocalizations.of(context);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (_) => TagPickerSheet(
-        title: 'Contexts',
+        title: loc.contextsTitle,
+        hint: loc.newContextHint,
         prefix: '@',
         available: notifier.allContexts,
         selected: _selectedContexts,
@@ -314,8 +242,8 @@ class _EditTaskFieldState extends State<EditTaskField> {
                   autofocus: true,
                   textInputAction: TextInputAction.done,
                   onSubmitted: _handleSubmit,
-                  decoration: const InputDecoration(
-                    hintText: 'Edit task...',
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context).editTaskHint,
                     border: InputBorder.none,
                   ),
                   style: const TextStyle(fontSize: 16),
