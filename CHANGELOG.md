@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.8.1] - 2026-04-19
+
+### Fixed
+
+- Date picker always showed labels in Spanish regardless of the selected language. It now inherits the app locale and shows the date UI in the language you chose
+
+### Removed
+
+- "First day of the week" setting. The date picker now follows the locale convention (Monday for Spanish, French, Italian, Portuguese; Sunday for English)
+
 ## [1.8.0] - 2026-04-19
 
 ### Added
