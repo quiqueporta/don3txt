@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0] - 2026-04-19
+
+### Added
+
+- Multi-language support with translations for Spanish, English, French, Italian and Portuguese
+- Language selector in Settings to switch UI language at runtime (with "System default" option that follows the device language)
+
 ## [1.7.1] - 2026-03-24
 
 ### Fixed
