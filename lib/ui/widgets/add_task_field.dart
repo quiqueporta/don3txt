@@ -13,11 +13,15 @@ class AddTaskField extends StatefulWidget {
       String? recurrence,
       String? priority}) onSubmit;
   final DateTime? initialDueDate;
+  final Set<String> initialProjects;
+  final Set<String> initialContexts;
 
   const AddTaskField({
     super.key,
     required this.onSubmit,
     this.initialDueDate,
+    this.initialProjects = const {},
+    this.initialContexts = const {},
   });
 
   @override
@@ -37,6 +41,8 @@ class _AddTaskFieldState extends State<AddTaskField> {
   void initState() {
     super.initState();
     _selectedDate = widget.initialDueDate;
+    _selectedProjects = Set.of(widget.initialProjects);
+    _selectedContexts = Set.of(widget.initialContexts);
   }
 
   // Compara por token completo (split por espacios) en vez de subcadena para

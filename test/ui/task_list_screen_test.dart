@@ -183,6 +183,42 @@ void main() {
       expect(find.byType(Chip), findsNothing);
     });
 
+    testWidgets('FAB preloads project chip when viewing a project',
+        (tester) async {
+      final repo = InMemoryTodoRepository(
+        TodoFile([TodoItem(description: 'Task', projects: ['+Casa'])]),
+      );
+      final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+      await notifier.loadTasks();
+      notifier.selectProject('+Casa');
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.pump();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(Chip, '+Casa'), findsOneWidget);
+    });
+
+    testWidgets('FAB preloads context chip when viewing a context',
+        (tester) async {
+      final repo = InMemoryTodoRepository(
+        TodoFile([TodoItem(description: 'Task', contexts: ['@oficina'])]),
+      );
+      final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+      await notifier.loadTasks();
+      notifier.selectContext('@oficina');
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.pump();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(Chip, '@oficina'), findsOneWidget);
+    });
+
     testWidgets('has Today title by default', (tester) async {
       final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
       await notifier.loadTasks();

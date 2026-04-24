@@ -91,6 +91,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
         value: notifier,
         child: AddTaskField(
           initialDueDate: _defaultDueDateFor(notifier.activeFilter),
+          initialProjects: _defaultProjectsFor(notifier),
+          initialContexts: _defaultContextsFor(notifier),
           onSubmit: (text, {dueDate, startDate, recurrence, priority}) {
             notifier.addTask(text,
                 dueDate: dueDate,
@@ -110,6 +112,22 @@ class _TaskListScreenState extends State<TaskListScreen> {
     final now = DateTime.now();
 
     return DateTime(now.year, now.month, now.day);
+  }
+
+  Set<String> _defaultProjectsFor(TodoListNotifier notifier) {
+    if (notifier.activeFilter != TaskFilter.project) return const {};
+
+    final project = notifier.selectedProject;
+
+    return project == null ? const {} : {project};
+  }
+
+  Set<String> _defaultContextsFor(TodoListNotifier notifier) {
+    if (notifier.activeFilter != TaskFilter.context) return const {};
+
+    final ctx = notifier.selectedContext;
+
+    return ctx == null ? const {} : {ctx};
   }
 
   void _showEditTaskSheet(

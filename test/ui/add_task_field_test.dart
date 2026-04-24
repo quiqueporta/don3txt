@@ -59,6 +59,8 @@ Widget buildTestApp({
       String? priority}) onSubmit,
   SettingsNotifier? settingsNotifier,
   DateTime? initialDueDate,
+  Set<String> initialProjects = const {},
+  Set<String> initialContexts = const {},
 }) {
   settingsNotifier ??= SettingsNotifier(InMemorySettingsRepository());
 
@@ -72,6 +74,8 @@ Widget buildTestApp({
         body: AddTaskField(
           onSubmit: onSubmit,
           initialDueDate: initialDueDate,
+          initialProjects: initialProjects,
+          initialContexts: initialContexts,
         ),
       ),
     ),
@@ -242,6 +246,74 @@ void main() {
       await tester.pump();
 
       expect(receivedDate, today);
+    });
+
+    testWidgets('shows project chip on open when initialProjects is provided',
+        (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(
+          onSubmit: (_, {dueDate, startDate, recurrence, priority}) {},
+          initialProjects: const {'+Casa'},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('+Casa'), findsOneWidget);
+    });
+
+    testWidgets('shows context chip on open when initialContexts is provided',
+        (tester) async {
+      await tester.pumpWidget(
+        buildTestApp(
+          onSubmit: (_, {dueDate, startDate, recurrence, priority}) {},
+          initialContexts: const {'@oficina'},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('@oficina'), findsOneWidget);
+    });
+
+    testWidgets('onSubmit injects preloaded project into text',
+        (tester) async {
+      String? submittedText;
+
+      await tester.pumpWidget(
+        buildTestApp(
+          onSubmit: (text, {dueDate, startDate, recurrence, priority}) {
+            submittedText = text;
+          },
+          initialProjects: const {'+Casa'},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Buy milk');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(submittedText, 'Buy milk +Casa');
+    });
+
+    testWidgets('onSubmit injects preloaded context into text',
+        (tester) async {
+      String? submittedText;
+
+      await tester.pumpWidget(
+        buildTestApp(
+          onSubmit: (text, {dueDate, startDate, recurrence, priority}) {
+            submittedText = text;
+          },
+          initialContexts: const {'@oficina'},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Call mom');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(submittedText, 'Call mom @oficina');
     });
 
     testWidgets('DatePicker inherits locale from MaterialApp', (tester) async {
