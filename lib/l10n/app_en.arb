@@ -96,5 +96,14 @@
       "count": { "type": "int" }
     }
   },
-  "recurrenceStrictPrefix": "(strict) "
+  "recurrenceStrictPrefix": "(strict) ",
+  "sectionPriorityColors": "Priority colors",
+  "priorityColorPickerTitle": "Choose a color",
+  "resetToDefaults": "Reset to defaults",
+  "priorityLabel": "Priority {letter}",
+  "@priorityLabel": {
+    "placeholders": {
+      "letter": { "type": "String" }
+    }
+  }
 }

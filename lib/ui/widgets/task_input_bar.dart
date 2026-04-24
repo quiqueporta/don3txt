@@ -33,6 +33,7 @@ class TaskInputBar extends StatelessWidget {
   final DateTime? selectedStartDate;
   final String? recurrence;
   final String? priority;
+  final Color? priorityColor;
   final Set<String> selectedProjects;
   final Set<String> selectedContexts;
 
@@ -55,6 +56,7 @@ class TaskInputBar extends StatelessWidget {
     this.selectedStartDate,
     this.recurrence,
     this.priority,
+    this.priorityColor,
     this.selectedProjects = const {},
     this.selectedContexts = const {},
     required this.onClearDate,
@@ -152,7 +154,12 @@ class TaskInputBar extends StatelessWidget {
           children: [
             if (priority != null)
               Chip(
-                label: Text('($priority)'),
+                label: Text(
+                  '($priority)',
+                  style: priorityColor != null
+                      ? TextStyle(color: priorityColor, fontWeight: FontWeight.w600)
+                      : null,
+                ),
                 deleteIcon: const Icon(Icons.close, size: 18),
                 onDeleted: onClearPriority,
               ),

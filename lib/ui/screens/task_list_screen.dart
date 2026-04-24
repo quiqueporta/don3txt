@@ -83,12 +83,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   void _showAddTaskSheet(BuildContext context) {
     final notifier = context.read<TodoListNotifier>();
+    final settings = context.read<SettingsNotifier>();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => ChangeNotifierProvider.value(
-        value: notifier,
+      builder: (_) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: notifier),
+          ChangeNotifierProvider.value(value: settings),
+        ],
         child: AddTaskField(
           initialDueDate: _defaultDueDateFor(notifier.activeFilter),
           initialProjects: _defaultProjectsFor(notifier),
@@ -133,12 +137,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
   void _showEditTaskSheet(
       BuildContext context, TodoListNotifier notifier, int originalIndex) {
     final item = notifier.todoFile!.items[originalIndex];
+    final settings = context.read<SettingsNotifier>();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => ChangeNotifierProvider.value(
-        value: notifier,
+      builder: (_) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: notifier),
+          ChangeNotifierProvider.value(value: settings),
+        ],
         child: EditTaskField(
           item: item,
           onSave: (updatedItem) {
@@ -323,6 +331,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
                       return TaskTile(
                         item: item,
+                        priorityColors:
+                            context.watch<SettingsNotifier>().priorityColors,
                         onToggle: () {
                           if (isCompletedView) {
                             notifier.uncompleteTask(originalIndex);

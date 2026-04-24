@@ -6,10 +6,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
+import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
+import 'package:don3txt/ui/priority_color_palette.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -102,6 +104,19 @@ class SettingsScreen extends StatelessWidget {
               groupValue: settings.upcomingDays,
               onChanged: (value) => settings.setUpcomingDays(value!),
             ),
+          const Divider(),
+          _SectionHeader(title: loc.sectionPriorityColors),
+          for (final letter in PriorityColors.supportedLetters)
+            _PriorityColorTile(
+              letter: letter,
+              color: Color(settings.priorityColors.colorFor(letter)!),
+              onPick: (picked) => settings.setPriorityColor(letter, picked),
+            ),
+          ListTile(
+            leading: const Icon(Icons.restore),
+            title: Text(loc.resetToDefaults),
+            onTap: () => settings.resetPriorityColors(),
+          ),
         ],
       ),
     );
@@ -177,3 +192,121 @@ class _SectionHeader extends StatelessWidget {
 }
 
 const _sentinel = Object();
+
+class _PriorityColorTile extends StatelessWidget {
+  final String letter;
+  final Color color;
+  final ValueChanged<int> onPick;
+
+  const _PriorityColorTile({
+    required this.letter,
+    required this.color,
+    required this.onPick,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
+    return ListTile(
+      title: Text(loc.priorityLabel(letter)),
+      trailing: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.black26),
+        ),
+      ),
+      onTap: () => _showPicker(context),
+    );
+  }
+
+  Future<void> _showPicker(BuildContext context) async {
+    final loc = AppLocalizations.of(context);
+
+    final picked = await showModalBottomSheet<int>(
+      context: context,
+      builder: (_) => _PriorityColorPickerSheet(
+        title: loc.priorityColorPickerTitle,
+        currentColor: color,
+      ),
+    );
+
+    if (picked != null) onPick(picked);
+  }
+}
+
+class _PriorityColorPickerSheet extends StatelessWidget {
+  final String title;
+  final Color currentColor;
+
+  const _PriorityColorPickerSheet({
+    required this.title,
+    required this.currentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                for (var i = 0; i < kPriorityColorPalette.length; i++)
+                  _ColorSwatch(
+                    key: ValueKey('priority_color_swatch_$i'),
+                    color: kPriorityColorPalette[i],
+                    isSelected: kPriorityColorPalette[i].value == currentColor.value,
+                    onTap: () =>
+                        Navigator.of(context).pop(kPriorityColorPalette[i].value),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ColorSwatch extends StatelessWidget {
+  final Color color;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ColorSwatch({
+    super.key,
+    required this.color,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: isSelected ? Colors.black : Colors.black26,
+            width: isSelected ? 3 : 1,
+          ),
+        ),
+      ),
+    );
+  }
+}

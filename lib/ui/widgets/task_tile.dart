@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
 
@@ -7,6 +8,7 @@ class TaskTile extends StatelessWidget {
   final VoidCallback onToggle;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
+  final PriorityColors? priorityColors;
 
   const TaskTile({
     super.key,
@@ -14,7 +16,14 @@ class TaskTile extends StatelessWidget {
     required this.onToggle,
     this.onTap,
     this.onDelete,
+    this.priorityColors,
   });
+
+  Color _priorityColor(String letter) {
+    final stored = priorityColors?.colorFor(letter);
+
+    return stored != null ? Color(stored) : Colors.orange.shade400;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,10 +82,9 @@ class TaskTile extends StatelessWidget {
                       runSpacing: 4,
                       children: [
                         if (priority != null)
-                          _TagChip(
-                            icon: Icons.flag,
+                          _PriorityChip(
                             label: priority,
-                            color: Colors.orange,
+                            color: _priorityColor(priority),
                           ),
                         if (dueDate != null)
                           _MetadataChip(
@@ -177,6 +185,28 @@ class _TagChip extends StatelessWidget {
         Text(
           label,
           style: TextStyle(fontSize: 13, color: color.shade400),
+        ),
+      ],
+    );
+  }
+}
+
+class _PriorityChip extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _PriorityChip({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.flag, size: 14, color: color),
+        const SizedBox(width: 2),
+        Text(
+          label,
+          style: TextStyle(fontSize: 13, color: color),
         ),
       ],
     );

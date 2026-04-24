@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
+import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/infrastructure/shared_preferences_settings_repository.dart';
 
 void main() {
@@ -91,6 +92,24 @@ void main() {
       final result = await repository.loadLanguage();
 
       expect(result, AppLanguage.portuguese);
+    });
+
+    test('loadPriorityColors returns defaults when nothing is stored',
+        () async {
+      final result = await repository.loadPriorityColors();
+
+      expect(result, PriorityColors.defaults());
+    });
+
+    test('savePriorityColors persists custom colors', () async {
+      final custom =
+          PriorityColors.defaults().withColor('A', 0xFF001122);
+
+      await repository.savePriorityColors(custom);
+
+      final result = await repository.loadPriorityColors();
+
+      expect(result, custom);
     });
   });
 }

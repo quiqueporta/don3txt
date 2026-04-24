@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
+import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/widgets/recurrence_dialog.dart';
 import 'package:don3txt/ui/widgets/tag_picker_sheet.dart';
@@ -93,6 +95,8 @@ class _AddTaskFieldState extends State<AddTaskField> {
   }
 
   void _pickPriority() {
+    final colors = context.read<SettingsNotifier>().priorityColors;
+
     showModalBottomSheet(
       context: context,
       builder: (_) => SafeArea(
@@ -103,9 +107,16 @@ class _AddTaskFieldState extends State<AddTaskField> {
             alignment: WrapAlignment.center,
             children: List.generate(6, (i) {
               final letter = String.fromCharCode(65 + i);
+              final stored = colors.colorFor(letter);
+              final color = stored != null ? Color(stored) : null;
 
               return ActionChip(
-                label: Text('($letter)'),
+                label: Text(
+                  '($letter)',
+                  style: color != null
+                      ? TextStyle(color: color, fontWeight: FontWeight.w600)
+                      : null,
+                ),
                 onPressed: () {
                   setState(() => _priority = letter);
                   Navigator.pop(context);
@@ -194,8 +205,18 @@ class _AddTaskFieldState extends State<AddTaskField> {
     super.dispose();
   }
 
+  Color? _priorityChipColor(PriorityColors colors) {
+    if (_priority == null) return null;
+
+    final stored = colors.colorFor(_priority!);
+
+    return stored != null ? Color(stored) : null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final priorityColors = context.watch<SettingsNotifier>().priorityColors;
+
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -235,6 +256,7 @@ class _AddTaskFieldState extends State<AddTaskField> {
             selectedStartDate: _selectedStartDate,
             recurrence: _recurrence,
             priority: _priority,
+            priorityColor: _priorityChipColor(priorityColors),
             selectedProjects: _selectedProjects,
             selectedContexts: _selectedContexts,
             onClearDate: () => setState(() => _selectedDate = null),

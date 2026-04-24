@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
+import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
@@ -48,6 +49,16 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> saveLanguage(AppLanguage value) async {
     _language = value;
+  }
+
+  PriorityColors _priorityColors = PriorityColors.defaults();
+
+  @override
+  Future<PriorityColors> loadPriorityColors() async => _priorityColors;
+
+  @override
+  Future<void> savePriorityColors(PriorityColors value) async {
+    _priorityColors = value;
   }
 }
 
@@ -180,6 +191,67 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(notifier.language, AppLanguage.french);
+    });
+
+    testWidgets('shows priority colors section with a row per A-F letter',
+        (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.scrollUntilVisible(find.text('Priority colors'), 200,
+          scrollable: find.byType(Scrollable).first);
+
+      expect(find.text('Priority colors'), findsOneWidget);
+
+      for (final letter in PriorityColors.supportedLetters) {
+        await tester.scrollUntilVisible(
+          find.text('Priority $letter'),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(find.text('Priority $letter'), findsOneWidget);
+      }
+    });
+
+    testWidgets('tapping a priority row opens color picker sheet',
+        (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.scrollUntilVisible(find.text('Reset to defaults'), 200,
+          scrollable: find.byType(Scrollable).first);
+
+      await tester.tap(find.text('Priority A'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Choose a color'), findsOneWidget);
+    });
+
+    testWidgets('selecting a color in the sheet updates priorityColors',
+        (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.scrollUntilVisible(find.text('Reset to defaults'), 200,
+          scrollable: find.byType(Scrollable).first);
+
+      await tester.tap(find.text('Priority A'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      final swatch = find.byKey(const ValueKey('priority_color_swatch_0'));
+      expect(swatch, findsOneWidget);
+
+      await tester.tap(swatch);
+      await tester.pumpAndSettle();
+
+      expect(notifier.priorityColors.colorFor('A'), isNotNull);
+    });
+
+    testWidgets('reset tile restores defaults', (tester) async {
+      await notifier.setPriorityColor('A', 0xFF000000);
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.scrollUntilVisible(find.text('Reset to defaults'), 200,
+          scrollable: find.byType(Scrollable).first);
+
+      await tester.tap(find.text('Reset to defaults'));
+      await tester.pumpAndSettle();
+
+      expect(notifier.priorityColors, PriorityColors.defaults());
     });
   });
 }

@@ -61,5 +61,14 @@
   "recurrenceEveryWeeks": "{count, plural, =1{Toutes les {count} semaine} other{Toutes les {count} semaines}}",
   "recurrenceEveryMonths": "{count, plural, =1{Tous les {count} mois} other{Tous les {count} mois}}",
   "recurrenceEveryYears": "{count, plural, =1{Tous les {count} an} other{Tous les {count} ans}}",
-  "recurrenceStrictPrefix": "(stricte) "
+  "recurrenceStrictPrefix": "(stricte) ",
+  "sectionPriorityColors": "Couleurs des priorités",
+  "priorityColorPickerTitle": "Choisir une couleur",
+  "resetToDefaults": "Réinitialiser",
+  "priorityLabel": "Priorité {letter}",
+  "@priorityLabel": {
+    "placeholders": {
+      "letter": { "type": "String" }
+    }
+  }
 }

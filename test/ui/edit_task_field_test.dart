@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
+import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
@@ -48,6 +49,16 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> saveLanguage(AppLanguage value) async {
     _language = value;
+  }
+
+  PriorityColors _priorityColors = PriorityColors.defaults();
+
+  @override
+  Future<PriorityColors> loadPriorityColors() async => _priorityColors;
+
+  @override
+  Future<void> savePriorityColors(PriorityColors value) async {
+    _priorityColors = value;
   }
 }
 

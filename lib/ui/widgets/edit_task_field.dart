@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
+import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/domain/todo_parser.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
@@ -115,6 +117,8 @@ class _EditTaskFieldState extends State<EditTaskField> {
   }
 
   void _pickPriority() {
+    final colors = context.read<SettingsNotifier>().priorityColors;
+
     showModalBottomSheet(
       context: context,
       builder: (_) => SafeArea(
@@ -125,9 +129,16 @@ class _EditTaskFieldState extends State<EditTaskField> {
             alignment: WrapAlignment.center,
             children: List.generate(6, (i) {
               final letter = String.fromCharCode(65 + i);
+              final stored = colors.colorFor(letter);
+              final color = stored != null ? Color(stored) : null;
 
               return ActionChip(
-                label: Text('($letter)'),
+                label: Text(
+                  '($letter)',
+                  style: color != null
+                      ? TextStyle(color: color, fontWeight: FontWeight.w600)
+                      : null,
+                ),
                 onPressed: () {
                   setState(() => _priority = letter);
                   Navigator.pop(context);
@@ -138,6 +149,14 @@ class _EditTaskFieldState extends State<EditTaskField> {
         ),
       ),
     );
+  }
+
+  Color? _priorityChipColor(PriorityColors colors) {
+    if (_priority == null) return null;
+
+    final stored = colors.colorFor(_priority!);
+
+    return stored != null ? Color(stored) : null;
   }
 
   Future<void> _pickStartDate() async {
@@ -218,6 +237,8 @@ class _EditTaskFieldState extends State<EditTaskField> {
 
   @override
   Widget build(BuildContext context) {
+    final priorityColors = context.watch<SettingsNotifier>().priorityColors;
+
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -257,6 +278,7 @@ class _EditTaskFieldState extends State<EditTaskField> {
             selectedStartDate: _selectedStartDate,
             recurrence: _recurrence,
             priority: _priority,
+            priorityColor: _priorityChipColor(priorityColors),
             selectedProjects: _selectedProjects,
             selectedContexts: _selectedContexts,
             onClearDate: () => setState(() => _selectedDate = null),

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
+import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 
@@ -9,17 +10,20 @@ class InMemorySettingsRepository implements SettingsRepository {
   AppThemeMode _themeMode = AppThemeMode.system;
   int _upcomingDays = 7;
   AppLanguage _language = AppLanguage.system;
+  PriorityColors _priorityColors = PriorityColors.defaults();
 
   InMemorySettingsRepository({
     String? todoFilePath,
     AppThemeMode? themeMode,
     int? upcomingDays,
     AppLanguage? language,
+    PriorityColors? priorityColors,
   }) {
     _todoFilePath = todoFilePath;
     if (themeMode != null) _themeMode = themeMode;
     if (upcomingDays != null) _upcomingDays = upcomingDays;
     if (language != null) _language = language;
+    if (priorityColors != null) _priorityColors = priorityColors;
   }
 
   @override
@@ -52,6 +56,14 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> saveLanguage(AppLanguage value) async {
     _language = value;
+  }
+
+  @override
+  Future<PriorityColors> loadPriorityColors() async => _priorityColors;
+
+  @override
+  Future<void> savePriorityColors(PriorityColors value) async {
+    _priorityColors = value;
   }
 }
 
@@ -196,6 +208,49 @@ void main() {
       await notifier.setLanguage(AppLanguage.portuguese);
 
       expect(notified, true);
+    });
+
+    test('priorityColors defaults to PriorityColors.defaults()', () {
+      expect(notifier.priorityColors, PriorityColors.defaults());
+    });
+
+    test('load reads priorityColors from repository', () async {
+      final custom =
+          PriorityColors.defaults().withColor('A', 0xFF010203);
+      repository = InMemorySettingsRepository(priorityColors: custom);
+      notifier = SettingsNotifier(repository);
+
+      await notifier.load();
+
+      expect(notifier.priorityColors, custom);
+    });
+
+    test('setPriorityColor updates and persists', () async {
+      await notifier.setPriorityColor('A', 0xFF010203);
+
+      expect(notifier.priorityColors.colorFor('A'), 0xFF010203);
+
+      final persisted = await repository.loadPriorityColors();
+      expect(persisted.colorFor('A'), 0xFF010203);
+    });
+
+    test('setPriorityColor notifies listeners', () async {
+      var notified = false;
+      notifier.addListener(() => notified = true);
+
+      await notifier.setPriorityColor('A', 0xFF010203);
+
+      expect(notified, true);
+    });
+
+    test('resetPriorityColors restores defaults and persists', () async {
+      await notifier.setPriorityColor('A', 0xFF010203);
+
+      await notifier.resetPriorityColors();
+
+      expect(notifier.priorityColors, PriorityColors.defaults());
+      final persisted = await repository.loadPriorityColors();
+      expect(persisted, PriorityColors.defaults());
     });
   });
 }
