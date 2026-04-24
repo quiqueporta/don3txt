@@ -12,8 +12,13 @@ class AddTaskField extends StatefulWidget {
       DateTime? startDate,
       String? recurrence,
       String? priority}) onSubmit;
+  final DateTime? initialDueDate;
 
-  const AddTaskField({super.key, required this.onSubmit});
+  const AddTaskField({
+    super.key,
+    required this.onSubmit,
+    this.initialDueDate,
+  });
 
   @override
   State<AddTaskField> createState() => _AddTaskFieldState();
@@ -27,6 +32,12 @@ class _AddTaskFieldState extends State<AddTaskField> {
   String? _priority;
   Set<String> _selectedProjects = {};
   Set<String> _selectedContexts = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialDueDate;
+  }
 
   // Compara por token completo (split por espacios) en vez de subcadena para
   // evitar falsos positivos: "+Casa" no debe considerarse presente si el texto

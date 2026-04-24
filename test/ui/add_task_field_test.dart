@@ -58,6 +58,7 @@ Widget buildTestApp({
       String? recurrence,
       String? priority}) onSubmit,
   SettingsNotifier? settingsNotifier,
+  DateTime? initialDueDate,
 }) {
   settingsNotifier ??= SettingsNotifier(InMemorySettingsRepository());
 
@@ -68,7 +69,10 @@ Widget buildTestApp({
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
-        body: AddTaskField(onSubmit: onSubmit),
+        body: AddTaskField(
+          onSubmit: onSubmit,
+          initialDueDate: initialDueDate,
+        ),
       ),
     ),
   );
@@ -200,6 +204,44 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(Chip), findsNothing);
+    });
+
+    testWidgets('shows due date chip on open when initialDueDate is provided',
+        (tester) async {
+      final today = DateTime(2025, 6, 15);
+
+      await tester.pumpWidget(
+        buildTestApp(
+          onSubmit: (_, {dueDate, startDate, recurrence, priority}) {},
+          initialDueDate: today,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('2025-06-15'), findsOneWidget);
+    });
+
+    testWidgets(
+        'onSubmit receives initialDueDate without user interaction',
+        (tester) async {
+      DateTime? receivedDate;
+      final today = DateTime(2025, 6, 15);
+
+      await tester.pumpWidget(
+        buildTestApp(
+          onSubmit: (_, {dueDate, startDate, recurrence, priority}) {
+            receivedDate = dueDate;
+          },
+          initialDueDate: today,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Buy milk');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+
+      expect(receivedDate, today);
     });
 
     testWidgets('DatePicker inherits locale from MaterialApp', (tester) async {

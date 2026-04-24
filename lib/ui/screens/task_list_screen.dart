@@ -90,6 +90,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       builder: (_) => ChangeNotifierProvider.value(
         value: notifier,
         child: AddTaskField(
+          initialDueDate: _defaultDueDateFor(notifier.activeFilter),
           onSubmit: (text, {dueDate, startDate, recurrence, priority}) {
             notifier.addTask(text,
                 dueDate: dueDate,
@@ -101,6 +102,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
         ),
       ),
     );
+  }
+
+  DateTime? _defaultDueDateFor(TaskFilter filter) {
+    if (filter != TaskFilter.today) return null;
+
+    final now = DateTime.now();
+
+    return DateTime(now.year, now.month, now.day);
   }
 
   void _showEditTaskSheet(

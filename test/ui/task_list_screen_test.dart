@@ -148,6 +148,41 @@ void main() {
       expect(find.byType(FloatingActionButton), findsOneWidget);
     });
 
+    testWidgets('FAB preloads due:today when filter is Today', (tester) async {
+      final notifier = TodoListNotifier(
+          InMemoryTodoRepository(), InMemoryTodoRepository());
+      await notifier.loadTasks();
+      notifier.activeFilter = TaskFilter.today;
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.pump();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      final now = DateTime.now();
+      final todayStr = '${now.year}-'
+          '${now.month.toString().padLeft(2, '0')}-'
+          '${now.day.toString().padLeft(2, '0')}';
+      expect(find.text(todayStr), findsOneWidget);
+    });
+
+    testWidgets('FAB does not preload due when filter is Inbox',
+        (tester) async {
+      final notifier = TodoListNotifier(
+          InMemoryTodoRepository(), InMemoryTodoRepository());
+      await notifier.loadTasks();
+      notifier.activeFilter = TaskFilter.inbox;
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.pump();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Chip), findsNothing);
+    });
+
     testWidgets('has Today title by default', (tester) async {
       final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
       await notifier.loadTasks();
