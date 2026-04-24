@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.9.0] - 2026-04-24
+
+### Added
+
+- The "+" button pre-fills the due date with today when you are in the Today view
+- The "+" button pre-fills the project or context tag when you are viewing a specific project or context
+- Configurable priority colors (A-F) in Settings with a red-to-green default palette, applied to priority chips in the task list, editor and priority picker
+
 ## [1.8.1] - 2026-04-19
 
 ### Fixed
