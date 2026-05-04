@@ -74,9 +74,11 @@ Components: completion (`x`), priority (`(A)`-`(Z)`), dates (`YYYY-MM-DD`), proj
 
 When it's time to bump the version, follow these steps in order:
 
-1. **Update version** in these two files:
+1. **Update version** in these files:
    - `pubspec.yaml` → `version:` field
    - `lib/ui/widgets/sidebar_drawer.dart` → `applicationVersion:` field
+   - `docs/index.html` → `"softwareVersion"` field in the JSON-LD block
+   - `docs/index.html` → `<p class="cta-version">Current version: vX.Y.Z</p>`
 2. **Update `CHANGELOG.md`** — add a new entry at the top with date and changes (Added/Changed/Fixed sections as appropriate)
 3. **Run tests** — `flutter test` and confirm all pass
 4. **Commit** with message `Bump version to X.Y.Z`
