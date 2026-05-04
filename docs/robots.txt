@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://quiqueporta.github.io/don3txt/sitemap.xml

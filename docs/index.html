@@ -3,8 +3,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>don3txt — todo.txt task manager for Android</title>
-  <meta name="description" content="Manage your tasks in todo.txt format on Android. Plain text, no cloud, no accounts. Your data is yours.">
+
+  <title>don3txt — todo.txt App for Android | Free, Open Source Task Manager</title>
+  <meta name="description" content="don3txt is a free todo.txt app for Android. Manage tasks in plain text — no cloud, no accounts, no telemetry. Open source, MIT licensed. Compatible with Syncthing and Dropbox.">
+  <meta name="keywords" content="todo.txt, todo.txt app, todo.txt android, task manager android, plain text task manager, gtd android, open source todo app, todotxt android, syncthing todo, offline task manager">
+  <meta name="author" content="Quique Porta">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#f5a623">
+
+  <link rel="canonical" href="https://quiqueporta.github.io/don3txt/">
+  <link rel="icon" type="image/png" href="don3txt_logo.png">
+  <link rel="apple-touch-icon" href="don3txt_logo.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="don3txt">
+  <meta property="og:title" content="don3txt — todo.txt App for Android">
+  <meta property="og:description" content="Free, open source todo.txt task manager for Android. Plain text, local-only, no accounts. Your data is yours.">
+  <meta property="og:url" content="https://quiqueporta.github.io/don3txt/">
+  <meta property="og:image" content="https://quiqueporta.github.io/don3txt/don3txt_logo.png">
+  <meta property="og:image:alt" content="don3txt logo">
+  <meta property="og:locale" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@don3txt">
+  <meta name="twitter:creator" content="@don3txt">
+  <meta name="twitter:title" content="don3txt — todo.txt App for Android">
+  <meta name="twitter:description" content="Free, open source todo.txt task manager for Android. Plain text, local-only, no accounts.">
+  <meta name="twitter:image" content="https://quiqueporta.github.io/don3txt/don3txt_logo.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    "name": "don3txt",
+    "alternateName": "don3txt — todo.txt for Android",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Android",
+    "description": "don3txt is a free, open source todo.txt task manager for Android. Manage your tasks in plain text with full support for the todo.txt open standard: priorities, projects, contexts, due dates, threshold dates and recurring tasks. No cloud, no accounts, no telemetry.",
+    "url": "https://quiqueporta.github.io/don3txt/",
+    "downloadUrl": "https://github.com/quiqueporta/don3txt/releases",
+    "softwareVersion": "1.9.0",
+    "author": {
+      "@type": "Person",
+      "name": "Quique Porta",
+      "url": "https://github.com/quiqueporta"
+    },
+    "license": "https://opensource.org/licenses/MIT",
+    "image": "https://quiqueporta.github.io/don3txt/don3txt_logo.png",
+    "screenshot": [
+      "https://quiqueporta.github.io/don3txt/screen_1.png",
+      "https://quiqueporta.github.io/don3txt/screen_2.png",
+      "https://quiqueporta.github.io/don3txt/screen_3.png"
+    ],
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "todo.txt open standard format",
+      "Priorities (A) to (Z)",
+      "Projects (+name) and contexts (@name)",
+      "Due dates and threshold dates",
+      "Recurring tasks (flexible and strict)",
+      "Today, Inbox, Upcoming, Recurring and Completed views",
+      "Full-text search",
+      "Light, dark and system theme",
+      "Compatible with Syncthing and Dropbox sync",
+      "100% offline, no account required"
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is todo.txt?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "todo.txt is an open, human-readable plain text format for managing tasks, created by Gina Trapani. A single text file holds all your tasks with a simple syntax for priorities, projects, contexts and metadata. Because it is plain text, you can read, edit and sync it with any tool and on any platform, with no vendor lock-in."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is don3txt free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. don3txt is completely free and open source under the MIT license. There are no premium features, subscriptions, ads or in-app purchases."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does don3txt work offline?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. don3txt works 100% offline. It does not require an internet connection, an account or a server. Your todo.txt file lives exclusively on your device unless you choose to sync it yourself."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I sync my tasks across devices?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "don3txt does not include built-in sync, by design. You can sync your todo.txt file using any folder-sync service such as Syncthing, Dropbox, Google Drive or Nextcloud. Just point don3txt to the synced file."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is don3txt compatible with other todo.txt apps?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. don3txt follows the official todo.txt specification, so your file is compatible with any other todo.txt application on iOS, macOS, Linux, Windows or the web. You can switch apps at any time without losing data."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Where is the don3txt APK available?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The latest don3txt APK is published on GitHub Releases at github.com/quiqueporta/don3txt/releases. Download the APK and install it directly on your Android device."
+        }
+      }
+    ]
+  }
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -941,6 +1068,104 @@
       line-height: 1.65;
     }
 
+    .faq-section {
+      padding: 100px 0;
+      background: var(--bg-raised);
+      border-top: 1px solid var(--bg-border);
+      border-bottom: 1px solid var(--bg-border);
+    }
+
+    .faq-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .faq-header h2 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    .faq-header p {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .faq-list {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .faq-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--bg-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .faq-item[open] {
+      border-color: rgba(245, 166, 35, 0.25);
+    }
+
+    .faq-item summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 20px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: color 0.2s;
+    }
+
+    .faq-item summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .faq-item summary:hover {
+      color: var(--accent);
+    }
+
+    .faq-item summary::after {
+      content: '+';
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--accent);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .faq-item[open] summary::after {
+      transform: rotate(45deg);
+    }
+
+    .faq-answer {
+      padding: 0 24px 22px;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .faq-answer a {
+      color: var(--accent);
+      transition: color 0.2s;
+    }
+
+    .faq-answer a:hover {
+      color: #ffba45;
+    }
+
     .cta-section {
       padding: 80px 0 100px;
     }
@@ -1186,6 +1411,7 @@
     <div class="spy-dot" data-target="features" title="Features"></div>
     <div class="spy-dot" data-target="format" title="Format"></div>
     <div class="spy-dot" data-target="philosophy" title="Philosophy"></div>
+    <div class="spy-dot" data-target="faq" title="FAQ"></div>
     <div class="spy-dot" data-target="download" title="Download"></div>
   </div>
 
@@ -1200,6 +1426,7 @@
         <a href="#features">Features</a>
         <a href="#format">Format</a>
         <a href="#philosophy">Philosophy</a>
+        <a href="#faq">FAQ</a>
         <a href="#download">Download</a>
       </div>
       <a href="https://x.com/don3txt" class="nav-social" target="_blank" rel="noopener" aria-label="Follow on X">
@@ -1213,7 +1440,7 @@
         </svg>
         GitHub
       </a>
-      <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="nav-panel">
+      <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-panel">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
@@ -1227,6 +1454,7 @@
     <a href="#features">Features</a>
     <a href="#format">Format</a>
     <a href="#philosophy">Philosophy</a>
+    <a href="#faq">FAQ</a>
     <a href="#download">Download</a>
     <a href="https://github.com/quiqueporta/don3txt" class="mobile-panel-cta" target="_blank" rel="noopener">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -1256,14 +1484,14 @@
       <img src="don3txt_logo.png" alt="don3txt logo" class="hero-logo fade-in" data-delay="80">
 
       <h1 class="fade-in" data-delay="160">
-        Manage your tasks.<br>
+        todo.txt app for Android.<br>
         <span class="name">No cloud. No accounts.</span>
       </h1>
 
       <p class="hero-tagline fade-in" data-delay="240">
-        <strong>don3txt</strong> is an Android task manager based on the open
+        <strong>don3txt</strong> is a free, open source task manager for Android based on the
         <a href="http://todotxt.org/" class="format-link" target="_blank" rel="noopener">todo.txt</a>
-        format. Plain text, local, no external dependencies. Your data is yours.
+        open standard. Plain text, 100% local, no external dependencies. Your data is yours.
       </p>
 
       <div class="hero-actions fade-in" data-delay="320">
@@ -1510,12 +1738,69 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
     </div>
   </section>
 
+  <section class="faq-section" id="faq">
+    <div class="container">
+
+      <div class="faq-header fade-in" data-delay="0">
+        <span class="section-label">FAQ</span>
+        <h2>Frequently asked questions</h2>
+        <p>Everything you need to know about don3txt and the todo.txt format</p>
+      </div>
+
+      <div class="faq-list fade-in" data-delay="80">
+
+        <details class="faq-item">
+          <summary>What is todo.txt?</summary>
+          <div class="faq-answer">
+            <p><a href="http://todotxt.org/" target="_blank" rel="noopener">todo.txt</a> is an open, human-readable plain text format for managing tasks, created by Gina Trapani. A single text file holds all your tasks with a simple syntax for priorities, projects, contexts and metadata. Because it is plain text, you can read, edit and sync it with any tool and on any platform, with no vendor lock-in.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Is don3txt free?</summary>
+          <div class="faq-answer">
+            <p>Yes. don3txt is completely free and open source under the <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT license</a>. There are no premium features, no subscriptions, no ads and no in-app purchases.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Does don3txt work offline?</summary>
+          <div class="faq-answer">
+            <p>Yes. don3txt works 100% offline. It does not require an internet connection, an account or a server. Your todo.txt file lives exclusively on your device unless you choose to sync it yourself.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>How do I sync my tasks across devices?</summary>
+          <div class="faq-answer">
+            <p>don3txt does not include built-in sync, by design. You can sync your todo.txt file using any folder-sync service such as <a href="https://syncthing.net/" target="_blank" rel="noopener">Syncthing</a>, <a href="https://www.dropbox.com/" target="_blank" rel="noopener">Dropbox</a>, Google Drive or Nextcloud. Just point don3txt to the synced file and pull-to-refresh to reload changes.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Is don3txt compatible with other todo.txt apps?</summary>
+          <div class="faq-answer">
+            <p>Yes. don3txt follows the official todo.txt specification, so your file is fully compatible with any other todo.txt application on iOS, macOS, Linux, Windows or the web. You can switch apps at any time without losing data.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Where can I download the don3txt APK?</summary>
+          <div class="faq-answer">
+            <p>The latest don3txt APK is published on <a href="https://github.com/quiqueporta/don3txt/releases" target="_blank" rel="noopener">GitHub Releases</a>. Download the APK and install it directly on your Android device.</p>
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
   <section class="cta-section" id="download">
     <div class="container">
       <div class="cta-box fade-in" data-delay="0">
         <h2>Get started today</h2>
         <p>Download the APK, pick your todo.txt file and start managing your tasks with no strings attached.</p>
-        <p class="cta-version">Current version: v1.7.1</p>
+        <p class="cta-version">Current version: v1.9.0</p>
         <div class="cta-actions">
           <a href="https://github.com/quiqueporta/don3txt/releases" class="btn-primary" target="_blank" rel="noopener">
             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -1546,6 +1831,7 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
         <a href="#features">Features</a>
         <a href="#format">Format</a>
         <a href="#philosophy">Philosophy</a>
+        <a href="#faq">FAQ</a>
         <a href="#download">Download</a>
       </div>
       <div class="footer-divider"></div>
@@ -1568,7 +1854,7 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
       navLinks.classList.add('open');
       overlay.classList.add('open');
       toggle.setAttribute('aria-expanded', 'true');
-      toggle.setAttribute('aria-label', 'Cerrar menú de navegación');
+      toggle.setAttribute('aria-label', 'Close navigation menu');
       document.body.style.overflow = 'hidden';
     }
 
@@ -1576,7 +1862,7 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
       navLinks.classList.remove('open');
       overlay.classList.remove('open');
       toggle.setAttribute('aria-expanded', 'false');
-      toggle.setAttribute('aria-label', 'Abrir menú de navegación');
+      toggle.setAttribute('aria-label', 'Open navigation menu');
       document.body.style.overflow = '';
     }
 
@@ -1603,7 +1889,7 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
 
     const spyPanel = document.getElementById('scroll-spy');
     const spyDots = spyPanel.querySelectorAll('.spy-dot');
-    const sectionIds = ['hero', 'screenshots', 'features', 'format', 'philosophy', 'download'];
+    const sectionIds = ['hero', 'screenshots', 'features', 'format', 'philosophy', 'faq', 'download'];
     const sections = sectionIds.map((id) => document.getElementById(id));
 
     spyDots.forEach((dot, i) => {

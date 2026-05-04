@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://quiqueporta.github.io/don3txt/</loc>
+    <lastmod>2026-05-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://quiqueporta.github.io/don3txt/don3txt_logo.png</image:loc>
+      <image:title>don3txt logo</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://quiqueporta.github.io/don3txt/screen_1.png</image:loc>
+      <image:title>don3txt navigation sidebar</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://quiqueporta.github.io/don3txt/screen_2.png</image:loc>
+      <image:title>don3txt inbox view</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://quiqueporta.github.io/don3txt/screen_3.png</image:loc>
+      <image:title>don3txt settings screen</image:title>
+    </image:image>
+  </url>
+</urlset>
