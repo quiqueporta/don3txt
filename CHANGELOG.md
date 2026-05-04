@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.1] - 2026-05-04
+
+### Changed
+
+- New app launcher icon on Android with adaptive icon support
+- New favicon set on the documentation site (ico, svg, apple-touch-icon and web app manifest)
+
 ## [1.9.0] - 2026-04-24
 
 ### Added
