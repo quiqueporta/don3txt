@@ -1229,6 +1229,37 @@
       position: relative;
     }
 
+    .cta-qr {
+      display: none;
+      margin-top: 36px;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    .cta-qr img {
+      width: 160px;
+      height: 160px;
+      padding: 12px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    .cta-qr-caption {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-dim);
+      margin: 0;
+    }
+
+    @media (min-width: 768px) {
+      .cta-qr {
+        display: flex;
+      }
+    }
+
     footer {
       border-top: 1px solid var(--bg-border);
       padding: 40px 24px;
@@ -1820,6 +1851,10 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
             </svg>
             View the code
           </a>
+        </div>
+        <div class="cta-qr">
+          <img src="qr-latest-release.svg" alt="QR code linking to the latest release on GitHub" width="160" height="160" loading="lazy">
+          <p class="cta-qr-caption">Scan to download</p>
         </div>
       </div>
     </div>
