@@ -15,7 +15,7 @@ class FilterBottomSheet extends StatelessWidget {
     final priorities = notifier.availablePrioritiesForView;
 
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,

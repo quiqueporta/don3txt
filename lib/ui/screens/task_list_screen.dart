@@ -74,6 +74,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   void _showFilterSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (_) => ChangeNotifierProvider.value(
         value: context.read<TodoListNotifier>(),
         child: const FilterBottomSheet(),
