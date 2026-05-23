@@ -260,6 +260,54 @@ void main() {
       expect(newTask.metadata['rec'], '+2w');
     });
 
+    test(
+        'completeTask with simple recurrence and only t (no due) creates new task with shifted t',
+        () {
+      final file = TodoFile([
+        TodoItem(
+          description: 'Review report',
+          metadata: {'t': '2026-03-09', 'rec': '1w'},
+        ),
+      ]);
+
+      final updated = file.completeTask(0);
+
+      expect(updated.items.length, 2);
+      expect(updated.items[0].isCompleted, true);
+
+      final newTask = updated.items[1];
+      expect(newTask.isCompleted, false);
+      expect(newTask.metadata['rec'], '1w');
+      expect(newTask.metadata.containsKey('due'), isFalse);
+
+      final now = DateTime.now();
+      final expectedT = DateTime(now.year, now.month, now.day + 7);
+      final expectedTStr =
+          '${expectedT.year}-${expectedT.month.toString().padLeft(2, '0')}-${expectedT.day.toString().padLeft(2, '0')}';
+      expect(newTask.metadata['t'], expectedTStr);
+    });
+
+    test(
+        'completeTask with strict recurrence and only t (no due) shifts t from original',
+        () {
+      final file = TodoFile([
+        TodoItem(
+          description: 'Review report',
+          metadata: {'t': '2026-03-09', 'rec': '+1w'},
+        ),
+      ]);
+
+      final updated = file.completeTask(0);
+
+      expect(updated.items.length, 2);
+      expect(updated.items[0].isCompleted, true);
+
+      final newTask = updated.items[1];
+      expect(newTask.metadata['t'], '2026-03-16');
+      expect(newTask.metadata['rec'], '+1w');
+      expect(newTask.metadata.containsKey('due'), isFalse);
+    });
+
     test('completeTask with recurrence does not create new task on uncomplete',
         () {
       final file = TodoFile([

@@ -197,15 +197,23 @@ class TodoFile {
         newMetadata['t'] = _formatDate(rec.applyTo(oldT));
       }
     } else {
-      final newDue = rec.applyTo(completionDate);
-      newMetadata['due'] = _formatDate(newDue);
+      final hasOriginalDue = item.metadata.containsKey('due');
+      final hasT = newMetadata.containsKey('t');
 
-      if (newMetadata.containsKey('t') && newMetadata.containsKey('due')) {
-        final oldDue = DateTime.parse(item.metadata['due']!);
-        final oldT = DateTime.parse(newMetadata['t']!);
-        final gap = oldDue.difference(oldT);
-        final newT = newDue.subtract(gap);
-        newMetadata['t'] = _formatDate(newT);
+      if (hasOriginalDue) {
+        final newDue = rec.applyTo(completionDate);
+        newMetadata['due'] = _formatDate(newDue);
+
+        if (hasT) {
+          final oldDue = DateTime.parse(item.metadata['due']!);
+          final oldT = DateTime.parse(newMetadata['t']!);
+          final gap = oldDue.difference(oldT);
+          newMetadata['t'] = _formatDate(newDue.subtract(gap));
+        }
+      } else if (hasT) {
+        newMetadata['t'] = _formatDate(rec.applyTo(completionDate));
+      } else {
+        newMetadata['due'] = _formatDate(rec.applyTo(completionDate));
       }
     }
 
