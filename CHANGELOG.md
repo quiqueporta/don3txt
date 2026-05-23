@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.10.0] - 2026-05-23
+
+### Added
+
+- Configurable task ordering in Settings. Build a multi-level sort chain from priority, due date, threshold date and creation date, with drag-to-reorder and add/remove of criteria
+
+### Fixed
+
+- Filter bottom sheet was not scrollable, hiding contexts and priorities when many projects filled the available height
+- Recurrent tasks with only a threshold date (`t:`) and no due date could not be marked as completed
+- Switching the todo.txt file location from Settings now jumps to Inbox and pops back to the list so the newly loaded tasks are visible immediately
+
 ## [1.9.1] - 2026-05-04
 
 ### Changed
