@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
+import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 
@@ -11,6 +12,7 @@ class InMemorySettingsRepository implements SettingsRepository {
   int _upcomingDays = 7;
   AppLanguage _language = AppLanguage.system;
   PriorityColors _priorityColors = PriorityColors.defaults();
+  List<TaskSortCriterion> _sortCriteria = defaultSortCriteria;
 
   InMemorySettingsRepository({
     String? todoFilePath,
@@ -18,12 +20,14 @@ class InMemorySettingsRepository implements SettingsRepository {
     int? upcomingDays,
     AppLanguage? language,
     PriorityColors? priorityColors,
+    List<TaskSortCriterion>? sortCriteria,
   }) {
     _todoFilePath = todoFilePath;
     if (themeMode != null) _themeMode = themeMode;
     if (upcomingDays != null) _upcomingDays = upcomingDays;
     if (language != null) _language = language;
     if (priorityColors != null) _priorityColors = priorityColors;
+    if (sortCriteria != null) _sortCriteria = sortCriteria;
   }
 
   @override
@@ -64,6 +68,14 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> savePriorityColors(PriorityColors value) async {
     _priorityColors = value;
+  }
+
+  @override
+  Future<List<TaskSortCriterion>> loadSortCriteria() async => _sortCriteria;
+
+  @override
+  Future<void> saveSortCriteria(List<TaskSortCriterion> value) async {
+    _sortCriteria = value;
   }
 }
 
@@ -251,6 +263,46 @@ void main() {
       expect(notifier.priorityColors, PriorityColors.defaults());
       final persisted = await repository.loadPriorityColors();
       expect(persisted, PriorityColors.defaults());
+    });
+
+    test('sortCriteria defaults to the canonical chain', () {
+      expect(notifier.sortCriteria, defaultSortCriteria);
+    });
+
+    test('load reads sortCriteria from repository', () async {
+      repository = InMemorySettingsRepository(sortCriteria: [
+        TaskSortCriterion.due,
+        TaskSortCriterion.priority,
+      ]);
+      notifier = SettingsNotifier(repository);
+
+      await notifier.load();
+
+      expect(notifier.sortCriteria, [
+        TaskSortCriterion.due,
+        TaskSortCriterion.priority,
+      ]);
+    });
+
+    test('setSortCriteria updates and persists', () async {
+      final newChain = [
+        TaskSortCriterion.threshold,
+        TaskSortCriterion.creation,
+      ];
+
+      await notifier.setSortCriteria(newChain);
+
+      expect(notifier.sortCriteria, newChain);
+      expect(await repository.loadSortCriteria(), newChain);
+    });
+
+    test('setSortCriteria notifies listeners', () async {
+      var notified = false;
+      notifier.addListener(() => notified = true);
+
+      await notifier.setSortCriteria([TaskSortCriterion.due]);
+
+      expect(notified, true);
     });
   });
 }

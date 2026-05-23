@@ -105,5 +105,12 @@
     "placeholders": {
       "letter": { "type": "String" }
     }
-  }
+  },
+  "sectionTaskOrdering": "Task ordering",
+  "sortCriterionPriority": "Priority",
+  "sortCriterionDue": "Due date",
+  "sortCriterionThreshold": "Threshold date",
+  "sortCriterionCreation": "Creation date",
+  "addSortCriterion": "Add criterion",
+  "removeSortCriterion": "Remove"
 }

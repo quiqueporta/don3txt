@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
+import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/infrastructure/shared_preferences_settings_repository.dart';
 
 void main() {
@@ -110,6 +111,67 @@ void main() {
       final result = await repository.loadPriorityColors();
 
       expect(result, custom);
+    });
+
+    test('loadSortCriteria returns default chain when nothing stored',
+        () async {
+      final result = await repository.loadSortCriteria();
+
+      expect(result, [
+        TaskSortCriterion.priority,
+        TaskSortCriterion.due,
+        TaskSortCriterion.creation,
+      ]);
+    });
+
+    test('saveSortCriteria round-trips the chain', () async {
+      final chain = [
+        TaskSortCriterion.due,
+        TaskSortCriterion.priority,
+        TaskSortCriterion.threshold,
+      ];
+
+      await repository.saveSortCriteria(chain);
+
+      final result = await repository.loadSortCriteria();
+
+      expect(result, chain);
+    });
+
+    test('loadSortCriteria falls back to default when stored value is invalid',
+        () async {
+      SharedPreferences.setMockInitialValues({'sort_criteria': 'foo,bar'});
+
+      final result = await repository.loadSortCriteria();
+
+      expect(result, [
+        TaskSortCriterion.priority,
+        TaskSortCriterion.due,
+        TaskSortCriterion.creation,
+      ]);
+    });
+
+    test('loadSortCriteria skips unknown entries while keeping known ones',
+        () async {
+      SharedPreferences.setMockInitialValues(
+          {'sort_criteria': 'due,nope,priority'});
+
+      final result = await repository.loadSortCriteria();
+
+      expect(result, [TaskSortCriterion.due, TaskSortCriterion.priority]);
+    });
+
+    test('saveSortCriteria with empty list falls back to default on load',
+        () async {
+      await repository.saveSortCriteria([]);
+
+      final result = await repository.loadSortCriteria();
+
+      expect(result, [
+        TaskSortCriterion.priority,
+        TaskSortCriterion.due,
+        TaskSortCriterion.creation,
+      ]);
     });
   });
 }

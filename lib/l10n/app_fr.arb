@@ -70,5 +70,12 @@
     "placeholders": {
       "letter": { "type": "String" }
     }
-  }
+  },
+  "sectionTaskOrdering": "Tri des tâches",
+  "sortCriterionPriority": "Priorité",
+  "sortCriterionDue": "Date d'échéance",
+  "sortCriterionThreshold": "Date seuil",
+  "sortCriterionCreation": "Date de création",
+  "addSortCriterion": "Ajouter un critère",
+  "removeSortCriterion": "Supprimer"
 }

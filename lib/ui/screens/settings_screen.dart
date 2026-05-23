@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
+import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
@@ -117,6 +118,9 @@ class SettingsScreen extends StatelessWidget {
             title: Text(loc.resetToDefaults),
             onTap: () => settings.resetPriorityColors(),
           ),
+          const Divider(),
+          _SectionHeader(title: loc.sectionTaskOrdering),
+          _TaskOrderingSection(settings: settings),
         ],
       ),
     );
@@ -276,6 +280,119 @@ class _PriorityColorPickerSheet extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _TaskOrderingSection extends StatelessWidget {
+  final SettingsNotifier settings;
+
+  const _TaskOrderingSection({required this.settings});
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final criteria = settings.sortCriteria;
+    final available = TaskSortCriterion.values
+        .where((c) => !criteria.contains(c))
+        .toList();
+
+    return Column(
+      children: [
+        ReorderableListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          buildDefaultDragHandles: false,
+          itemCount: criteria.length,
+          onReorder: (oldIndex, newIndex) =>
+              _onReorder(criteria, oldIndex, newIndex),
+          itemBuilder: (context, index) {
+            final criterion = criteria[index];
+
+            return ListTile(
+              key: ValueKey('sort_criterion_${criterion.name}'),
+              leading: ReorderableDragStartListener(
+                index: index,
+                child: const Icon(Icons.drag_handle),
+              ),
+              title: Text(_labelFor(criterion, loc)),
+              trailing: criteria.length > 1
+                  ? IconButton(
+                      key: ValueKey('remove_sort_criterion_${criterion.name}'),
+                      icon: const Icon(Icons.close),
+                      tooltip: loc.removeSortCriterion,
+                      onPressed: () => _remove(criterion),
+                    )
+                  : null,
+            );
+          },
+        ),
+        if (available.isNotEmpty)
+          ListTile(
+            leading: const Icon(Icons.add),
+            title: Text(loc.addSortCriterion),
+            onTap: () => _showAddPicker(context, available),
+          ),
+      ],
+    );
+  }
+
+  String _labelFor(TaskSortCriterion criterion, AppLocalizations loc) {
+    switch (criterion) {
+      case TaskSortCriterion.priority:
+        return loc.sortCriterionPriority;
+      case TaskSortCriterion.due:
+        return loc.sortCriterionDue;
+      case TaskSortCriterion.threshold:
+        return loc.sortCriterionThreshold;
+      case TaskSortCriterion.creation:
+        return loc.sortCriterionCreation;
+    }
+  }
+
+  void _onReorder(
+      List<TaskSortCriterion> current, int oldIndex, int newIndex) {
+    final updated = List<TaskSortCriterion>.from(current);
+    final adjustedNew = newIndex > oldIndex ? newIndex - 1 : newIndex;
+    final moved = updated.removeAt(oldIndex);
+    updated.insert(adjustedNew, moved);
+
+    settings.setSortCriteria(updated);
+  }
+
+  void _remove(TaskSortCriterion criterion) {
+    final updated = settings.sortCriteria
+        .where((c) => c != criterion)
+        .toList(growable: false);
+
+    settings.setSortCriteria(updated);
+  }
+
+  Future<void> _showAddPicker(
+      BuildContext context, List<TaskSortCriterion> available) async {
+    final loc = AppLocalizations.of(context);
+
+    final picked = await showModalBottomSheet<TaskSortCriterion>(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final criterion in available)
+                ListTile(
+                  title: Text(_labelFor(criterion, loc)),
+                  onTap: () => Navigator.of(sheetContext).pop(criterion),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (picked == null) return;
+
+    final updated = [...settings.sortCriteria, picked];
+    await settings.setSortCriteria(updated);
   }
 }
 

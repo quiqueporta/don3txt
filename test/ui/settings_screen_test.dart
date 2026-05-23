@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
+import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
@@ -59,6 +60,16 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> savePriorityColors(PriorityColors value) async {
     _priorityColors = value;
+  }
+
+  List<TaskSortCriterion> _sortCriteria = defaultSortCriteria;
+
+  @override
+  Future<List<TaskSortCriterion>> loadSortCriteria() async => _sortCriteria;
+
+  @override
+  Future<void> saveSortCriteria(List<TaskSortCriterion> value) async {
+    _sortCriteria = value;
   }
 }
 
@@ -252,6 +263,83 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(notifier.priorityColors, PriorityColors.defaults());
+    });
+
+    group('task ordering section', () {
+      testWidgets('shows section header and default criteria', (tester) async {
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.scrollUntilVisible(find.text('Task ordering'), 200,
+            scrollable: find.byType(Scrollable).first);
+
+        expect(find.text('Task ordering'), findsOneWidget);
+        expect(find.text('Priority'), findsWidgets);
+        expect(find.text('Due date'), findsOneWidget);
+        expect(find.text('Creation date'), findsOneWidget);
+        expect(find.text('Threshold date'), findsNothing);
+      });
+
+      testWidgets('Add criterion offers only missing criteria',
+          (tester) async {
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.scrollUntilVisible(find.text('Add criterion'), 200,
+            scrollable: find.byType(Scrollable).first);
+        await tester.ensureVisible(find.text('Add criterion'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Threshold date'), findsNothing);
+
+        await tester.tap(find.text('Add criterion'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Threshold date'), findsOneWidget);
+      });
+
+      testWidgets('selecting a criterion appends it to the chain',
+          (tester) async {
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.scrollUntilVisible(find.text('Add criterion'), 200,
+            scrollable: find.byType(Scrollable).first);
+        await tester.ensureVisible(find.text('Add criterion'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Add criterion'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Threshold date'));
+        await tester.pumpAndSettle();
+
+        expect(notifier.sortCriteria.last,
+            equals(TaskSortCriterion.threshold));
+      });
+
+      testWidgets('remove button drops a criterion', (tester) async {
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.scrollUntilVisible(find.text('Task ordering'), 200,
+            scrollable: find.byType(Scrollable).first);
+
+        final removeButtons = find.byKey(
+            const ValueKey('remove_sort_criterion_due'));
+
+        expect(removeButtons, findsOneWidget);
+
+        await tester.tap(removeButtons);
+        await tester.pumpAndSettle();
+
+        expect(notifier.sortCriteria.contains(TaskSortCriterion.due), isFalse);
+      });
+
+      testWidgets('remove button is hidden when only one criterion remains',
+          (tester) async {
+        await notifier.setSortCriteria([TaskSortCriterion.priority]);
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.scrollUntilVisible(find.text('Task ordering'), 200,
+            scrollable: find.byType(Scrollable).first);
+
+        expect(
+          find.byKey(const ValueKey('remove_sort_criterion_priority')),
+          findsNothing,
+        );
+      });
     });
   });
 }

@@ -27,21 +27,22 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
     final settings = context.read<SettingsNotifier>();
     if (_settings != settings) {
-      _settings?.removeListener(_syncUpcomingDays);
+      _settings?.removeListener(_syncFromSettings);
       _settings = settings;
-      _settings!.addListener(_syncUpcomingDays);
-      _syncUpcomingDays();
+      _settings!.addListener(_syncFromSettings);
+      _syncFromSettings();
     }
   }
 
-  void _syncUpcomingDays() {
+  void _syncFromSettings() {
     final notifier = context.read<TodoListNotifier>();
     notifier.upcomingDays = _settings!.upcomingDays;
+    notifier.setSortCriteria(_settings!.sortCriteria);
   }
 
   @override
   void dispose() {
-    _settings?.removeListener(_syncUpcomingDays);
+    _settings?.removeListener(_syncFromSettings);
     _searchController.dispose();
     super.dispose();
   }

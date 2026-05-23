@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
+import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
@@ -51,6 +52,12 @@ class InMemorySettingsRepository implements SettingsRepository {
       PriorityColors.defaults();
   @override
   Future<void> savePriorityColors(PriorityColors value) async {}
+
+  @override
+  Future<List<TaskSortCriterion>> loadSortCriteria() async => defaultSortCriteria;
+
+  @override
+  Future<void> saveSortCriteria(List<TaskSortCriterion> value) async {}
 }
 
 Widget buildTestApp(TodoListNotifier notifier) {

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
+import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 
 class SettingsNotifier extends ChangeNotifier {
@@ -11,6 +12,7 @@ class SettingsNotifier extends ChangeNotifier {
   int _upcomingDays = 7;
   AppLanguage _language = AppLanguage.system;
   PriorityColors _priorityColors = PriorityColors.defaults();
+  List<TaskSortCriterion> _sortCriteria = defaultSortCriteria;
 
   SettingsNotifier(this._repository);
 
@@ -19,6 +21,7 @@ class SettingsNotifier extends ChangeNotifier {
   int get upcomingDays => _upcomingDays;
   AppLanguage get language => _language;
   PriorityColors get priorityColors => _priorityColors;
+  List<TaskSortCriterion> get sortCriteria => List.unmodifiable(_sortCriteria);
 
   Future<void> load() async {
     _todoFilePath = await _repository.loadTodoFilePath();
@@ -26,6 +29,7 @@ class SettingsNotifier extends ChangeNotifier {
     _upcomingDays = await _repository.loadUpcomingDays();
     _language = await _repository.loadLanguage();
     _priorityColors = await _repository.loadPriorityColors();
+    _sortCriteria = await _repository.loadSortCriteria();
 
     notifyListeners();
   }
@@ -70,5 +74,12 @@ class SettingsNotifier extends ChangeNotifier {
     notifyListeners();
 
     await _repository.savePriorityColors(_priorityColors);
+  }
+
+  Future<void> setSortCriteria(List<TaskSortCriterion> value) async {
+    _sortCriteria = List.unmodifiable(value);
+    notifyListeners();
+
+    await _repository.saveSortCriteria(value);
   }
 }

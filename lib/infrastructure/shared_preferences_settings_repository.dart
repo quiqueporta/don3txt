@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
+import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 
 class SharedPreferencesSettingsRepository implements SettingsRepository {
@@ -12,6 +13,7 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
   static const _upcomingDaysKey = 'upcoming_days';
   static const _languageKey = 'language';
   static const _priorityColorsKey = 'priority_colors';
+  static const _sortCriteriaKey = 'sort_criteria';
 
   @override
   Future<String?> loadTodoFilePath() async {
@@ -93,6 +95,31 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setString(_priorityColorsKey, jsonEncode(value.toMap()));
+  }
+
+  @override
+  Future<List<TaskSortCriterion>> loadSortCriteria() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_sortCriteriaKey);
+
+    if (raw == null || raw.isEmpty) return defaultSortCriteria;
+
+    final parsed = raw
+        .split(',')
+        .map((name) => TaskSortCriterion.parse(name.trim()))
+        .whereType<TaskSortCriterion>()
+        .toList();
+
+    if (parsed.isEmpty) return defaultSortCriteria;
+
+    return parsed;
+  }
+
+  @override
+  Future<void> saveSortCriteria(List<TaskSortCriterion> value) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString(_sortCriteriaKey, value.map((c) => c.name).join(','));
   }
 
   PriorityColors _parsePriorityColors(String raw) {

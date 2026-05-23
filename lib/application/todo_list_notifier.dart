@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/domain/todo_parser.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
+import 'package:don3txt/infrastructure/settings_repository.dart';
 
 enum TaskFilter { inbox, today, upcoming, project, context, recurring, completed }
 
@@ -18,6 +20,7 @@ class TodoListNotifier extends ChangeNotifier {
   String? _selectedProject;
   String? _selectedContext;
   int _upcomingDays = 7;
+  List<TaskSortCriterion> _sortCriteria = defaultSortCriteria;
 
   String _searchQuery = '';
 
@@ -100,6 +103,15 @@ class TodoListNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  List<TaskSortCriterion> get sortCriteria => List.unmodifiable(_sortCriteria);
+
+  void setSortCriteria(List<TaskSortCriterion> value) {
+    if (listEquals(_sortCriteria, value)) return;
+
+    _sortCriteria = List<TaskSortCriterion>.unmodifiable(value);
+    notifyListeners();
+  }
+
   int get upcomingTaskCount {
     if (_todoFile == null) return 0;
 
@@ -157,34 +169,6 @@ class TodoListNotifier extends ChangeNotifier {
     }
   }
 
-  static int _compareTasks(TodoItem a, TodoItem b) {
-    final aPri = a.priority;
-    final bPri = b.priority;
-    if (aPri != null && bPri == null) return -1;
-    if (aPri == null && bPri != null) return 1;
-    if (aPri != null && bPri != null && aPri != bPri) {
-      return aPri.compareTo(bPri);
-    }
-
-    final aDue = a.metadata['due'];
-    final bDue = b.metadata['due'];
-    if (aDue != null && bDue == null) return -1;
-    if (aDue == null && bDue != null) return 1;
-    if (aDue != null && bDue != null && aDue != bDue) {
-      return aDue.compareTo(bDue);
-    }
-
-    final aCreation = a.creationDate;
-    final bCreation = b.creationDate;
-    if (aCreation != null && bCreation == null) return -1;
-    if (aCreation == null && bCreation != null) return 1;
-    if (aCreation != null && bCreation != null) {
-      return aCreation.compareTo(bCreation);
-    }
-
-    return 0;
-  }
-
   static int _compareCompletedTasks(TodoItem a, TodoItem b) {
     final aDate = a.completionDate;
     final bDate = b.completionDate;
@@ -199,7 +183,7 @@ class TodoListNotifier extends ChangeNotifier {
   List<TodoItem> get filteredTasks {
     final comparator = _activeFilter == TaskFilter.completed
         ? _compareCompletedTasks
-        : _compareTasks;
+        : compareTasksBy(_sortCriteria);
     final tasks = List<TodoItem>.from(_unfilteredViewTasks)
       ..sort(comparator);
 

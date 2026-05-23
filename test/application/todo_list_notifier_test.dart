@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
@@ -1436,6 +1437,102 @@ void main() {
         await notifier.loadTasks();
 
         expect(slowRepository.loadCallCount, 2);
+      });
+    });
+
+    group('sortCriteria', () {
+      test('orders by configured chain (due first)', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+              description: 'Late, high priority',
+              priority: 'A',
+              metadata: {'due': '2026-12-31'},
+            ),
+            TodoItem(
+              description: 'Early, low priority',
+              priority: 'C',
+              metadata: {'due': '2026-01-15'},
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
+
+        notifier.setSortCriteria([
+          TaskSortCriterion.due,
+          TaskSortCriterion.priority,
+        ]);
+
+        final result = notifier.filteredTasks;
+
+        expect(result[0].description, 'Early, low priority');
+        expect(result[1].description, 'Late, high priority');
+      });
+
+      test('defaults to priority -> due -> creation', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+              description: 'Lower priority, earlier due',
+              priority: 'C',
+              metadata: {'due': '2026-01-15'},
+            ),
+            TodoItem(
+              description: 'Higher priority, later due',
+              priority: 'A',
+              metadata: {'due': '2026-12-31'},
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
+
+        final result = notifier.filteredTasks;
+
+        expect(result[0].priority, 'A');
+        expect(result[1].priority, 'C');
+      });
+
+      test('setSortCriteria notifies listeners', () async {
+        await notifier.loadTasks();
+        var notified = false;
+        notifier.addListener(() => notified = true);
+
+        notifier.setSortCriteria([TaskSortCriterion.due]);
+
+        expect(notified, true);
+      });
+
+      test('completed view ignores configured chain (keeps completion desc)',
+          () async {
+        repository = InMemoryTodoRepository();
+        final done = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+              description: 'Older completion',
+              isCompleted: true,
+              completionDate: DateTime(2026, 1, 1),
+            ),
+            TodoItem(
+              description: 'Newer completion',
+              isCompleted: true,
+              completionDate: DateTime(2026, 3, 1),
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository, done);
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.completed;
+
+        notifier.setSortCriteria([TaskSortCriterion.due]);
+
+        final result = notifier.filteredTasks;
+
+        expect(result[0].description, 'Newer completion');
+        expect(result[1].description, 'Older completion');
       });
     });
   });
