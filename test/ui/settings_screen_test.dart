@@ -99,6 +99,37 @@ Widget buildTestApp(SettingsNotifier notifier) {
   );
 }
 
+Widget buildTestAppPushedFromHome(
+  SettingsNotifier notifier,
+  TodoListNotifier todoListNotifier, {
+  String defaultPath = '/default/todo.txt',
+}) {
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider.value(value: notifier),
+      ChangeNotifierProvider.value(value: todoListNotifier),
+      Provider<String>.value(value: defaultPath),
+    ],
+    child: MaterialApp(
+      locale: const Locale('en'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Builder(
+        builder: (context) => Scaffold(
+          body: Center(
+            child: ElevatedButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              ),
+              child: const Text('open settings'),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 void main() {
   late SettingsNotifier notifier;
 
@@ -263,6 +294,36 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(notifier.priorityColors, PriorityColors.defaults());
+    });
+
+    group('todo file switch', () {
+      testWidgets(
+          'reset to default switches active filter to inbox and pops settings',
+          (tester) async {
+        notifier = SettingsNotifier(InMemorySettingsRepository());
+        await notifier.setTodoFilePath('/storage/custom/todo.txt');
+        final todoListNotifier = TodoListNotifier(
+          InMemoryTodoRepository(),
+          InMemoryTodoRepository(),
+        );
+        await todoListNotifier.loadTasks();
+        todoListNotifier.activeFilter = TaskFilter.today;
+
+        await tester.pumpWidget(
+          buildTestAppPushedFromHome(notifier, todoListNotifier),
+        );
+        await tester.tap(find.text('open settings'));
+        await tester.pumpAndSettle();
+
+        final restoreButton = find.widgetWithIcon(IconButton, Icons.restore);
+        expect(restoreButton, findsOneWidget);
+
+        await tester.tap(restoreButton);
+        await tester.pumpAndSettle();
+
+        expect(todoListNotifier.activeFilter, TaskFilter.inbox);
+        expect(find.byType(SettingsScreen), findsNothing);
+      });
     });
 
     group('task ordering section', () {

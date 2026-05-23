@@ -164,6 +164,10 @@ class SettingsScreen extends StatelessWidget {
   }) async {
     final settings = context.read<SettingsNotifier>();
     final todoList = context.read<TodoListNotifier>();
+    final navigator = Navigator.of(context);
+
+    todoList.activeFilter = TaskFilter.inbox;
+    if (navigator.canPop()) navigator.pop();
 
     await settings.setTodoFilePath(savePath == _sentinel ? path : savePath as String?);
 
