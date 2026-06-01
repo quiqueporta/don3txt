@@ -66,13 +66,16 @@
     },
     "featureList": [
       "todo.txt open standard format",
-      "Priorities (A) to (Z)",
-      "Projects (+name) and contexts (@name)",
+      "Priorities (A) to (Z) with customizable colors",
+      "Projects (+name) and contexts (@name) with visual pickers",
       "Due dates and threshold dates",
       "Recurring tasks (flexible and strict)",
       "Today, Inbox, Upcoming, Recurring and Completed views",
-      "Full-text search",
+      "Full-text search across any view",
+      "Configurable multi-level task sort order",
+      "Multi-language: English, Spanish, French, Italian, Portuguese",
       "Light, dark and system theme",
+      "Pull-to-refresh and done.txt archive",
       "Compatible with Syncthing and Dropbox sync",
       "100% offline, no account required"
     ]
@@ -1610,7 +1613,7 @@
             <div class="phone-btn-left-1"></div>
             <div class="phone-btn-left-2"></div>
             <div class="phone-screen">
-              <img src="screen_3.png" alt="Settings screen: todo.txt file, theme, first day of week, upcoming days">
+              <img src="screen_3.png" alt="Settings screen: todo.txt file, language, theme, upcoming period, priority colors and task sort order">
             </div>
           </div>
           <p class="phone-caption">Settings</p>
@@ -1659,7 +1662,7 @@
         <div class="feature-card fade-in" data-delay="0">
           <div class="feature-icon">&#128336;</div>
           <h3>Threshold date</h3>
-          <p>With <code style="color:var(--accent);font-family:var(--font-mono);">t:2024-02-25</code> the task stays hidden from action views until its time comes. Still visible in <strong>Upcoming</strong> and <strong>Recurring</strong> before the threshold date.</p>
+          <p>With <code style="color:var(--accent);font-family:var(--font-mono);">t:2024-02-25</code> the task is deferred until that date. Hidden from <strong>Today</strong> so action views stay focused, but still visible (with reduced opacity) in <strong>Inbox</strong>, <strong>Project</strong>, <strong>Context</strong>, <strong>Upcoming</strong> and <strong>Recurring</strong>.</p>
         </div>
 
         <div class="feature-card fade-in" data-delay="80">
@@ -1689,10 +1692,22 @@
         <div class="feature-card fade-in" data-delay="80">
           <div class="feature-icon">&#9881;</div>
           <h3>Fully configurable</h3>
-          <p>First day of the week (Monday or Sunday), Upcoming period (3, 7, 14 or 30 days) and file path. All from Settings.</p>
+          <p>Custom <strong>task sort order</strong> (multi-level chain by priority, due date, threshold date and creation date), Upcoming period (3, 7, 14 or 30 days), theme and file path. All from Settings.</p>
         </div>
 
         <div class="feature-card fade-in" data-delay="160">
+          <div class="feature-icon">&#127912;</div>
+          <h3>Priority colors</h3>
+          <p>Personalize the color of each priority from <code style="color:var(--accent);font-family:var(--font-mono);">(A)</code> to <code style="color:var(--accent);font-family:var(--font-mono);">(F)</code> in Settings. A red-to-green palette ships by default and applies to chips in the task list, editor and picker.</p>
+        </div>
+
+        <div class="feature-card fade-in" data-delay="0">
+          <div class="feature-icon">&#127760;</div>
+          <h3>Multi-language</h3>
+          <p>Available in <strong>English</strong>, <strong>Spanish</strong>, <strong>French</strong>, <strong>Italian</strong> and <strong>Portuguese</strong>. Pick the language in Settings or let it follow your device default.</p>
+        </div>
+
+        <div class="feature-card fade-in" data-delay="80">
           <div class="feature-icon">&#128274;</div>
           <h3>No external dependencies</h3>
           <p>No internet required. No account needed. No server. Your tasks live exclusively on your device, in plain text.</p>

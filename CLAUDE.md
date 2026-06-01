@@ -32,7 +32,8 @@ Clean Architecture with layer separation:
 - Snackbar with Undo when completing a task
 - Free-text search across task descriptions, available in all views
 - Select todo.txt file from any location on the device
-- Light/dark/system theme, configurable first day of the week, configurable upcoming period
+- Light/dark/system theme, configurable upcoming period, configurable task sort order (multi-level chain), configurable priority colors (A–F)
+- Multi-language UI: English, Spanish, French, Italian, Portuguese (selector in Settings with "System default" option)
 
 ## Commands
 
