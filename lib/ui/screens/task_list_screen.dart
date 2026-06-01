@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/application/settings_notifier.dart';
+import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/widgets/task_tile.dart';
 import 'package:don3txt/ui/widgets/add_task_field.dart';
@@ -45,6 +46,18 @@ class _TaskListScreenState extends State<TaskListScreen> {
     _settings?.removeListener(_syncFromSettings);
     _searchController.dispose();
     super.dispose();
+  }
+
+  bool _hasFutureThreshold(TodoItem item) {
+    final threshold = item.metadata['t'];
+    if (threshold == null) return false;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final todayString =
+        '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+
+    return threshold.compareTo(todayString) > 0;
   }
 
   String _titleFor(TodoListNotifier notifier, AppLocalizations loc) {
@@ -333,6 +346,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
                       return TaskTile(
                         item: item,
+                        isDeferred: _hasFutureThreshold(item),
                         priorityColors:
                             context.watch<SettingsNotifier>().priorityColors,
                         onToggle: () {

@@ -24,7 +24,7 @@ Clean Architecture with layer separation:
 - CRUD task management with standard todo.txt format
 - Priorities `(A)`-`(Z)`, projects (`+name`), contexts (`@name`), metadata (`key:value`)
 - Due dates (`due:`) with calendar picker
-- Threshold dates (`t:`) with calendar picker — hides tasks with future `t:` from action views (Today, Inbox), but they remain visible in Upcoming and Recurring
+- Threshold dates (`t:`) with calendar picker — marks tasks as "deferred until" a date. Tasks with future `t:` are hidden only from the action views Today and overdue counter. They remain visible (with reduced opacity) in Inbox, Project, Context, and Recurring views. In Upcoming, `t:` acts as a fallback reference date when the task has no `due:`
 - Recurring tasks (`rec:`) with flexible and strict (`+`) modes. Strict requires `t:` to calculate from original date; without `t:` falls back to flexible
 - Visual project and context pickers: `@` and `+` buttons in the editor icon bar open a `ModalBottomSheet` (`TagPickerSheet`) with existing tags as selectable chips and a field to create new ones. Selected tags are shown as removable chips before saving. Compatible with manual typing: if the user types `@context` directly in the text, it merges without duplicates with those selected via UI
 - Views: Today (default, with overdue/today badges), Inbox, Upcoming (tasks from tomorrow to N days, configurable period), filter by Project (collapsible), filter by Context (collapsible), Recurring (tasks with `rec:`, no threshold filter), Completed (completed tasks, sorted by completion date descending)

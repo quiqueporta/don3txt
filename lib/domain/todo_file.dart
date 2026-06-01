@@ -14,7 +14,7 @@ class TodoFile {
       items.where((item) => item.isCompleted).toList();
 
   List<TodoItem> visiblePendingTasks(DateTime today) {
-    return pendingTasks.where((item) => _isVisible(item, today)).toList();
+    return pendingTasks;
   }
 
   List<TodoItem> todayTasks(DateTime today) {
@@ -42,8 +42,7 @@ class TodoFile {
   }
 
   List<String> allProjects([DateTime? today]) {
-    final source = today != null ? visiblePendingTasks(today) : pendingTasks;
-    final projects = source
+    final projects = pendingTasks
         .expand((item) => item.projects)
         .toSet()
         .toList()
@@ -53,17 +52,13 @@ class TodoFile {
   }
 
   List<TodoItem> tasksByProject(String project, [DateTime? today]) {
-    return items
-        .where((item) =>
-            !item.isCompleted &&
-            (today == null || _isVisible(item, today)) &&
-            item.projects.contains(project))
+    return pendingTasks
+        .where((item) => item.projects.contains(project))
         .toList();
   }
 
   List<String> allContexts([DateTime? today]) {
-    final source = today != null ? visiblePendingTasks(today) : pendingTasks;
-    final contexts = source
+    final contexts = pendingTasks
         .expand((item) => item.contexts)
         .toSet()
         .toList()
@@ -73,11 +68,8 @@ class TodoFile {
   }
 
   List<TodoItem> tasksByContext(String context, [DateTime? today]) {
-    return items
-        .where((item) =>
-            !item.isCompleted &&
-            (today == null || _isVisible(item, today)) &&
-            item.contexts.contains(context))
+    return pendingTasks
+        .where((item) => item.contexts.contains(context))
         .toList();
   }
 
@@ -85,13 +77,15 @@ class TodoFile {
     final tomorrowString = _formatDate(today.add(const Duration(days: 1)));
     final limitString = _formatDate(today.add(Duration(days: days)));
 
-    return items
-        .where((item) =>
-            !item.isCompleted &&
-            item.metadata['due'] != null &&
-            item.metadata['due']!.compareTo(tomorrowString) >= 0 &&
-            item.metadata['due']!.compareTo(limitString) <= 0)
-        .toList();
+    return items.where((item) {
+      if (item.isCompleted) return false;
+
+      final referenceDate = item.metadata['due'] ?? item.metadata['t'];
+      if (referenceDate == null) return false;
+
+      return referenceDate.compareTo(tomorrowString) >= 0 &&
+          referenceDate.compareTo(limitString) <= 0;
+    }).toList();
   }
 
   List<TodoItem> get recurringTasks =>

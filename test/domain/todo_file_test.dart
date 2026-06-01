@@ -585,18 +585,19 @@ void main() {
     group('threshold filtering', () {
       final today = DateTime(2026, 3, 13);
 
-      test('visiblePendingTasks excludes tasks with future t:', () {
+      test('visiblePendingTasks includes tasks with future t:', () {
         final file = TodoFile([
-          TodoItem(description: 'Visible', metadata: {'t': '2026-03-13'}),
-          TodoItem(description: 'Hidden', metadata: {'t': '2026-03-14'}),
+          TodoItem(description: 'Today threshold', metadata: {'t': '2026-03-13'}),
+          TodoItem(description: 'Future threshold', metadata: {'t': '2026-03-14'}),
           TodoItem(description: 'No threshold'),
         ]);
 
         final result = file.visiblePendingTasks(today);
 
-        expect(result.length, 2);
-        expect(result[0].description, 'Visible');
-        expect(result[1].description, 'No threshold');
+        expect(result.length, 3);
+        expect(result[0].description, 'Today threshold');
+        expect(result[1].description, 'Future threshold');
+        expect(result[2].description, 'No threshold');
       });
 
       test('todayTasks includes tasks with t: <= today', () {
@@ -644,15 +645,15 @@ void main() {
         expect(result[0].description, 'Overdue visible');
       });
 
-      test('tasksByProject excludes tasks with future t:', () {
+      test('tasksByProject includes tasks with future t:', () {
         final file = TodoFile([
           TodoItem(
-            description: 'Visible',
+            description: 'Today threshold',
             projects: ['+Work'],
             metadata: {'t': '2026-03-13'},
           ),
           TodoItem(
-            description: 'Hidden',
+            description: 'Future threshold',
             projects: ['+Work'],
             metadata: {'t': '2026-03-14'},
           ),
@@ -660,19 +661,20 @@ void main() {
 
         final result = file.tasksByProject('+Work', today);
 
-        expect(result.length, 1);
-        expect(result[0].description, 'Visible');
+        expect(result.length, 2);
+        expect(result[0].description, 'Today threshold');
+        expect(result[1].description, 'Future threshold');
       });
 
-      test('tasksByContext excludes tasks with future t:', () {
+      test('tasksByContext includes tasks with future t:', () {
         final file = TodoFile([
           TodoItem(
-            description: 'Visible',
+            description: 'Today threshold',
             contexts: ['@phone'],
             metadata: {'t': '2026-03-13'},
           ),
           TodoItem(
-            description: 'Hidden',
+            description: 'Future threshold',
             contexts: ['@phone'],
             metadata: {'t': '2026-03-14'},
           ),
@@ -680,42 +682,43 @@ void main() {
 
         final result = file.tasksByContext('@phone', today);
 
-        expect(result.length, 1);
-        expect(result[0].description, 'Visible');
+        expect(result.length, 2);
+        expect(result[0].description, 'Today threshold');
+        expect(result[1].description, 'Future threshold');
       });
 
-      test('allProjects excludes projects from tasks with future t:', () {
+      test('allProjects includes projects from tasks with future t:', () {
         final file = TodoFile([
           TodoItem(
-            description: 'Visible',
+            description: 'Today threshold',
             projects: ['+Work'],
             metadata: {'t': '2026-03-13'},
           ),
           TodoItem(
-            description: 'Hidden',
-            projects: ['+Secret'],
+            description: 'Future threshold',
+            projects: ['+Future'],
             metadata: {'t': '2026-03-14'},
           ),
         ]);
 
-        expect(file.allProjects(today), ['+Work']);
+        expect(file.allProjects(today), ['+Future', '+Work']);
       });
 
-      test('allContexts excludes contexts from tasks with future t:', () {
+      test('allContexts includes contexts from tasks with future t:', () {
         final file = TodoFile([
           TodoItem(
-            description: 'Visible',
+            description: 'Today threshold',
             contexts: ['@phone'],
             metadata: {'t': '2026-03-13'},
           ),
           TodoItem(
-            description: 'Hidden',
-            contexts: ['@secret'],
+            description: 'Future threshold',
+            contexts: ['@future'],
             metadata: {'t': '2026-03-14'},
           ),
         ]);
 
-        expect(file.allContexts(today), ['@phone']);
+        expect(file.allContexts(today), ['@future', '@phone']);
       });
     });
 
@@ -828,14 +831,71 @@ void main() {
         expect(result, isEmpty);
       });
 
-      test('excludes task without due date', () {
+      test('excludes task without due nor t:', () {
         final file = TodoFile([
-          TodoItem(description: 'No due'),
+          TodoItem(description: 'No dates'),
         ]);
 
         final result = file.upcomingTasks(today, 7);
 
         expect(result, isEmpty);
+      });
+
+      test('includes task with only t: in range', () {
+        final file = TodoFile([
+          TodoItem(description: 'Deferred', metadata: {'t': '2026-03-15'}),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Deferred');
+      });
+
+      test('includes task with only t: at limit', () {
+        final file = TodoFile([
+          TodoItem(description: 'Deferred at limit', metadata: {'t': '2026-03-20'}),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Deferred at limit');
+      });
+
+      test('excludes task with only t: beyond limit', () {
+        final file = TodoFile([
+          TodoItem(description: 'Far deferred', metadata: {'t': '2026-03-21'}),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result, isEmpty);
+      });
+
+      test('excludes task with only t: today or earlier', () {
+        final file = TodoFile([
+          TodoItem(description: 'Already active', metadata: {'t': '2026-03-13'}),
+          TodoItem(description: 'Active since yesterday', metadata: {'t': '2026-03-12'}),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result, isEmpty);
+      });
+
+      test('prefers due over t: when both are present', () {
+        final file = TodoFile([
+          TodoItem(
+            description: 'Due in range, t in range',
+            metadata: {'due': '2026-03-15', 't': '2026-03-14'},
+          ),
+        ]);
+
+        final result = file.upcomingTasks(today, 7);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Due in range, t in range');
       });
 
       test('excludes completed task', () {

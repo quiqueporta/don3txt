@@ -9,6 +9,7 @@ class TaskTile extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
   final PriorityColors? priorityColors;
+  final bool isDeferred;
 
   const TaskTile({
     super.key,
@@ -17,6 +18,7 @@ class TaskTile extends StatelessWidget {
     this.onTap,
     this.onDelete,
     this.priorityColors,
+    this.isDeferred = false,
   });
 
   Color _priorityColor(String letter) {
@@ -38,7 +40,7 @@ class TaskTile extends StatelessWidget {
         startDate != null ||
         recurrence != null;
 
-    return Padding(
+    final content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,6 +139,10 @@ class TaskTile extends StatelessWidget {
         ],
       ),
     );
+
+    if (!isDeferred) return content;
+
+    return Opacity(opacity: 0.45, child: content);
   }
 }
 

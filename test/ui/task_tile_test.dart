@@ -296,5 +296,50 @@ void main() {
 
       expect(find.byIcon(Icons.flag), findsNothing);
     });
+
+    testWidgets('renders with reduced opacity when isDeferred is true',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(description: 'Deferred'),
+              onToggle: () {},
+              isDeferred: true,
+            ),
+          ),
+        ),
+      );
+
+      final opacity = tester.widget<Opacity>(
+        find.ancestor(
+          of: find.text('Deferred'),
+          matching: find.byType(Opacity),
+        ),
+      );
+
+      expect(opacity.opacity, lessThan(1.0));
+    });
+
+    testWidgets('renders with full opacity when isDeferred is false',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(description: 'Active'),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      final opacityFinder = find.ancestor(
+        of: find.text('Active'),
+        matching: find.byType(Opacity),
+      );
+
+      expect(opacityFinder, findsNothing);
+    });
   });
 }
