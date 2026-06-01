@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0] - 2026-06-01
+
+### Changed
+
+- Tasks with a future threshold date (`t:`) now appear in Inbox, project and context views with reduced opacity, instead of being hidden until the threshold date is reached. Today and overdue counter still filter them out so action views stay focused on what is actionable now
+- Upcoming view now uses `t:` as a fallback reference date when a task has no `due:`, so deferred tasks become visible as their threshold approaches
+
 ## [1.10.0] - 2026-05-23
 
 ### Added
