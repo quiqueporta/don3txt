@@ -20,13 +20,15 @@ class TodoFile {
   List<TodoItem> todayTasks(DateTime today) {
     final todayString = _formatDate(today);
 
-    return items
-        .where((item) =>
-            !item.isCompleted &&
-            _isVisible(item, today) &&
-            item.metadata['due'] != null &&
-            item.metadata['due']!.compareTo(todayString) <= 0)
-        .toList();
+    return items.where((item) {
+      if (item.isCompleted) return false;
+      if (!_isVisible(item, today)) return false;
+
+      final referenceDate = item.metadata['due'] ?? item.metadata['t'];
+      if (referenceDate == null) return false;
+
+      return referenceDate.compareTo(todayString) <= 0;
+    }).toList();
   }
 
   List<TodoItem> overdueTasks(DateTime today) {

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.11.1] - 2026-06-02
+
+### Changed
+
+- Today view now shows tasks whose threshold date (`t:`) is today or earlier even when they have no `due:` date, using `t:` as a fallback reference date. A deferred task becomes actionable in Today the moment its threshold is reached
+
 ## [1.11.0] - 2026-06-01
 
 ### Changed

@@ -451,6 +451,36 @@ void main() {
         expect(result.length, 1);
         expect(result[0].description, 'Yesterday');
       });
+
+      test('includes tasks with t: equal to today and no due', () {
+        final file = TodoFile([
+          TodoItem(description: 'Deferred until today', metadata: {'t': '2026-03-12'}),
+        ]);
+
+        final result = file.todayTasks(today);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Deferred until today');
+      });
+
+      test('includes tasks with past t: and no due', () {
+        final file = TodoFile([
+          TodoItem(description: 'Deferred until yesterday', metadata: {'t': '2026-03-11'}),
+        ]);
+
+        final result = file.todayTasks(today);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Deferred until yesterday');
+      });
+
+      test('excludes tasks with future t: and no due', () {
+        final file = TodoFile([
+          TodoItem(description: 'Deferred until tomorrow', metadata: {'t': '2026-03-13'}),
+        ]);
+
+        expect(file.todayTasks(today), isEmpty);
+      });
     });
 
     group('overdueTasks', () {
