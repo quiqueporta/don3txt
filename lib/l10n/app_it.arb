@@ -1,6 +1,7 @@
 {
   "@@locale": "it",
   "inbox": "In arrivo",
+  "past": "Passate",
   "today": "Oggi",
   "upcoming": "Prossime",
   "upcomingWithDays": "Prossime · {days}g",

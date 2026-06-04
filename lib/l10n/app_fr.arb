@@ -1,6 +1,7 @@
 {
   "@@locale": "fr",
   "inbox": "Boîte de réception",
+  "past": "Passées",
   "today": "Aujourd'hui",
   "upcoming": "À venir",
   "upcomingWithDays": "À venir · {days}j",

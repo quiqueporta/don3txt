@@ -1,6 +1,7 @@
 {
   "@@locale": "pt",
   "inbox": "Caixa de entrada",
+  "past": "Passadas",
   "today": "Hoje",
   "upcoming": "Próximas",
   "upcomingWithDays": "Próximas · {days}d",

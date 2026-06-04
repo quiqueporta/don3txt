@@ -1,6 +1,7 @@
 {
   "@@locale": "es",
   "inbox": "Bandeja",
+  "past": "Pasadas",
   "today": "Hoy",
   "upcoming": "Próximas",
   "upcomingWithDays": "Próximas · {days}d",

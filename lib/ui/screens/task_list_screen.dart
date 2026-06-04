@@ -64,6 +64,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
     switch (notifier.activeFilter) {
       case TaskFilter.inbox:
         return loc.inbox;
+      case TaskFilter.past:
+        return loc.past;
       case TaskFilter.today:
         return loc.today;
       case TaskFilter.upcoming:
@@ -81,6 +83,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   bool _supportsFiltering(TaskFilter filter) {
     return filter == TaskFilter.inbox ||
+        filter == TaskFilter.past ||
         filter == TaskFilter.today ||
         filter == TaskFilter.upcoming;
   }

@@ -120,13 +120,25 @@ void main() {
   });
 
   group('SidebarDrawer', () {
-    testWidgets('shows Inbox and Today items', (tester) async {
+    testWidgets('shows Inbox, Past and Today items', (tester) async {
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
 
       expect(find.text('Inbox'), findsOneWidget);
+      expect(find.text('Past'), findsOneWidget);
       expect(find.text('Today'), findsOneWidget);
+    });
+
+    testWidgets('selecting Past changes active filter', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Past'));
+      await tester.pumpAndSettle();
+
+      expect(notifier.activeFilter, TaskFilter.past);
     });
 
     testWidgets('selecting Today changes active filter', (tester) async {
@@ -204,7 +216,7 @@ void main() {
       expect(find.byType(SettingsScreen), findsOneWidget);
     });
 
-    testWidgets('shows grey badge for today-only tasks', (tester) async {
+    testWidgets('shows grey badge on Today for today tasks', (tester) async {
       final todayStr = _formatDate(DateTime.now());
       notifier = TodoListNotifier(InMemoryTodoRepository(
         TodoFile([
@@ -219,13 +231,17 @@ void main() {
       await tester.pumpAndSettle();
 
       final badges = tester.widgetList<Badge>(find.byType(Badge)).toList();
+      final todayBadge = tester.widget<Badge>(find.descendant(
+        of: find.widgetWithText(ListTile, 'Today'),
+        matching: find.byType(Badge),
+      ));
 
       expect(badges.length, 1);
-      expect(badges[0].backgroundColor, Colors.grey);
+      expect(todayBadge.backgroundColor, Colors.grey);
       expect(find.text('2'), findsOneWidget);
     });
 
-    testWidgets('shows separate red badge for overdue and grey for today',
+    testWidgets('shows red badge on Past and grey badge on Today',
         (tester) async {
       final todayStr = _formatDate(DateTime.now());
       final yesterdayStr =
@@ -242,14 +258,20 @@ void main() {
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
 
-      final badges = tester.widgetList<Badge>(find.byType(Badge)).toList();
+      final pastBadge = tester.widget<Badge>(find.descendant(
+        of: find.widgetWithText(ListTile, 'Past'),
+        matching: find.byType(Badge),
+      ));
+      final todayBadge = tester.widget<Badge>(find.descendant(
+        of: find.widgetWithText(ListTile, 'Today'),
+        matching: find.byType(Badge),
+      ));
 
-      expect(badges.length, 2);
-      expect(badges[0].backgroundColor, Colors.red);
-      expect(badges[1].backgroundColor, Colors.grey);
+      expect(pastBadge.backgroundColor, Colors.red);
+      expect(todayBadge.backgroundColor, Colors.grey);
     });
 
-    testWidgets('shows only red badge when all tasks are overdue',
+    testWidgets('shows only red badge on Past when all tasks are overdue',
         (tester) async {
       final yesterdayStr =
           _formatDate(DateTime.now().subtract(const Duration(days: 1)));
@@ -265,9 +287,13 @@ void main() {
       await tester.pumpAndSettle();
 
       final badges = tester.widgetList<Badge>(find.byType(Badge)).toList();
+      final pastBadge = tester.widget<Badge>(find.descendant(
+        of: find.widgetWithText(ListTile, 'Past'),
+        matching: find.byType(Badge),
+      ));
 
       expect(badges.length, 1);
-      expect(badges[0].backgroundColor, Colors.red);
+      expect(pastBadge.backgroundColor, Colors.red);
     });
 
     testWidgets('does not show badges when no tasks due', (tester) async {

@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "inbox": "Inbox",
+  "past": "Past",
   "today": "Today",
   "upcoming": "Upcoming",
   "upcomingWithDays": "Upcoming · {days}d",

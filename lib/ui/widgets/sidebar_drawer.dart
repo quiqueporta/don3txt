@@ -15,9 +15,8 @@ class SidebarDrawer extends StatelessWidget {
     final notifier = context.watch<TodoListNotifier>();
     final settings = context.watch<SettingsNotifier>();
     final loc = AppLocalizations.of(context);
-    final todayOnlyCount = notifier.todayOnlyTaskCount;
-    final overdueCount = notifier.overdueTaskCount;
-    final hasBadges = todayOnlyCount > 0 || overdueCount > 0;
+    final pastCount = notifier.pastTaskCount;
+    final todayCount = notifier.todayTaskCount;
     final upcomingCount = notifier.upcomingTaskCount;
     return Drawer(
       child: ListView(
@@ -56,25 +55,27 @@ class SidebarDrawer extends StatelessWidget {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.history, color: Colors.red),
+            title: Text(loc.past),
+            trailing: pastCount > 0
+                ? Badge(
+                    backgroundColor: Colors.red,
+                    label: Text('$pastCount'),
+                  )
+                : null,
+            selected: notifier.activeFilter == TaskFilter.past,
+            onTap: () {
+              notifier.activeFilter = TaskFilter.past;
+              Navigator.of(context).pop();
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.today, color: Colors.amber),
             title: Text(loc.today),
-            trailing: hasBadges
-                ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (overdueCount > 0)
-                        Badge(
-                          backgroundColor: Colors.red,
-                          label: Text('$overdueCount'),
-                        ),
-                      if (overdueCount > 0 && todayOnlyCount > 0)
-                        const SizedBox(width: 6),
-                      if (todayOnlyCount > 0)
-                        Badge(
-                          backgroundColor: Colors.grey,
-                          label: Text('$todayOnlyCount'),
-                        ),
-                    ],
+            trailing: todayCount > 0
+                ? Badge(
+                    backgroundColor: Colors.grey,
+                    label: Text('$todayCount'),
                   )
                 : null,
             selected: notifier.activeFilter == TaskFilter.today,

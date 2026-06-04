@@ -24,23 +24,25 @@ class TodoFile {
       if (item.isCompleted) return false;
       if (!_isVisible(item, today)) return false;
 
-      final referenceDate = item.metadata['due'] ?? item.metadata['t'];
+      final referenceDate = _referenceDate(item);
       if (referenceDate == null) return false;
 
-      return referenceDate.compareTo(todayString) <= 0;
+      return referenceDate.compareTo(todayString) == 0;
     }).toList();
   }
 
-  List<TodoItem> overdueTasks(DateTime today) {
+  List<TodoItem> pastTasks(DateTime today) {
     final todayString = _formatDate(today);
 
-    return items
-        .where((item) =>
-            !item.isCompleted &&
-            _isVisible(item, today) &&
-            item.metadata['due'] != null &&
-            item.metadata['due']!.compareTo(todayString) < 0)
-        .toList();
+    return items.where((item) {
+      if (item.isCompleted) return false;
+      if (!_isVisible(item, today)) return false;
+
+      final referenceDate = _referenceDate(item);
+      if (referenceDate == null) return false;
+
+      return referenceDate.compareTo(todayString) < 0;
+    }).toList();
   }
 
   List<String> allProjects([DateTime? today]) {
@@ -82,7 +84,7 @@ class TodoFile {
     return items.where((item) {
       if (item.isCompleted) return false;
 
-      final referenceDate = item.metadata['due'] ?? item.metadata['t'];
+      final referenceDate = _referenceDate(item);
       if (referenceDate == null) return false;
 
       return referenceDate.compareTo(tomorrowString) >= 0 &&
@@ -92,6 +94,10 @@ class TodoFile {
 
   List<TodoItem> get recurringTasks =>
       pendingTasks.where((item) => item.metadata.containsKey('rec')).toList();
+
+  String? _referenceDate(TodoItem item) {
+    return item.metadata['due'] ?? item.metadata['t'];
+  }
 
   bool _isVisible(TodoItem item, DateTime today) {
     final threshold = item.metadata['t'];

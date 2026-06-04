@@ -6,7 +6,7 @@ import 'package:don3txt/domain/todo_parser.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 
-enum TaskFilter { inbox, today, upcoming, project, context, recurring, completed }
+enum TaskFilter { inbox, past, today, upcoming, project, context, recurring, completed }
 
 class TodoListNotifier extends ChangeNotifier {
   TodoRepository _todoRepository;
@@ -136,12 +136,10 @@ class TodoListNotifier extends ChangeNotifier {
     return _todoFile!.todayTasks(_today).length;
   }
 
-  int get todayOnlyTaskCount => todayTaskCount - overdueTaskCount;
-
-  int get overdueTaskCount {
+  int get pastTaskCount {
     if (_todoFile == null) return 0;
 
-    return _todoFile!.overdueTasks(_today).length;
+    return _todoFile!.pastTasks(_today).length;
   }
 
   List<TodoItem> get _unfilteredViewTasks {
@@ -152,6 +150,8 @@ class TodoListNotifier extends ChangeNotifier {
     switch (_activeFilter) {
       case TaskFilter.inbox:
         return _todoFile!.visiblePendingTasks(today);
+      case TaskFilter.past:
+        return _todoFile!.pastTasks(today);
       case TaskFilter.today:
         return _todoFile!.todayTasks(today);
       case TaskFilter.upcoming:

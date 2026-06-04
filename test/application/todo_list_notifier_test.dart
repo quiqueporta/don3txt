@@ -292,7 +292,7 @@ void main() {
         expect(notifier.filteredTasks, isEmpty);
       });
 
-      test('includes overdue tasks when filter is today', () async {
+      test('excludes overdue tasks when filter is today', () async {
         final now = DateTime.now();
         final yesterdayStr = _formatDate(now.subtract(const Duration(days: 1)));
         final todayStr = _formatDate(now);
@@ -313,12 +313,35 @@ void main() {
 
         final result = notifier.filteredTasks;
 
-        expect(result.length, 2);
+        expect(result.length, 1);
+        expect(result[0].description, 'Due today');
+      });
+
+      test('returns pastTasks when filter is past', () async {
+        final now = DateTime.now();
+        final yesterdayStr = _formatDate(now.subtract(const Duration(days: 1)));
+        final todayStr = _formatDate(now);
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(
+                description: 'Overdue', metadata: {'due': yesterdayStr}),
+            TodoItem(
+                description: 'Due today', metadata: {'due': todayStr}),
+          ]),
+        );
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.past;
+
+        final result = notifier.filteredTasks;
+
+        expect(result.length, 1);
+        expect(result[0].description, 'Overdue');
       });
     });
 
     group('todayTaskCount', () {
-      test('returns count of today and overdue tasks', () async {
+      test('returns count of today tasks only', () async {
         final now = DateTime.now();
         final yesterdayStr = _formatDate(now.subtract(const Duration(days: 1)));
         final todayStr = _formatDate(now);
@@ -334,7 +357,7 @@ void main() {
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
-        expect(notifier.todayTaskCount, 2);
+        expect(notifier.todayTaskCount, 1);
       });
 
       test('returns 0 when no file loaded', () {
@@ -342,8 +365,8 @@ void main() {
       });
     });
 
-    group('overdueTaskCount', () {
-      test('returns count of overdue tasks only', () async {
+    group('pastTaskCount', () {
+      test('returns count of past tasks only', () async {
         final now = DateTime.now();
         final yesterdayStr = _formatDate(now.subtract(const Duration(days: 1)));
         final todayStr = _formatDate(now);
@@ -352,17 +375,20 @@ void main() {
             TodoItem(
                 description: 'Overdue', metadata: {'due': yesterdayStr}),
             TodoItem(
+                description: 'Deferred since yesterday',
+                metadata: {'t': yesterdayStr}),
+            TodoItem(
                 description: 'Due today', metadata: {'due': todayStr}),
           ]),
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
-        expect(notifier.overdueTaskCount, 1);
+        expect(notifier.pastTaskCount, 2);
       });
 
       test('returns 0 when no file loaded', () {
-        expect(notifier.overdueTaskCount, 0);
+        expect(notifier.pastTaskCount, 0);
       });
     });
 
