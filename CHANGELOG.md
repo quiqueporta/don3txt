@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.12.0] - 2026-06-04
+
+### Added
+
+- New Past view in the sidebar showing tasks whose reference date (`due:`, or `t:` when there is no `due:`) is before today, with a red badge counting them. Placed chronologically between Inbox and Today
+
+### Changed
+
+- Today view now only shows tasks whose reference date is exactly today, with a single grey badge. Overdue tasks moved to the new Past view
+
 ## [1.11.1] - 2026-06-02
 
 ### Changed

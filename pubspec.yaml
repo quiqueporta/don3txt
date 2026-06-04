@@ -1,7 +1,7 @@
 name: don3txt
 description: "Todo.txt task manager for Android"
 publish_to: 'none'
-version: 1.11.1
+version: 1.12.0
 
 environment:
   sdk: ^3.9.2
