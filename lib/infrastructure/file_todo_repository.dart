@@ -56,12 +56,12 @@ class FileTodoRepository implements TodoRepository {
     await temporaryFile.rename(_filePath);
   }
 
-  // Syncthing never syncs files named like its own temporaries, so the half-written file never reaches other devices.
+  // Syncthing never syncs files named like its own temporaries; the don3txt- prefix keeps it apart from the one Syncthing uses while downloading this same file.
   String _temporaryPath() {
     final lastSlash = _filePath.lastIndexOf('/');
     final directory = _filePath.substring(0, lastSlash + 1);
     final fileName = _filePath.substring(lastSlash + 1);
 
-    return '$directory.syncthing.$fileName.tmp';
+    return '$directory.syncthing.don3txt-$fileName.tmp';
   }
 }

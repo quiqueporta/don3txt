@@ -87,6 +87,18 @@ void main() {
       expect(File(hardLinkPath).readAsStringSync(), 'Old task\n');
     });
 
+    test('save does not touch the file Syncthing uses while downloading todo.txt',
+        () async {
+      final syncthingDownload = File('${tempDir.path}/.syncthing.todo.txt.tmp')
+        ..writeAsStringSync('Downloading from another device\n');
+
+      await repository.save(TodoFile([TodoItem(description: 'Task')]));
+
+      expect(syncthingDownload.existsSync(), true);
+      expect(syncthingDownload.readAsStringSync(),
+          'Downloading from another device\n');
+    });
+
     test('save leaves no temporary files behind', () async {
       await repository.save(TodoFile([TodoItem(description: 'Task')]));
 
