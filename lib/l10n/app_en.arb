@@ -43,6 +43,7 @@
   "noPendingTasks": "No pending tasks",
   "taskCompletedSnack": "Task completed",
   "taskDeletedSnack": "Task deleted",
+  "taskChangedElsewhere": "This task was changed on another device",
   "undo": "Undo",
   "menuDelete": "Delete",
   "filterProject": "Project",

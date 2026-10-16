@@ -33,6 +33,7 @@
   "noPendingTasks": "Nessuna attività in sospeso",
   "taskCompletedSnack": "Attività completata",
   "taskDeletedSnack": "Attività eliminata",
+  "taskChangedElsewhere": "Questa attività è stata modificata su un altro dispositivo",
   "undo": "Annulla",
   "menuDelete": "Elimina",
   "filterProject": "Progetto",

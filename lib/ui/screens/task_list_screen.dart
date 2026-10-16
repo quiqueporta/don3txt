@@ -152,6 +152,78 @@ class _TaskListScreenState extends State<TaskListScreen> {
     return ctx == null ? const {} : {ctx};
   }
 
+  Future<void> _completeTask(
+      BuildContext context, TodoListNotifier notifier, TodoItem item) async {
+    final loc = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    final completedItem = await notifier.toggleTask(item);
+
+    if (completedItem == null) {
+      _showTaskChangedElsewhere(messenger, loc);
+
+      return;
+    }
+
+    messenger.hideCurrentSnackBar();
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(loc.taskCompletedSnack),
+        persist: false,
+        action: SnackBarAction(
+          label: loc.undo,
+          onPressed: () => notifier.uncompleteTask(completedItem),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _restoreTask(
+      BuildContext context, TodoListNotifier notifier, TodoItem item) async {
+    final loc = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    final restored = await notifier.uncompleteTask(item);
+
+    if (!restored) _showTaskChangedElsewhere(messenger, loc);
+  }
+
+  Future<void> _deleteTask(
+      BuildContext context, TodoListNotifier notifier, TodoItem item) async {
+    final loc = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final position = notifier.todoFile!.items.indexOf(item);
+
+    final deleted = await notifier.deleteTask(item);
+
+    if (!deleted) {
+      _showTaskChangedElsewhere(messenger, loc);
+
+      return;
+    }
+
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(loc.taskDeletedSnack),
+        persist: false,
+        action: SnackBarAction(
+          label: loc.undo,
+          onPressed: () => notifier.insertTask(position, item),
+        ),
+      ),
+    );
+  }
+
+  void _showTaskChangedElsewhere(
+      ScaffoldMessengerState messenger, AppLocalizations loc) {
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(content: Text(loc.taskChangedElsewhere)),
+    );
+  }
+
   void _showEditTaskSheet(
       BuildContext context, TodoListNotifier notifier, TodoItem item) {
     final settings = context.read<SettingsNotifier>();
@@ -166,9 +238,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
         ],
         child: EditTaskField(
           item: item,
-          onSave: (updatedItem) {
-            notifier.updateTask(item, updatedItem);
+          onSave: (updatedItem) async {
+            final messenger = ScaffoldMessenger.of(context);
+            final loc = AppLocalizations.of(context);
             Navigator.of(context).pop();
+
+            final updated = await notifier.updateTask(item, updatedItem);
+            if (!updated) _showTaskChangedElsewhere(messenger, loc);
           },
         ),
       ),
@@ -350,57 +426,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             context.watch<SettingsNotifier>().priorityColors,
                         onToggle: () {
                           if (isCompletedView) {
-                            notifier.uncompleteTask(item);
+                            _restoreTask(context, notifier, item);
                           } else {
-                            final completion = notifier.toggleTask(item);
-
-                            final loc = AppLocalizations.of(context);
-
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(loc.taskCompletedSnack),
-                                persist: false,
-                                action: SnackBarAction(
-                                  label: loc.undo,
-                                  onPressed: () async {
-                                    final completedItem = await completion;
-                                    if (completedItem != null) {
-                                      notifier.uncompleteTask(completedItem);
-                                    }
-                                  },
-                                ),
-                              ),
-                            );
+                            _completeTask(context, notifier, item);
                           }
                         },
                         onTap: isCompletedView
                             ? null
                             : () => _showEditTaskSheet(
                                 context, notifier, item),
-                        onDelete: () {
-                          final deletedItem = item;
-                          final deletedIndex =
-                              notifier.todoFile!.items.indexOf(item);
-                          notifier.deleteTask(deletedItem);
-
-                          final loc = AppLocalizations.of(context);
-
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(loc.taskDeletedSnack),
-                              persist: false,
-                              action: SnackBarAction(
-                                label: loc.undo,
-                                onPressed: () {
-                                  notifier.insertTask(
-                                      deletedIndex, deletedItem);
-                                },
-                              ),
-                            ),
-                          );
-                        },
+                        onDelete: () => _deleteTask(context, notifier, item),
                       );
                     },
                   ),

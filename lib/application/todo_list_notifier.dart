@@ -371,26 +371,42 @@ class TodoListNotifier extends ChangeNotifier {
     await _todoRepository.save(_todoFile!);
   }
 
-  Future<void> updateTask(TodoItem original, TodoItem newItem) async {
-    if (_todoFile == null) return;
+  Future<bool> updateTask(TodoItem original, TodoItem newItem) async {
+    if (_todoFile == null) return false;
 
     final todoFile = await _todoRepository.load();
+
+    if (!todoFile.contains(original)) {
+      _showCurrentFiles(todoFile);
+
+      return false;
+    }
 
     _todoFile = todoFile.updateTask(original, newItem);
     notifyListeners();
 
     await _todoRepository.save(_todoFile!);
+
+    return true;
   }
 
-  Future<void> deleteTask(TodoItem item) async {
-    if (_todoFile == null) return;
+  Future<bool> deleteTask(TodoItem item) async {
+    if (_todoFile == null) return false;
 
     final todoFile = await _todoRepository.load();
+
+    if (!todoFile.contains(item)) {
+      _showCurrentFiles(todoFile);
+
+      return false;
+    }
 
     _todoFile = todoFile.deleteTask(item);
     notifyListeners();
 
     await _todoRepository.save(_todoFile!);
+
+    return true;
   }
 
   Future<void> insertTask(int index, TodoItem item) async {
@@ -409,6 +425,13 @@ class TodoListNotifier extends ChangeNotifier {
 
     final todoFile = await _todoRepository.load();
     final doneFile = await _doneRepository.load();
+
+    if (!todoFile.contains(item)) {
+      _showCurrentFiles(todoFile, doneFile);
+
+      return null;
+    }
+
     final result = todoFile.completeTask(item);
 
     final completedItems = result.items.where((i) => i.isCompleted).toList();
@@ -423,17 +446,30 @@ class TodoListNotifier extends ChangeNotifier {
     return completedItems.isEmpty ? null : completedItems.first;
   }
 
+  void _showCurrentFiles(TodoFile todoFile, [TodoFile? doneFile]) {
+    _todoFile = todoFile;
+    _doneFile = doneFile ?? _doneFile;
+    notifyListeners();
+  }
+
   // done.txt goes first: if the second write fails the task ends up in both files instead of in neither.
   Future<void> _saveDoneThenTodo() async {
     await _doneRepository.save(_doneFile!);
     await _todoRepository.save(_todoFile!);
   }
 
-  Future<void> uncompleteTask(TodoItem doneItem) async {
-    if (_todoFile == null || _doneFile == null) return;
+  Future<bool> uncompleteTask(TodoItem doneItem) async {
+    if (_todoFile == null || _doneFile == null) return false;
 
     final todoFile = await _todoRepository.load();
     final doneFile = await _doneRepository.load();
+
+    if (!doneFile.contains(doneItem)) {
+      _showCurrentFiles(todoFile, doneFile);
+
+      return false;
+    }
+
     final restoredItem = doneItem.copyWith(
       isCompleted: false,
       completionDate: null,
@@ -445,6 +481,8 @@ class TodoListNotifier extends ChangeNotifier {
 
     await _todoRepository.save(_todoFile!);
     await _doneRepository.save(_doneFile!);
+
+    return true;
   }
 
   void _migrateCompletedToDone() {

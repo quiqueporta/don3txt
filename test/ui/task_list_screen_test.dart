@@ -481,6 +481,106 @@ void main() {
       });
     });
 
+    group('task changed on another device', () {
+      testWidgets(
+          'completing a task edited elsewhere warns and shows the current tasks',
+          (tester) async {
+        final repo = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Buy milk')]),
+        );
+        final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+        await repo.save(TodoFile([TodoItem(description: 'Buy oat milk')]));
+
+        await tester.tap(find.byIcon(Icons.radio_button_unchecked));
+        await tester.pumpAndSettle();
+
+        expect(find.text('This task was changed on another device'),
+            findsOneWidget);
+        expect(find.text('Buy oat milk'), findsOneWidget);
+        expect(find.text('Task completed'), findsNothing);
+      });
+
+      testWidgets(
+          'deleting a task edited elsewhere warns and keeps the current tasks',
+          (tester) async {
+        final repo = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Buy milk')]),
+        );
+        final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+        await repo.save(TodoFile([TodoItem(description: 'Buy oat milk')]));
+
+        await tester.tap(find.byIcon(Icons.more_vert));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Delete'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('This task was changed on another device'),
+            findsOneWidget);
+        expect(find.text('Buy oat milk'), findsOneWidget);
+        expect(find.text('Task deleted'), findsNothing);
+      });
+
+      testWidgets('editing a task edited elsewhere warns and keeps the other version',
+          (tester) async {
+        final repo = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Buy milk')]),
+        );
+        final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+        await repo.save(TodoFile([TodoItem(description: 'Buy oat milk')]));
+
+        await tester.tap(find.text('Buy milk'));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField).last, 'Buy soy milk');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pumpAndSettle();
+
+        expect(find.text('This task was changed on another device'),
+            findsOneWidget);
+        expect(find.text('Buy oat milk'), findsOneWidget);
+        expect(find.text('Buy soy milk'), findsNothing);
+      });
+
+      testWidgets(
+          'restoring a completed task removed elsewhere warns and shows the current tasks',
+          (tester) async {
+        final doneTask = TodoItem(
+          description: 'Done task',
+          isCompleted: true,
+          completionDate: DateTime(2026, 3, 10),
+        );
+        final doneRepo = InMemoryTodoRepository(TodoFile([doneTask]));
+        final notifier = TodoListNotifier(InMemoryTodoRepository(), doneRepo);
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.completed;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+        await doneRepo.save(TodoFile([]));
+
+        await tester.tap(find.byIcon(Icons.check_circle));
+        await tester.pumpAndSettle();
+
+        expect(find.text('This task was changed on another device'),
+            findsOneWidget);
+        expect(notifier.todoFile!.items, isEmpty);
+      });
+    });
+
     group('task deletion snackbar', () {
       testWidgets('snackbar disappears on its own after a while',
           (tester) async {

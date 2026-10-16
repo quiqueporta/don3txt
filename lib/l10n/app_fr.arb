@@ -33,6 +33,7 @@
   "noPendingTasks": "Aucune tâche en attente",
   "taskCompletedSnack": "Tâche terminée",
   "taskDeletedSnack": "Tâche supprimée",
+  "taskChangedElsewhere": "Cette tâche a été modifiée sur un autre appareil",
   "undo": "Annuler",
   "menuDelete": "Supprimer",
   "filterProject": "Projet",

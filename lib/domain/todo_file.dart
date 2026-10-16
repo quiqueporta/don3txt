@@ -7,6 +7,8 @@ class TodoFile {
 
   const TodoFile(this.items);
 
+  bool contains(TodoItem task) => items.contains(task);
+
   List<TodoItem> get pendingTasks =>
       items.where((item) => !item.isCompleted).toList();
 

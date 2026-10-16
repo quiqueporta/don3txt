@@ -33,6 +33,7 @@
   "noPendingTasks": "Sem tarefas pendentes",
   "taskCompletedSnack": "Tarefa concluída",
   "taskDeletedSnack": "Tarefa excluída",
+  "taskChangedElsewhere": "Esta tarefa foi alterada em outro dispositivo",
   "undo": "Desfazer",
   "menuDelete": "Excluir",
   "filterProject": "Projeto",
