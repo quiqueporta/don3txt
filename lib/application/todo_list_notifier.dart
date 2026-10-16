@@ -340,7 +340,9 @@ class TodoListNotifier extends ChangeNotifier {
     if (description.trim().isEmpty) return;
     if (_todoFile == null) return;
 
-    _todoFile = _todoFile!.addTask(description,
+    final todoFile = await _todoRepository.load();
+
+    _todoFile = todoFile.addTask(description,
         dueDate: dueDate,
         startDate: startDate,
         recurrence: recurrence,
@@ -369,19 +371,23 @@ class TodoListNotifier extends ChangeNotifier {
     await _todoRepository.save(_todoFile!);
   }
 
-  Future<void> updateTask(int index, TodoItem newItem) async {
+  Future<void> updateTask(TodoItem original, TodoItem newItem) async {
     if (_todoFile == null) return;
 
-    _todoFile = _todoFile!.updateTask(index, newItem);
+    final todoFile = await _todoRepository.load();
+
+    _todoFile = todoFile.updateTask(original, newItem);
     notifyListeners();
 
     await _todoRepository.save(_todoFile!);
   }
 
-  Future<void> deleteTask(int index) async {
+  Future<void> deleteTask(TodoItem item) async {
     if (_todoFile == null) return;
 
-    _todoFile = _todoFile!.deleteTask(index);
+    final todoFile = await _todoRepository.load();
+
+    _todoFile = todoFile.deleteTask(item);
     notifyListeners();
 
     await _todoRepository.save(_todoFile!);
@@ -390,39 +396,51 @@ class TodoListNotifier extends ChangeNotifier {
   Future<void> insertTask(int index, TodoItem item) async {
     if (_todoFile == null) return;
 
-    _todoFile = _todoFile!.insertTask(index, item);
+    final todoFile = await _todoRepository.load();
+
+    _todoFile = todoFile.insertTask(index, item);
     notifyListeners();
 
     await _todoRepository.save(_todoFile!);
   }
 
-  Future<void> toggleTask(int index) async {
-    if (_todoFile == null || _doneFile == null) return;
+  Future<TodoItem?> toggleTask(TodoItem item) async {
+    if (_todoFile == null || _doneFile == null) return null;
 
-    final result = _todoFile!.completeTask(index);
+    final todoFile = await _todoRepository.load();
+    final doneFile = await _doneRepository.load();
+    final result = todoFile.completeTask(item);
 
     final completedItems = result.items.where((i) => i.isCompleted).toList();
     final pendingItems = result.items.where((i) => !i.isCompleted).toList();
 
     _todoFile = TodoFile(pendingItems);
-    _doneFile = TodoFile([..._doneFile!.items, ...completedItems]);
+    _doneFile = TodoFile([...doneFile.items, ...completedItems]);
     notifyListeners();
 
-    await _todoRepository.save(_todoFile!);
-    await _doneRepository.save(_doneFile!);
+    await _saveDoneThenTodo();
+
+    return completedItems.isEmpty ? null : completedItems.first;
   }
 
-  Future<void> uncompleteTask(int doneIndex) async {
+  // done.txt goes first: if the second write fails the task ends up in both files instead of in neither.
+  Future<void> _saveDoneThenTodo() async {
+    await _doneRepository.save(_doneFile!);
+    await _todoRepository.save(_todoFile!);
+  }
+
+  Future<void> uncompleteTask(TodoItem doneItem) async {
     if (_todoFile == null || _doneFile == null) return;
 
-    final item = _doneFile!.items[doneIndex];
-    final restoredItem = item.copyWith(
+    final todoFile = await _todoRepository.load();
+    final doneFile = await _doneRepository.load();
+    final restoredItem = doneItem.copyWith(
       isCompleted: false,
       completionDate: null,
     );
 
-    _doneFile = _doneFile!.deleteTask(doneIndex);
-    _todoFile = TodoFile([..._todoFile!.items, restoredItem]);
+    _doneFile = doneFile.deleteTask(doneItem);
+    _todoFile = TodoFile([...todoFile.items, restoredItem]);
     notifyListeners();
 
     await _todoRepository.save(_todoFile!);

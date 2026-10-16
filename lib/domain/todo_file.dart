@@ -151,7 +151,10 @@ class TodoFile {
     return TodoFile([...items, newItem]);
   }
 
-  TodoFile completeTask(int index) {
+  TodoFile completeTask(TodoItem task) {
+    final index = items.indexOf(task);
+    if (index < 0) return this;
+
     final updatedItems = List<TodoItem>.from(items);
     final item = updatedItems[index];
 
@@ -228,7 +231,10 @@ class TodoFile {
     );
   }
 
-  TodoFile deleteTask(int index) {
+  TodoFile deleteTask(TodoItem task) {
+    final index = items.indexOf(task);
+    if (index < 0) return this;
+
     final updatedItems = List<TodoItem>.from(items);
     updatedItems.removeAt(index);
 
@@ -243,7 +249,10 @@ class TodoFile {
     return TodoFile(updatedItems);
   }
 
-  TodoFile updateTask(int index, TodoItem newItem) {
+  TodoFile updateTask(TodoItem original, TodoItem newItem) {
+    final index = items.indexOf(original);
+    if (index < 0) return this;
+
     final updatedItems = List<TodoItem>.from(items);
     updatedItems[index] = newItem;
 

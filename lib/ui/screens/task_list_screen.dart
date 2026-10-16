@@ -153,8 +153,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   void _showEditTaskSheet(
-      BuildContext context, TodoListNotifier notifier, int originalIndex) {
-    final item = notifier.todoFile!.items[originalIndex];
+      BuildContext context, TodoListNotifier notifier, TodoItem item) {
     final settings = context.read<SettingsNotifier>();
 
     showModalBottomSheet(
@@ -168,7 +167,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
         child: EditTaskField(
           item: item,
           onSave: (updatedItem) {
-            notifier.updateTask(originalIndex, updatedItem);
+            notifier.updateTask(item, updatedItem);
             Navigator.of(context).pop();
           },
         ),
@@ -343,9 +342,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       final item = tasks[index];
                       final isCompletedView =
                           notifier.activeFilter == TaskFilter.completed;
-                      final originalIndex = isCompletedView
-                          ? notifier.doneFile!.items.indexOf(item)
-                          : notifier.todoFile!.items.indexOf(item);
 
                       return TaskTile(
                         item: item,
@@ -354,9 +350,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             context.watch<SettingsNotifier>().priorityColors,
                         onToggle: () {
                           if (isCompletedView) {
-                            notifier.uncompleteTask(originalIndex);
+                            notifier.uncompleteTask(item);
                           } else {
-                            notifier.toggleTask(originalIndex);
+                            final completion = notifier.toggleTask(item);
 
                             final loc = AppLocalizations.of(context);
 
@@ -367,10 +363,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                 persist: false,
                                 action: SnackBarAction(
                                   label: loc.undo,
-                                  onPressed: () {
-                                    final doneItems = notifier.doneFile?.items ?? [];
-                                    if (doneItems.isNotEmpty) {
-                                      notifier.uncompleteTask(doneItems.length - 1);
+                                  onPressed: () async {
+                                    final completedItem = await completion;
+                                    if (completedItem != null) {
+                                      notifier.uncompleteTask(completedItem);
                                     }
                                   },
                                 ),
@@ -381,11 +377,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         onTap: isCompletedView
                             ? null
                             : () => _showEditTaskSheet(
-                                context, notifier, originalIndex),
+                                context, notifier, item),
                         onDelete: () {
                           final deletedItem = item;
-                          final deletedIndex = originalIndex;
-                          notifier.deleteTask(deletedIndex);
+                          final deletedIndex =
+                              notifier.todoFile!.items.indexOf(item);
+                          notifier.deleteTask(deletedItem);
 
                           final loc = AppLocalizations.of(context);
 

@@ -129,7 +129,7 @@ void main() {
       ]);
       final today = DateTime.now();
 
-      final updated = file.completeTask(0);
+      final updated = file.completeTask(file.items[0]);
 
       expect(updated.items[0].isCompleted, true);
       expect(updated.items[0].completionDate!.year, today.year);
@@ -147,7 +147,7 @@ void main() {
         ),
       ]);
 
-      final updated = file.completeTask(0);
+      final updated = file.completeTask(file.items[0]);
 
       expect(updated.items[0].isCompleted, false);
       expect(updated.items[0].completionDate, isNull);
@@ -164,7 +164,7 @@ void main() {
         ),
       ]);
 
-      final updated = file.completeTask(0);
+      final updated = file.completeTask(file.items[0]);
 
       expect(updated.items.length, 2);
       expect(updated.items[0].isCompleted, true);
@@ -196,7 +196,7 @@ void main() {
         ),
       ]);
 
-      final updated = file.completeTask(0);
+      final updated = file.completeTask(file.items[0]);
 
       expect(updated.items.length, 2);
       expect(updated.items[0].isCompleted, true);
@@ -220,7 +220,7 @@ void main() {
         ),
       ]);
 
-      final updated = file.completeTask(0);
+      final updated = file.completeTask(file.items[0]);
       final newTask = updated.items[1];
 
       final now = DateTime.now();
@@ -246,7 +246,7 @@ void main() {
         ),
       ]);
 
-      final updated = file.completeTask(0);
+      final updated = file.completeTask(file.items[0]);
 
       expect(updated.items.length, 2);
       expect(updated.items[0].isCompleted, true);
@@ -270,7 +270,7 @@ void main() {
         ),
       ]);
 
-      final updated = file.completeTask(0);
+      final updated = file.completeTask(file.items[0]);
 
       expect(updated.items.length, 2);
       expect(updated.items[0].isCompleted, true);
@@ -297,7 +297,7 @@ void main() {
         ),
       ]);
 
-      final updated = file.completeTask(0);
+      final updated = file.completeTask(file.items[0]);
 
       expect(updated.items.length, 2);
       expect(updated.items[0].isCompleted, true);
@@ -320,7 +320,7 @@ void main() {
         TodoItem(description: 'Other'),
       ]);
 
-      final updated = file.completeTask(0);
+      final updated = file.completeTask(file.items[0]);
 
       expect(updated.items.length, 2);
       expect(updated.items[0].isCompleted, false);
@@ -344,7 +344,7 @@ void main() {
     });
 
     group('updateTask', () {
-      test('replaces item at given index', () {
+      test('replaces the given task', () {
         final file = TodoFile([
           TodoItem(description: 'Task 1'),
           TodoItem(description: 'Task 2'),
@@ -352,7 +352,7 @@ void main() {
         ]);
 
         final updated = file.updateTask(
-            1, TodoItem(description: 'Task 2 edited'));
+            file.items[1], TodoItem(description: 'Task 2 edited'));
 
         expect(updated.items.length, 3);
         expect(updated.items[0].description, 'Task 1');
@@ -373,7 +373,7 @@ void main() {
         ]);
 
         final updated = file.updateTask(
-            1, TodoItem(description: 'Edited'));
+            file.items[1], TodoItem(description: 'Edited'));
 
         expect(updated.items[0].priority, 'A');
         expect(updated.items[0].projects, ['+Work']);
@@ -387,7 +387,7 @@ void main() {
         ]);
 
         final updated = file.updateTask(
-            0,
+          file.items[0],
             TodoItem(
               description: 'My task next:',
               metadata: {'due': '2026-03-20'},
@@ -1005,7 +1005,7 @@ void main() {
           TodoItem(description: 'Task 3'),
         ]);
 
-        final updated = file.deleteTask(1);
+        final updated = file.deleteTask(file.items[1]);
 
         expect(updated.items.length, 2);
         expect(updated.items[0].description, 'Task 1');
@@ -1018,7 +1018,7 @@ void main() {
           TodoItem(description: 'Task 2'),
         ]);
 
-        final updated = file.deleteTask(0);
+        final updated = file.deleteTask(file.items[0]);
 
         expect(updated.items.length, 1);
         expect(updated.items[0].description, 'Task 2');
@@ -1030,7 +1030,7 @@ void main() {
           TodoItem(description: 'Task 2'),
         ]);
 
-        final updated = file.deleteTask(1);
+        final updated = file.deleteTask(file.items[1]);
 
         expect(updated.items.length, 1);
         expect(updated.items[0].description, 'Task 1');
@@ -1041,7 +1041,7 @@ void main() {
           TodoItem(description: 'Task 1'),
         ]);
 
-        final updated = file.deleteTask(0);
+        final updated = file.deleteTask(file.items[0]);
 
         expect(updated.items, isEmpty);
       });

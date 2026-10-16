@@ -98,7 +98,7 @@ void main() {
       notifier = TodoListNotifier(repository, doneRepository);
       await notifier.loadTasks();
 
-      await notifier.toggleTask(0);
+      await notifier.toggleTask(TodoItem(description: 'Task 1'));
 
       expect(notifier.todoFile!.items, isEmpty);
       expect(notifier.doneFile!.items.length, 1);
@@ -124,7 +124,7 @@ void main() {
       notifier = TodoListNotifier(repository, doneRepository);
       await notifier.loadTasks();
 
-      await notifier.toggleTask(0);
+      await notifier.toggleTask(notifier.todoFile!.items.first);
 
       expect(notifier.todoFile!.items.length, 1);
       expect(notifier.todoFile!.items[0].isCompleted, false);
@@ -146,7 +146,7 @@ void main() {
       notifier = TodoListNotifier(repository, doneRepository);
       await notifier.loadTasks();
 
-      await notifier.uncompleteTask(0);
+      await notifier.uncompleteTask(notifier.doneFile!.items.first);
 
       expect(notifier.doneFile!.items, isEmpty);
       expect(notifier.todoFile!.items.length, 1);
@@ -167,7 +167,7 @@ void main() {
       notifier = TodoListNotifier(repository, doneRepository);
       await notifier.loadTasks();
 
-      await notifier.uncompleteTask(0);
+      await notifier.uncompleteTask(notifier.doneFile!.items.first);
 
       final reloadedTodo = await repository.load();
       expect(reloadedTodo.items.length, 1);
@@ -551,6 +551,122 @@ void main() {
       });
     });
 
+    group('changes made by another device', () {
+      test('completing a task keeps the tasks another device added meanwhile',
+          () async {
+        final milk = TodoItem(description: 'Buy milk');
+        final bread = TodoItem(description: 'Buy bread');
+        repository = InMemoryTodoRepository(TodoFile([milk]));
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+        await repository.save(TodoFile([milk, bread]));
+
+        await notifier.toggleTask(milk);
+
+        final stored = await repository.load();
+        expect(stored.items, [bread]);
+        expect(notifier.todoFile!.items, [bread]);
+      });
+
+      test('restoring a completed task keeps the tasks another device completed meanwhile',
+          () async {
+        final milk = TodoItem(
+            description: 'Buy milk',
+            isCompleted: true,
+            completionDate: DateTime(2026, 10, 1));
+        final bread = TodoItem(
+            description: 'Buy bread',
+            isCompleted: true,
+            completionDate: DateTime(2026, 10, 2));
+        doneRepository = InMemoryTodoRepository(TodoFile([milk]));
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+        await doneRepository.save(TodoFile([milk, bread]));
+
+        await notifier.uncompleteTask(milk);
+
+        final storedDone = await doneRepository.load();
+        expect(storedDone.items, [bread]);
+        final storedTodo = await repository.load();
+        expect(storedTodo.items.single.description, 'Buy milk');
+      });
+
+      test('deleting a task keeps the tasks another device added meanwhile',
+          () async {
+        final milk = TodoItem(description: 'Buy milk');
+        final bread = TodoItem(description: 'Buy bread');
+        repository = InMemoryTodoRepository(TodoFile([milk]));
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+        await repository.save(TodoFile([bread, milk]));
+
+        await notifier.deleteTask(milk);
+
+        final stored = await repository.load();
+        expect(stored.items, [bread]);
+      });
+
+      test('editing a task keeps the tasks another device added meanwhile',
+          () async {
+        final milk = TodoItem(description: 'Buy milk');
+        final bread = TodoItem(description: 'Buy bread');
+        final oatMilk = TodoItem(description: 'Buy oat milk');
+        repository = InMemoryTodoRepository(TodoFile([milk]));
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+        await repository.save(TodoFile([bread, milk]));
+
+        await notifier.updateTask(milk, oatMilk);
+
+        final stored = await repository.load();
+        expect(stored.items, [bread, oatMilk]);
+      });
+
+      test('undoing a deletion keeps the tasks another device added meanwhile',
+          () async {
+        final milk = TodoItem(description: 'Buy milk');
+        final bread = TodoItem(description: 'Buy bread');
+        repository = InMemoryTodoRepository(TodoFile([]));
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+        await repository.save(TodoFile([bread]));
+
+        await notifier.insertTask(0, milk);
+
+        final stored = await repository.load();
+        expect(stored.items, [milk, bread]);
+      });
+
+      test('adding a task keeps the tasks another device added meanwhile',
+          () async {
+        final bread = TodoItem(description: 'Buy bread');
+        repository = InMemoryTodoRepository(TodoFile([]));
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+        await repository.save(TodoFile([bread]));
+
+        await notifier.addTask('Buy milk');
+
+        final stored = await repository.load();
+        expect(stored.items.map((item) => item.description),
+            ['Buy bread', 'Buy milk']);
+      });
+
+      test('undoing a completion restores the task that was completed',
+          () async {
+        final milk = TodoItem(description: 'Buy milk', metadata: {'rec': '1d'});
+        repository = InMemoryTodoRepository(TodoFile([milk]));
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+
+        final completed = await notifier.toggleTask(milk);
+        await notifier.uncompleteTask(completed!);
+
+        final storedDone = await doneRepository.load();
+        expect(storedDone.items, isEmpty);
+      });
+    });
+
     group('updateTask', () {
       test('updates task and persists', () async {
         repository = InMemoryTodoRepository(
@@ -561,8 +677,8 @@ void main() {
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
-        await notifier.updateTask(
-            0, TodoItem(description: 'Updated task'));
+        await notifier.updateTask(TodoItem(description: 'Original task'),
+            TodoItem(description: 'Updated task'));
 
         expect(notifier.todoFile!.items[0].description, 'Updated task');
 
@@ -580,14 +696,14 @@ void main() {
         notifier.addListener(() => notified = true);
 
         await notifier.updateTask(
-            0, TodoItem(description: 'Edited'));
+            TodoItem(description: 'Task'), TodoItem(description: 'Edited'));
 
         expect(notified, true);
       });
 
       test('does nothing when no file loaded', () async {
-        await notifier.updateTask(
-            0, TodoItem(description: 'Should not crash'));
+        await notifier.updateTask(TodoItem(description: 'Task'),
+            TodoItem(description: 'Should not crash'));
 
         expect(notifier.todoFile, isNull);
       });
@@ -602,7 +718,7 @@ void main() {
         await notifier.loadTasks();
 
         await notifier.updateTask(
-            0,
+            TodoItem(description: 'My task next: important'),
             TodoItem(
               description: 'My task next: important',
               metadata: {'due': '2026-03-20'},
@@ -626,7 +742,7 @@ void main() {
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
 
-        await notifier.deleteTask(1);
+        await notifier.deleteTask(TodoItem(description: 'Task 2'));
 
         expect(notifier.todoFile!.items.length, 2);
         expect(notifier.todoFile!.items[0].description, 'Task 1');
@@ -645,13 +761,13 @@ void main() {
         var notified = false;
         notifier.addListener(() => notified = true);
 
-        await notifier.deleteTask(0);
+        await notifier.deleteTask(TodoItem(description: 'Task 1'));
 
         expect(notified, true);
       });
 
       test('does nothing when no file loaded', () async {
-        await notifier.deleteTask(0);
+        await notifier.deleteTask(TodoItem(description: 'Task 1'));
 
         expect(notifier.todoFile, isNull);
       });
