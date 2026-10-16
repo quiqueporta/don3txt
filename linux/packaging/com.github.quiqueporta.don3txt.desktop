@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=don3txt
+Comment=Task manager based on the todo.txt format
+Exec=don3txt
+Icon=com.github.quiqueporta.don3txt
+Terminal=false
+Categories=Office;ProjectManagement;
+Keywords=todo;todo.txt;tasks;
+StartupWMClass=don3txt
