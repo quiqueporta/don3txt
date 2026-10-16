@@ -49,3 +49,5 @@ jobs:
           cache: true
 
       - run: flutter build linux --release
+
+      - run: linux/packaging/package.sh 0.0.0-ci
