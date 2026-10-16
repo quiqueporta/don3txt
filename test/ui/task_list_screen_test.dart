@@ -545,6 +545,31 @@ void main() {
         expect(find.text('Task completed'), findsNothing);
       });
 
+      testWidgets(
+          'snackbar disappears on its own when an accessibility service is active',
+          (tester) async {
+        tester.platformDispatcher.accessibilityFeaturesTestValue =
+            const FakeAccessibilityFeatures(accessibleNavigation: true);
+        addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+
+        final repo = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Buy milk')]),
+        );
+        final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.radio_button_unchecked));
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(seconds: 5));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Task completed'), findsNothing);
+      });
+
       testWidgets('tapping undo restores the task', (tester) async {
         final repo = InMemoryTodoRepository(
           TodoFile([TodoItem(description: 'Buy milk')]),
