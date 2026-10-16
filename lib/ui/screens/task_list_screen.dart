@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/application/settings_notifier.dart';
@@ -364,6 +364,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(loc.taskCompletedSnack),
+                                persist: false,
                                 action: SnackBarAction(
                                   label: loc.undo,
                                   onPressed: () {
@@ -392,6 +393,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(loc.taskDeletedSnack),
+                              persist: false,
                               action: SnackBarAction(
                                 label: loc.undo,
                                 onPressed: () {

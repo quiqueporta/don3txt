@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
@@ -44,7 +44,10 @@ class Don3txtApp extends StatelessWidget {
             darkTheme: buildDarkTheme(),
             themeMode: _toThemeMode(settings.themeMode),
             locale: settings.language.locale,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
             supportedLocales: AppLocalizations.supportedLocales,
             home: const TaskListScreen(),
           );

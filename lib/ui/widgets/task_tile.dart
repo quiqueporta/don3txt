@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';

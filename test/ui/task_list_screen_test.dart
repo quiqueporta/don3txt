@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_language.dart';
@@ -481,6 +481,30 @@ void main() {
       });
     });
 
+    group('task deletion snackbar', () {
+      testWidgets('snackbar disappears on its own after a while',
+          (tester) async {
+        final repo = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Buy milk')]),
+        );
+        final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.more_vert));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Delete'));
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(seconds: 5));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Task deleted'), findsNothing);
+      });
+    });
+
     group('task completion snackbar', () {
       testWidgets('shows snackbar with undo when completing a task',
           (tester) async {
@@ -499,6 +523,26 @@ void main() {
 
         expect(find.text('Task completed'), findsOneWidget);
         expect(find.text('Undo'), findsOneWidget);
+      });
+
+      testWidgets('snackbar disappears on its own after a while',
+          (tester) async {
+        final repo = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Buy milk')]),
+        );
+        final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.radio_button_unchecked));
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(seconds: 5));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Task completed'), findsNothing);
       });
 
       testWidgets('tapping undo restores the task', (tester) async {
