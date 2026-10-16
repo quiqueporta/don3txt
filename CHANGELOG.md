@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.12.1] - 2026-10-17
+
+### Changed
+
+- Upgraded to Flutter 3.47 and the latest versions of all libraries (Google Fonts, file picker and permission handling)
+- The app now uses the standalone Material Design library (`material_ui`) instead of the one built into Flutter
+- Android build updated to Gradle 9 and Android API 37
+
 ## [1.12.0] - 2026-06-04
 
 ### Added
