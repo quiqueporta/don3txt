@@ -21,6 +21,18 @@ class _TaskListScreenState extends State<TaskListScreen> {
   bool _isSearching = false;
   final _searchController = TextEditingController();
   SettingsNotifier? _settings;
+  late final AppLifecycleListener _lifecycleListener;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _lifecycleListener = AppLifecycleListener(onResume: _reloadTasks);
+  }
+
+  void _reloadTasks() {
+    context.read<TodoListNotifier>().loadTasks();
+  }
 
   @override
   void didChangeDependencies() {
@@ -43,6 +55,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   @override
   void dispose() {
+    _lifecycleListener.dispose();
     _settings?.removeListener(_syncFromSettings);
     _searchController.dispose();
     super.dispose();

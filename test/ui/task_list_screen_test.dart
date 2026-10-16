@@ -481,6 +481,35 @@ void main() {
       });
     });
 
+    group('returning to the app', () {
+      testWidgets('shows the tasks another device added while it was in the background',
+          (tester) async {
+        final repo = InMemoryTodoRepository(
+          TodoFile([TodoItem(description: 'Buy milk')]),
+        );
+        final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.activeFilter = TaskFilter.inbox;
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await repo.save(TodoFile([
+          TodoItem(description: 'Buy milk'),
+          TodoItem(description: 'Buy bread'),
+        ]));
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Buy bread'), findsOneWidget);
+      });
+    });
+
     group('task changed on another device', () {
       testWidgets(
           'completing a task edited elsewhere warns and shows the current tasks',
