@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +12,7 @@ import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
+import 'package:don3txt/infrastructure/storage_permission.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/screens/settings_screen.dart';
@@ -81,7 +85,40 @@ class InMemoryTodoRepository implements TodoRepository {
   Future<void> save(TodoFile todoFile) async {}
 }
 
-Widget buildTestApp(SettingsNotifier notifier) {
+class FakeStoragePermission implements StoragePermission {
+  final bool granted;
+
+  const FakeStoragePermission({required this.granted});
+
+  @override
+  Future<bool> request() async => granted;
+}
+
+class FakeFilePicker extends FilePickerPlatform {
+  final String? directoryPath;
+  bool directoryPickerOpened = false;
+
+  FakeFilePicker(this.directoryPath);
+
+  @override
+  Future<String?> getDirectoryPath({
+    String? dialogTitle,
+    String? initialDirectory,
+    AndroidOptions androidOptions = const AndroidOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async {
+    directoryPickerOpened = true;
+
+    return directoryPath;
+  }
+}
+
+Widget buildTestApp(
+  SettingsNotifier notifier, {
+  StoragePermission storagePermission = const FakeStoragePermission(granted: true),
+}) {
   return MaterialApp(
     locale: const Locale('en'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -93,6 +130,7 @@ Widget buildTestApp(SettingsNotifier notifier) {
           create: (_) => TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository()),
         ),
         Provider<String>.value(value: '/default/todo.txt'),
+        Provider<StoragePermission>.value(value: storagePermission),
       ],
       child: const SettingsScreen(),
     ),
@@ -297,6 +335,45 @@ void main() {
     });
 
     group('todo file switch', () {
+      testWidgets(
+          'selecting a folder switches to its todo.txt when storage permission is granted',
+          (tester) async {
+        final folder = Directory.systemTemp.createTempSync('don3txt_folder_');
+        addTearDown(() => folder.deleteSync(recursive: true));
+        FilePickerPlatform.instance = FakeFilePicker(folder.path);
+
+        await tester.pumpWidget(buildTestApp(
+          notifier,
+          storagePermission: const FakeStoragePermission(granted: true),
+        ));
+
+        await tester.runAsync(() async {
+          await tester.tap(find.text('Default'));
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        });
+        await tester.pumpAndSettle();
+
+        expect(notifier.todoFilePath, '${folder.path}/todo.txt');
+      });
+
+      testWidgets(
+          'selecting a folder does not open the folder picker when storage permission is denied',
+          (tester) async {
+        final filePicker = FakeFilePicker('/somewhere');
+        FilePickerPlatform.instance = filePicker;
+
+        await tester.pumpWidget(buildTestApp(
+          notifier,
+          storagePermission: const FakeStoragePermission(granted: false),
+        ));
+
+        await tester.tap(find.text('Default'));
+        await tester.pumpAndSettle();
+
+        expect(filePicker.directoryPickerOpened, false);
+        expect(notifier.todoFilePath, isNull);
+      });
+
       testWidgets(
           'reset to default switches active filter to inbox and pops settings',
           (tester) async {

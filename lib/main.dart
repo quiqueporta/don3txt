@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:don3txt/infrastructure/android_storage_permission.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/shared_preferences_settings_repository.dart';
+import 'package:don3txt/infrastructure/storage_permission.dart';
+import 'package:don3txt/infrastructure/unrestricted_storage_permission.dart';
 import 'package:don3txt/ui/app.dart';
 
 void main() async {
@@ -11,11 +15,12 @@ void main() async {
   final directory = await getApplicationDocumentsDirectory();
   final defaultFilePath = '${directory.path}/todo.txt';
   final settingsRepository = SharedPreferencesSettingsRepository();
+  final storagePermission = _storagePermissionForPlatform();
 
   final savedPath = await settingsRepository.loadTodoFilePath();
 
   if (savedPath != null) {
-    await _requestStoragePermission();
+    await storagePermission.request();
   }
 
   final todoPath = savedPath ?? defaultFilePath;
@@ -27,12 +32,13 @@ void main() async {
     repository: repository,
     doneRepository: doneRepository,
     settingsRepository: settingsRepository,
+    storagePermission: storagePermission,
     defaultFilePath: defaultFilePath,
   ));
 }
 
-Future<void> _requestStoragePermission() async {
-  if (!await Permission.manageExternalStorage.isGranted) {
-    await Permission.manageExternalStorage.request();
-  }
+StoragePermission _storagePermissionForPlatform() {
+  if (Platform.isAndroid) return AndroidStoragePermission();
+
+  return UnrestrictedStoragePermission();
 }

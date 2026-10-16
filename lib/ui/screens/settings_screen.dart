@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
@@ -11,6 +10,7 @@ import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
+import 'package:don3txt/infrastructure/storage_permission.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/priority_color_palette.dart';
 
@@ -127,10 +127,9 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Future<void> _selectFolder(BuildContext context) async {
-    if (!await Permission.manageExternalStorage.isGranted) {
-      final status = await Permission.manageExternalStorage.request();
-      if (!status.isGranted) return;
-    }
+    final storagePermission = context.read<StoragePermission>();
+
+    if (!await storagePermission.request()) return;
 
     if (!context.mounted) return;
 

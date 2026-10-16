@@ -5,6 +5,7 @@ import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
+import 'package:don3txt/infrastructure/storage_permission.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/theme.dart';
 import 'package:don3txt/ui/screens/task_list_screen.dart';
@@ -13,6 +14,7 @@ class Don3txtApp extends StatelessWidget {
   final TodoRepository repository;
   final TodoRepository doneRepository;
   final SettingsRepository settingsRepository;
+  final StoragePermission storagePermission;
   final String defaultFilePath;
 
   const Don3txtApp({
@@ -20,6 +22,7 @@ class Don3txtApp extends StatelessWidget {
     required this.repository,
     required this.doneRepository,
     required this.settingsRepository,
+    required this.storagePermission,
     required this.defaultFilePath,
   });
 
@@ -34,6 +37,7 @@ class Don3txtApp extends StatelessWidget {
           create: (_) => SettingsNotifier(settingsRepository)..load(),
         ),
         Provider<String>.value(value: defaultFilePath),
+        Provider<StoragePermission>.value(value: storagePermission),
       ],
       child: Consumer<SettingsNotifier>(
         builder: (_, settings, _) {
