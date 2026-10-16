@@ -74,6 +74,30 @@ void main() {
       expect(content, '(A) Call Mom\nBuy milk\n');
     });
 
+    test('save replaces the file in one step instead of rewriting it in place',
+        () async {
+      final todoPath = '${tempDir.path}/todo.txt';
+      File(todoPath).writeAsStringSync('Old task\n');
+      final hardLinkPath = '${tempDir.path}/hard-link-to-old-content.txt';
+      Process.runSync('ln', [todoPath, hardLinkPath]);
+
+      await repository.save(TodoFile([TodoItem(description: 'New task')]));
+
+      expect(File(todoPath).readAsStringSync(), 'New task\n');
+      expect(File(hardLinkPath).readAsStringSync(), 'Old task\n');
+    });
+
+    test('save leaves no temporary files behind', () async {
+      await repository.save(TodoFile([TodoItem(description: 'Task')]));
+
+      final fileNames = tempDir
+          .listSync()
+          .map((entity) => entity.uri.pathSegments.last)
+          .toList();
+
+      expect(fileNames, ['todo.txt']);
+    });
+
     test('round-trip: save then load yields same items', () async {
       final original = TodoFile([
         TodoItem(

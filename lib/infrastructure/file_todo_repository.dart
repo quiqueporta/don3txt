@@ -46,8 +46,22 @@ class FileTodoRepository implements TodoRepository {
 
   @override
   Future<void> save(TodoFile todoFile) async {
-    final file = File(_filePath);
+    await _replaceContent(todoFile.serialize());
+  }
 
-    await file.writeAsString(todoFile.serialize());
+  Future<void> _replaceContent(String content) async {
+    final temporaryFile = File(_temporaryPath());
+
+    await temporaryFile.writeAsString(content, flush: true);
+    await temporaryFile.rename(_filePath);
+  }
+
+  // Syncthing never syncs files named like its own temporaries, so the half-written file never reaches other devices.
+  String _temporaryPath() {
+    final lastSlash = _filePath.lastIndexOf('/');
+    final directory = _filePath.substring(0, lastSlash + 1);
+    final fileName = _filePath.substring(lastSlash + 1);
+
+    return '$directory.syncthing.$fileName.tmp';
   }
 }
