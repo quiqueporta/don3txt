@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -u
+
+HERE="$(dirname "$(readlink -f "$0")")"
+APP_ID="com.github.quiqueporta.don3txt"
+DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+CHOICE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/don3txt/desktop-integration"
+DESKTOP_FILE="$DATA_HOME/applications/$APP_ID.desktop"
+ICON_FILE="$DATA_HOME/icons/hicolor/512x512/apps/$APP_ID.png"
+
+refresh_caches() {
+  update-desktop-database "$DATA_HOME/applications" 2>/dev/null || true
+  gtk-update-icon-cache -f -t "$DATA_HOME/icons/hicolor" 2>/dev/null || true
+}
+
+add_desktop_entry() {
+  mkdir -p "$(dirname "$DESKTOP_FILE")" "$(dirname "$ICON_FILE")"
+  cp "$HERE/$APP_ID.png" "$ICON_FILE"
+  sed "s|^Exec=.*|Exec=\"$APPIMAGE\"|" "$HERE/$APP_ID.desktop" > "$DESKTOP_FILE"
+  refresh_caches
+}
+
+remove_desktop_entry() {
+  rm -f "$DESKTOP_FILE" "$ICON_FILE"
+  remember_choice no
+  refresh_caches
+}
+
+remember_choice() {
+  mkdir -p "$(dirname "$CHOICE_FILE")"
+  echo "$1" > "$CHOICE_FILE"
+}
+
+integrated_by_another_tool() {
+  grep -lsF "$APPIMAGE" "$DATA_HOME"/applications/*.desktop | grep -qvxF "$DESKTOP_FILE"
+}
+
+ask_choice() {
+  if zenity --question --title="don3txt" --text="Add don3txt to your applications menu?"; then
+    echo yes
+  else
+    echo no
+  fi
+}
+
+integrate_with_desktop() {
+  [ -n "${APPIMAGE:-}" ] || return 0
+  integrated_by_another_tool && return 0
+
+  local choice
+  choice="$(cat "$CHOICE_FILE" 2>/dev/null || true)"
+
+  if [ -z "$choice" ]; then
+    command -v zenity >/dev/null || return 0
+    choice="$(ask_choice)"
+    remember_choice "$choice"
+  fi
+
+  # Rewritten on every launch so the menu entry follows the AppImage if the user moves it.
+  [ "$choice" = yes ] && add_desktop_entry
+}
+
+if [ "${1:-}" = "--remove-desktop-entry" ]; then
+  remove_desktop_entry
+  echo "don3txt removed from your applications menu."
+  exit 0
+fi
+
+integrate_with_desktop
+exec "$HERE/don3txt" "$@"
