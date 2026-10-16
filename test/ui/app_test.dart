@@ -13,6 +13,9 @@ import 'package:don3txt/ui/app.dart';
 import 'package:don3txt/ui/screens/task_list_screen.dart';
 
 class InMemoryTodoRepository implements TodoRepository {
+  @override
+  Stream<void> get changes => const Stream.empty();
+
   TodoFile _stored = TodoFile([]);
 
   @override

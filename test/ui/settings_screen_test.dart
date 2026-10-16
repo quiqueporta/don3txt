@@ -79,6 +79,9 @@ class InMemorySettingsRepository implements SettingsRepository {
 
 class InMemoryTodoRepository implements TodoRepository {
   @override
+  Stream<void> get changes => const Stream.empty();
+
+  @override
   Future<TodoFile> load() async => TodoFile([]);
 
   @override

@@ -110,6 +110,45 @@ void main() {
       expect(fileNames, ['todo.txt']);
     });
 
+    group('changes', () {
+      const watcherStartup = Duration(milliseconds: 200);
+      const quietPeriod = Duration(milliseconds: 500);
+
+      test('announces when another program writes the todo file', () async {
+        final announced = repository.changes.first;
+        await Future<void>.delayed(watcherStartup);
+
+        File('${tempDir.path}/todo.txt').writeAsStringSync('Task\n');
+
+        await announced.timeout(const Duration(seconds: 2));
+      });
+
+      test('announces when another program replaces the todo file by renaming',
+          () async {
+        final announced = repository.changes.first;
+        await Future<void>.delayed(watcherStartup);
+
+        File('${tempDir.path}/.syncthing.todo.txt.tmp')
+          ..writeAsStringSync('Task\n')
+          ..renameSync('${tempDir.path}/todo.txt');
+
+        await announced.timeout(const Duration(seconds: 2));
+      });
+
+      test('does not announce changes to other files in the same folder',
+          () async {
+        var announcements = 0;
+        final subscription = repository.changes.listen((_) => announcements++);
+        await Future<void>.delayed(watcherStartup);
+
+        File('${tempDir.path}/done.txt').writeAsStringSync('x Task\n');
+        await Future<void>.delayed(quietPeriod);
+        await subscription.cancel();
+
+        expect(announcements, 0);
+      });
+    });
+
     test('round-trip: save then load yields same items', () async {
       final original = TodoFile([
         TodoItem(

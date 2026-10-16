@@ -17,6 +17,9 @@ import 'package:don3txt/ui/screens/settings_screen.dart';
 import 'package:don3txt/ui/screens/debug_screen.dart';
 
 class InMemoryTodoRepository implements TodoRepository {
+  @override
+  Stream<void> get changes => const Stream.empty();
+
   TodoFile _stored = TodoFile([]);
 
   InMemoryTodoRepository([TodoFile? initial]) {

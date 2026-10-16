@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/domain/todo_file.dart';
@@ -28,7 +30,47 @@ class TodoListNotifier extends ChangeNotifier {
   Set<String> _filterContexts = {};
   Set<String> _filterPriorities = {};
 
-  TodoListNotifier(this._todoRepository, this._doneRepository);
+  StreamSubscription<void>? _todoChanges;
+  StreamSubscription<void>? _doneChanges;
+  bool _reloadPending = false;
+
+  TodoListNotifier(this._todoRepository, this._doneRepository) {
+    _followChanges();
+  }
+
+  @override
+  void dispose() {
+    _stopFollowingChanges();
+    super.dispose();
+  }
+
+  void _followChanges() {
+    _todoChanges = _followChangesOf(_todoRepository);
+    _doneChanges = _followChangesOf(_doneRepository);
+  }
+
+  // Watching only keeps the list fresh; data stays safe without it because every change rereads the file first.
+  StreamSubscription<void> _followChangesOf(TodoRepository repository) {
+    return repository.changes.listen(
+      (_) => _reloadAfterChange(),
+      onError: (Object _) {},
+    );
+  }
+
+  void _reloadAfterChange() {
+    if (_isLoading) {
+      _reloadPending = true;
+
+      return;
+    }
+
+    loadTasks();
+  }
+
+  void _stopFollowingChanges() {
+    _todoChanges?.cancel();
+    _doneChanges?.cancel();
+  }
 
   TodoFile? get todoFile => _todoFile;
   TodoFile? get doneFile => _doneFile;
@@ -306,8 +348,10 @@ class TodoListNotifier extends ChangeNotifier {
 
   Future<void> switchRepository(
       TodoRepository todoRepository, TodoRepository doneRepository) async {
+    _stopFollowingChanges();
     _todoRepository = todoRepository;
     _doneRepository = doneRepository;
+    _followChanges();
 
     await loadTasks();
   }
@@ -329,6 +373,11 @@ class TodoListNotifier extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+
+    if (_reloadPending) {
+      _reloadPending = false;
+      await loadTasks();
     }
   }
 

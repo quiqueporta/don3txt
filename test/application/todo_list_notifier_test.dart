@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/domain/todo_file.dart';
@@ -19,6 +22,15 @@ class InMemoryTodoRepository implements TodoRepository {
   Future<void> save(TodoFile todoFile) async {
     _stored = todoFile;
   }
+
+  final _changes = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get changes => _changes.stream;
+
+  void announceChange() => _changes.add(null);
+
+  void failWatching() => _changes.addError(const FileSystemException('watch failed'));
 }
 
 void main() {
@@ -548,6 +560,83 @@ void main() {
         await notifier.saveRawContent('Task 1\n\nTask 2\n');
 
         expect(notifier.todoFile!.items.length, 2);
+      });
+    });
+
+    group('changes on disk', () {
+      test('reloads the tasks when the todo file changes on disk', () async {
+        final milk = TodoItem(description: 'Buy milk');
+        final bread = TodoItem(description: 'Buy bread');
+        repository = InMemoryTodoRepository(TodoFile([milk]));
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+
+        await repository.save(TodoFile([milk, bread]));
+        repository.announceChange();
+        await pumpEventQueue();
+
+        expect(notifier.todoFile!.items, [milk, bread]);
+      });
+
+      test('reloads the completed tasks when the done file changes on disk',
+          () async {
+        final milk = TodoItem(
+            description: 'Buy milk',
+            isCompleted: true,
+            completionDate: DateTime(2026, 10, 1));
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+
+        await doneRepository.save(TodoFile([milk]));
+        doneRepository.announceChange();
+        await pumpEventQueue();
+
+        expect(notifier.doneFile!.items, [milk]);
+      });
+
+      test('does not miss a change announced while the tasks are being loaded',
+          () async {
+        final milk = TodoItem(description: 'Buy milk');
+        final bread = TodoItem(description: 'Buy bread');
+        final pausedRepository = _PausedLoadRepository(TodoFile([milk]));
+        notifier = TodoListNotifier(pausedRepository, doneRepository);
+
+        final loading = notifier.loadTasks();
+        pausedRepository.stored = TodoFile([milk, bread]);
+        pausedRepository.announceChange();
+        await pumpEventQueue();
+        pausedRepository.resumeLoads();
+        await loading;
+        await pumpEventQueue();
+
+        expect(notifier.todoFile!.items, [milk, bread]);
+      });
+
+      test('keeps working when watching the files fails', () async {
+        final milk = TodoItem(description: 'Buy milk');
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+
+        repository.failWatching();
+        await pumpEventQueue();
+        await notifier.addTask('Buy milk');
+
+        expect(notifier.todoFile!.items.single.description, milk.description);
+      });
+
+      test('follows the new files after switching to another todo file',
+          () async {
+        final bread = TodoItem(description: 'Buy bread');
+        final otherRepository = InMemoryTodoRepository();
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+        await notifier.switchRepository(otherRepository, InMemoryTodoRepository());
+
+        await otherRepository.save(TodoFile([bread]));
+        otherRepository.announceChange();
+        await pumpEventQueue();
+
+        expect(notifier.todoFile!.items, [bread]);
       });
     });
 
@@ -1686,6 +1775,9 @@ String _formatDate(DateTime date) {
 
 class _FailingRepository implements TodoRepository {
   @override
+  Stream<void> get changes => const Stream.empty();
+
+  @override
   Future<TodoFile> load() async => throw Exception('disk error');
 
   @override
@@ -1693,6 +1785,9 @@ class _FailingRepository implements TodoRepository {
 }
 
 class _SlowRepository implements TodoRepository {
+  @override
+  Stream<void> get changes => const Stream.empty();
+
   int loadCallCount = 0;
 
   @override
@@ -1705,4 +1800,35 @@ class _SlowRepository implements TodoRepository {
 
   @override
   Future<void> save(TodoFile todoFile) async {}
+}
+
+class _PausedLoadRepository implements TodoRepository {
+  TodoFile stored;
+  final _changes = StreamController<void>.broadcast();
+  Completer<void> _loadsPaused = Completer<void>();
+
+  _PausedLoadRepository(this.stored);
+
+  @override
+  Future<TodoFile> load() async {
+    final content = stored;
+    await _loadsPaused.future;
+
+    return content;
+  }
+
+  @override
+  Future<void> save(TodoFile todoFile) async {
+    stored = todoFile;
+  }
+
+  @override
+  Stream<void> get changes => _changes.stream;
+
+  void announceChange() => _changes.add(null);
+
+  void resumeLoads() {
+    _loadsPaused.complete();
+    _loadsPaused = Completer<void>()..complete();
+  }
 }

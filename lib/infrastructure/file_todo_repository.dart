@@ -7,6 +7,7 @@ import 'package:don3txt/domain/todo_parser.dart';
 abstract class TodoRepository {
   Future<TodoFile> load();
   Future<void> save(TodoFile todoFile);
+  Stream<void> get changes;
 }
 
 class FileTodoRepository implements TodoRepository {
@@ -42,6 +43,24 @@ class FileTodoRepository implements TodoRepository {
     }
 
     return TodoFile(items);
+  }
+
+  // The folder is watched instead of the file because every save replaces todo.txt with a renamed file.
+  @override
+  Stream<void> get changes => File(_filePath)
+      .parent
+      .watch()
+      .where(_touchesThisFile)
+      .map((_) {});
+
+  bool _touchesThisFile(FileSystemEvent event) {
+    final destination = event is FileSystemMoveEvent ? event.destination : null;
+
+    return _isThisFile(event.path) || _isThisFile(destination);
+  }
+
+  bool _isThisFile(String? path) {
+    return path != null && File(path).absolute.path == File(_filePath).absolute.path;
   }
 
   @override

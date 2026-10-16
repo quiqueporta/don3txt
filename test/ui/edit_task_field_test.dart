@@ -583,6 +583,9 @@ void main() {
 }
 
 class InMemoryTodoRepository implements TodoRepository {
+  @override
+  Stream<void> get changes => const Stream.empty();
+
   final TodoFile _file;
 
   InMemoryTodoRepository(this._file);

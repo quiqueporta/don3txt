@@ -15,6 +15,9 @@ import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/screens/task_list_screen.dart';
 
 class InMemoryTodoRepository implements TodoRepository {
+  @override
+  Stream<void> get changes => const Stream.empty();
+
   TodoFile _stored = TodoFile([]);
 
   InMemoryTodoRepository([TodoFile? initial]) {
@@ -870,6 +873,9 @@ void main() {
 }
 
 class _CountingRepository implements TodoRepository {
+  @override
+  Stream<void> get changes => const Stream.empty();
+
   TodoFile _stored;
   int loadCallCount = 0;
 

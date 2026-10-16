@@ -14,6 +14,9 @@ import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/widgets/filter_bottom_sheet.dart';
 
 class InMemoryTodoRepository implements TodoRepository {
+  @override
+  Stream<void> get changes => const Stream.empty();
+
   TodoFile _stored = TodoFile([]);
 
   InMemoryTodoRepository([TodoFile? initial]) {
