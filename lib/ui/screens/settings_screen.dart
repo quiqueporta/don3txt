@@ -134,7 +134,7 @@ class SettingsScreen extends StatelessWidget {
 
     if (!context.mounted) return;
 
-    final directoryPath = await FilePicker.platform.getDirectoryPath();
+    final directoryPath = await FilePicker.getDirectoryPath();
     if (directoryPath == null) return;
 
     if (!context.mounted) return;
