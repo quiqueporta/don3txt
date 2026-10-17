@@ -403,7 +403,16 @@ class TodoListNotifier extends ChangeNotifier {
 
   String get rawContent => _todoFile?.serialize() ?? '';
 
-  Future<void> saveRawContent(String content) async {
+  Future<bool> saveRawContent(String content,
+      {required String editedFrom}) async {
+    final todoFile = await _todoRepository.load();
+
+    if (todoFile.serialize() != editedFrom) {
+      _showCurrentFiles(todoFile);
+
+      return false;
+    }
+
     final lines = content.split('\n');
     final items = <TodoItem>[];
 
@@ -418,6 +427,8 @@ class TodoListNotifier extends ChangeNotifier {
     notifyListeners();
 
     await _todoRepository.save(_todoFile!);
+
+    return true;
   }
 
   Future<bool> updateTask(TodoItem original, TodoItem newItem) async {

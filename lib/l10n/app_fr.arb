@@ -34,6 +34,7 @@
   "taskCompletedSnack": "Tâche terminée",
   "taskDeletedSnack": "Tâche supprimée",
   "taskChangedElsewhere": "Cette tâche a été modifiée sur un autre appareil",
+  "fileChangedElsewhere": "Le fichier a été modifié sur un autre appareil. Vos modifications n'ont pas été enregistrées.",
   "undo": "Annuler",
   "menuDelete": "Supprimer",
   "filterProject": "Projet",

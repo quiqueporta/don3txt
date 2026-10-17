@@ -34,6 +34,7 @@
   "taskCompletedSnack": "Tarea completada",
   "taskDeletedSnack": "Tarea eliminada",
   "taskChangedElsewhere": "Esta tarea se ha modificado en otro dispositivo",
+  "fileChangedElsewhere": "El fichero se ha modificado en otro dispositivo. Tus cambios no se han guardado.",
   "undo": "Deshacer",
   "menuDelete": "Eliminar",
   "filterProject": "Proyecto",

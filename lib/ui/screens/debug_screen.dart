@@ -12,13 +12,33 @@ class DebugScreen extends StatefulWidget {
 
 class _DebugScreenState extends State<DebugScreen> {
   late final TextEditingController _controller;
+  late final String _originalContent;
 
   @override
   void initState() {
     super.initState();
 
     final notifier = context.read<TodoListNotifier>();
-    _controller = TextEditingController(text: notifier.rawContent);
+    _originalContent = notifier.rawContent;
+    _controller = TextEditingController(text: _originalContent);
+  }
+
+  Future<void> _save() async {
+    final notifier = context.read<TodoListNotifier>();
+    final loc = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    final saved = await notifier.saveRawContent(_controller.text,
+        editedFrom: _originalContent);
+
+    if (!saved) {
+      messenger.showSnackBar(SnackBar(content: Text(loc.fileChangedElsewhere)));
+
+      return;
+    }
+
+    navigator.pop();
   }
 
   @override
@@ -36,15 +56,7 @@ class _DebugScreenState extends State<DebugScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
-            onPressed: () async {
-              final notifier = context.read<TodoListNotifier>();
-
-              await notifier.saveRawContent(_controller.text);
-
-              if (context.mounted) {
-                Navigator.of(context).pop();
-              }
-            },
+            onPressed: _save,
           ),
         ],
       ),

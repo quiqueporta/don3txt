@@ -524,7 +524,8 @@ void main() {
       test('parses raw text and updates todoFile', () async {
         await notifier.loadTasks();
 
-        await notifier.saveRawContent('Buy milk\n(A) Call mom +Family @phone\n');
+        await notifier.saveRawContent('Buy milk\n(A) Call mom +Family @phone\n',
+            editedFrom: notifier.rawContent);
 
         expect(notifier.todoFile!.items.length, 2);
         expect(notifier.todoFile!.items[0].description, 'Buy milk');
@@ -537,7 +538,8 @@ void main() {
       test('persists to repository', () async {
         await notifier.loadTasks();
 
-        await notifier.saveRawContent('Task from raw\n');
+        await notifier.saveRawContent('Task from raw\n',
+            editedFrom: notifier.rawContent);
 
         final reloaded = await repository.load();
         expect(reloaded.items.length, 1);
@@ -549,7 +551,8 @@ void main() {
         var notified = false;
         notifier.addListener(() => notified = true);
 
-        await notifier.saveRawContent('New task\n');
+        await notifier.saveRawContent('New task\n',
+            editedFrom: notifier.rawContent);
 
         expect(notified, true);
       });
@@ -557,7 +560,8 @@ void main() {
       test('skips empty lines', () async {
         await notifier.loadTasks();
 
-        await notifier.saveRawContent('Task 1\n\nTask 2\n');
+        await notifier.saveRawContent('Task 1\n\nTask 2\n',
+            editedFrom: notifier.rawContent);
 
         expect(notifier.todoFile!.items.length, 2);
       });

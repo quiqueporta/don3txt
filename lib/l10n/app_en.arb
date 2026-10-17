@@ -44,6 +44,7 @@
   "taskCompletedSnack": "Task completed",
   "taskDeletedSnack": "Task deleted",
   "taskChangedElsewhere": "This task was changed on another device",
+  "fileChangedElsewhere": "The file was changed on another device. Your changes were not saved.",
   "undo": "Undo",
   "menuDelete": "Delete",
   "filterProject": "Project",

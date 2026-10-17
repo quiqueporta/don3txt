@@ -54,6 +54,26 @@ void main() {
   });
 
   group('DebugScreen', () {
+    testWidgets(
+        'does not overwrite a file changed on another device while editing',
+        (tester) async {
+      await notifier.loadTasks();
+      await tester.pumpWidget(buildTestApp(notifier));
+      final changedElsewhere = TodoFile([TodoItem(description: 'Task 3')]);
+      await repository.save(changedElsewhere);
+
+      await tester.enterText(find.byType(TextField), 'My edit\n');
+      await tester.tap(find.byIcon(Icons.save));
+      await tester.pumpAndSettle();
+
+      expect(await repository.load(), same(changedElsewhere));
+      expect(
+          find.text(
+              'The file was changed on another device. Your changes were not saved.'),
+          findsOneWidget);
+      expect(find.text('My edit\n'), findsOneWidget);
+    });
+
     testWidgets('shows raw content in text field', (tester) async {
       await notifier.loadTasks();
 

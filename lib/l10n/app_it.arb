@@ -34,6 +34,7 @@
   "taskCompletedSnack": "Attività completata",
   "taskDeletedSnack": "Attività eliminata",
   "taskChangedElsewhere": "Questa attività è stata modificata su un altro dispositivo",
+  "fileChangedElsewhere": "Il file è stato modificato su un altro dispositivo. Le tue modifiche non sono state salvate.",
   "undo": "Annulla",
   "menuDelete": "Elimina",
   "filterProject": "Progetto",
