@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.13.0] - 2026-10-17
+
+### Added
+
+- Linux desktop version, available as an AppImage and as a tarball. The AppImage offers once to add don3txt to the applications menu (`--remove-desktop-entry` removes it); the tarball includes `install.sh` and `uninstall.sh`
+- The task list refreshes on its own when `todo.txt` or `done.txt` change on disk, for example when a sync tool brings changes from another device, and when the app returns to the foreground
+- Warning when the task you complete, restore, edit or delete was changed on another device, instead of acting on it. The raw editor also refuses to overwrite a file changed elsewhere and keeps your text
+
+### Changed
+
+- Every change is applied to the current content of the file, so tasks added or changed on another device are no longer overwritten
+- Files are saved atomically, so sync tools never pick up a half-written `todo.txt`
+
+### Fixed
+
+- Undoing a completion now restores exactly the task that was completed, instead of the last line of `done.txt`
+
 ## [1.12.1] - 2026-10-17
 
 ### Changed
