@@ -1,6 +1,6 @@
 # don3txt
 
-Task manager based on the open standard [todo.txt](http://todotxt.org/) format, built with Flutter for Android.
+Task manager based on the open standard [todo.txt](http://todotxt.org/) format, built with Flutter for Android and Linux.
 
 ## Tech stack
 
@@ -15,7 +15,7 @@ Task manager based on the open standard [todo.txt](http://todotxt.org/) format, 
 Clean Architecture with layer separation:
 
 - `lib/domain/` — Value Objects (`TodoItem`, `AppThemeMode`, `StartOfWeek`), Aggregates (`TodoFile`), pure parsing functions (`todo_parser.dart`), recurrence logic (`recurrence.dart`)
-- `lib/infrastructure/` — Repositories (`FileTodoRepository`, `SharedPreferencesSettingsRepository`). Also contains domain interfaces (abstractions only, no concrete implementations)
+- `lib/infrastructure/` — Repositories (`FileTodoRepository`, `SharedPreferencesSettingsRepository`) and platform services (`AndroidStoragePermission`, `UnrestrictedStoragePermission`). Also contains domain interfaces (abstractions only, no concrete implementations): `TodoRepository`, `SettingsRepository`, `StoragePermission`
 - `lib/application/` — Reactive state (`TodoListNotifier`, `SettingsNotifier` with `ChangeNotifier`)
 - `lib/ui/` — Theme, screens (`TaskListScreen`, `SettingsScreen`) and widgets (`SidebarDrawer`, `TaskTile`, `AddTaskField`, `EditTaskField`, `TaskInputBar`, `TagPickerSheet`)
 
@@ -34,6 +34,8 @@ Clean Architecture with layer separation:
 - Select todo.txt file from any location on the device
 - Light/dark/system theme, configurable upcoming period, configurable task sort order (multi-level chain), configurable priority colors (A–F)
 - Multi-language UI: English, Spanish, French, Italian, Portuguese (selector in Settings with "System default" option)
+- Safe to share the same `todo.txt` between devices through a sync tool: every operation rereads the file before changing it and identifies tasks by content (not position), saves are atomic (temporary file `.syncthing.don3txt-<name>.tmp` renamed over the original), the list reloads when the file changes on disk (`TodoRepository.changes`) and when the app returns to the foreground, and the user is warned when a task or the raw file was changed on another device
+- Linux desktop build distributed as AppImage and tarball (`linux/packaging/`). The AppImage `AppRun` asks once (with `zenity`) whether to add a menu entry and supports `--remove-desktop-entry`
 
 ## Commands
 
@@ -49,6 +51,13 @@ flutter run
 
 # Build APK
 flutter build apk --release
+
+# Install on a connected device keeping the app data (never use `flutter install`: it uninstalls first)
+adb install -r build/app/outputs/flutter-apk/app-release.apk
+
+# Build Linux and package AppImage + tarball into build/linux/dist/
+flutter build linux --release
+linux/packaging/package.sh X.Y.Z
 ```
 
 ## Tests
@@ -85,5 +94,6 @@ When it's time to bump the version, follow these steps in order:
 4. **Commit** with message `Bump version to X.Y.Z`
 5. **Create tag** — `git tag vX.Y.Z`
 6. **Push** — `git push origin main && git push origin vX.Y.Z`
-7. **Build APK** — `flutter build apk --release`
-8. **Create GitHub Release** — `gh release create vX.Y.Z build/app/outputs/flutter-apk/app-release.apk#don3txt-vX.Y.Z.apk --title "vX.Y.Z"` with changelog notes
+7. **Build APK** — `flutter build apk --release && cp build/app/outputs/flutter-apk/app-release.apk build/don3txt-vX.Y.Z.apk`
+8. **Create GitHub Release** — `gh release create vX.Y.Z build/don3txt-vX.Y.Z.apk --title "vX.Y.Z"` with changelog notes
+9. **Check the Linux build** — publishing the release triggers `.github/workflows/release-linux.yml`, which attaches `don3txt-vX.Y.Z-x86_64.AppImage` and `don3txt-vX.Y.Z-linux-x86_64.tar.gz` to it. Wait for it with `gh run watch` and confirm both files are in the release

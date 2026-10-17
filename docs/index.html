@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>don3txt — todo.txt App for Android | Free, Open Source Task Manager</title>
-  <meta name="description" content="don3txt is a free todo.txt app for Android. Manage tasks in plain text — no cloud, no accounts, no telemetry. Open source, MIT licensed. Compatible with Syncthing and Dropbox.">
-  <meta name="keywords" content="todo.txt, todo.txt app, todo.txt android, task manager android, plain text task manager, gtd android, open source todo app, todotxt android, syncthing todo, offline task manager">
+  <script>document.documentElement.classList.add('js');</script>
+  <title>don3txt — todo.txt App for Android and Linux | Free, Open Source Task Manager</title>
+  <meta name="description" content="don3txt is a free todo.txt app for Android and Linux. Manage tasks in plain text — no cloud, no accounts, no telemetry. Open source, MIT licensed. Compatible with Syncthing and Dropbox.">
+  <meta name="keywords" content="todo.txt, todo.txt app, todo.txt android, todo.txt linux, task manager android, task manager linux, todo.txt appimage, plain text task manager, gtd android, open source todo app, todotxt android, syncthing todo, offline task manager">
   <meta name="author" content="Quique Porta">
   <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="theme-color" content="#f5a623">
 
-  <link rel="canonical" href="https://quiqueporta.github.io/don3txt/">
+  <link rel="canonical" href="https://quiqueporta.com/don3txt/">
   <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="shortcut icon" href="favicon.ico">
@@ -21,30 +22,32 @@
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="don3txt">
-  <meta property="og:title" content="don3txt — todo.txt App for Android">
-  <meta property="og:description" content="Free, open source todo.txt task manager for Android. Plain text, local-only, no accounts. Your data is yours.">
-  <meta property="og:url" content="https://quiqueporta.github.io/don3txt/">
-  <meta property="og:image" content="https://quiqueporta.github.io/don3txt/don3txt_logo.png">
-  <meta property="og:image:alt" content="don3txt logo">
+  <meta property="og:title" content="don3txt — todo.txt App for Android and Linux">
+  <meta property="og:description" content="Free, open source todo.txt task manager for Android and Linux. Plain text, local-only, no accounts. Your data is yours.">
+  <meta property="og:url" content="https://quiqueporta.com/don3txt/">
+  <meta property="og:image" content="https://quiqueporta.com/don3txt/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="don3txt — todo.txt app for Android and Linux">
   <meta property="og:locale" content="en_US">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@don3txt">
   <meta name="twitter:creator" content="@don3txt">
-  <meta name="twitter:title" content="don3txt — todo.txt App for Android">
-  <meta name="twitter:description" content="Free, open source todo.txt task manager for Android. Plain text, local-only, no accounts.">
-  <meta name="twitter:image" content="https://quiqueporta.github.io/don3txt/don3txt_logo.png">
+  <meta name="twitter:title" content="don3txt — todo.txt App for Android and Linux">
+  <meta name="twitter:description" content="Free, open source todo.txt task manager for Android and Linux. Plain text, local-only, no accounts.">
+  <meta name="twitter:image" content="https://quiqueporta.com/don3txt/og-image.png">
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "MobileApplication",
+    "@type": "SoftwareApplication",
     "name": "don3txt",
-    "alternateName": "don3txt — todo.txt for Android",
+    "alternateName": "don3txt — todo.txt for Android and Linux",
     "applicationCategory": "ProductivityApplication",
-    "operatingSystem": "Android",
-    "description": "don3txt is a free, open source todo.txt task manager for Android. Manage your tasks in plain text with full support for the todo.txt open standard: priorities, projects, contexts, due dates, threshold dates and recurring tasks. No cloud, no accounts, no telemetry.",
-    "url": "https://quiqueporta.github.io/don3txt/",
+    "operatingSystem": "Android, Linux",
+    "description": "don3txt is a free, open source todo.txt task manager for Android and Linux. Manage your tasks in plain text with full support for the todo.txt open standard: priorities, projects, contexts, due dates, threshold dates and recurring tasks. No cloud, no accounts, no telemetry.",
+    "url": "https://quiqueporta.com/don3txt/",
     "downloadUrl": "https://github.com/quiqueporta/don3txt/releases",
     "softwareVersion": "1.12.1",
     "author": {
@@ -53,11 +56,11 @@
       "url": "https://github.com/quiqueporta"
     },
     "license": "https://opensource.org/licenses/MIT",
-    "image": "https://quiqueporta.github.io/don3txt/don3txt_logo.png",
+    "image": "https://quiqueporta.com/don3txt/don3txt_logo.png",
     "screenshot": [
-      "https://quiqueporta.github.io/don3txt/screen_1.png",
-      "https://quiqueporta.github.io/don3txt/screen_2.png",
-      "https://quiqueporta.github.io/don3txt/screen_3.png"
+      "https://quiqueporta.com/don3txt/screen_1.png",
+      "https://quiqueporta.com/don3txt/screen_2.png",
+      "https://quiqueporta.com/don3txt/screen_3.png"
     ],
     "offers": {
       "@type": "Offer",
@@ -77,6 +80,8 @@
       "Light, dark and system theme",
       "Pull-to-refresh and done.txt archive",
       "Compatible with Syncthing and Dropbox sync",
+      "Safe to share the same todo.txt between phone and computer",
+      "Linux desktop app as AppImage",
       "100% offline, no account required"
     ]
   }
@@ -116,7 +121,7 @@
         "name": "How do I sync my tasks across devices?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "don3txt does not include built-in sync, by design. You can sync your todo.txt file using any folder-sync service such as Syncthing, Dropbox, Google Drive or Nextcloud. Just point don3txt to the synced file."
+          "text": "don3txt does not include built-in sync, by design. You can sync your todo.txt file using any folder-sync service such as Syncthing, Dropbox, Google Drive or Nextcloud. Just point don3txt to the synced file: the list refreshes on its own when the file changes, and tasks changed on another device are never overwritten."
         }
       },
       {
@@ -129,10 +134,10 @@
       },
       {
         "@type": "Question",
-        "name": "Where is the don3txt APK available?",
+        "name": "Where can I download don3txt?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "The latest don3txt APK is published on GitHub Releases at github.com/quiqueporta/don3txt/releases. Download the APK and install it directly on your Android device."
+          "text": "Every don3txt release is published on GitHub Releases at github.com/quiqueporta/don3txt/releases, with an APK for Android and an AppImage and a tarball for Linux."
         }
       }
     ]
@@ -241,13 +246,13 @@
       opacity: 0.4;
     }
 
-    .fade-in {
+    .js .fade-in {
       opacity: 0;
       transform: translateY(30px);
       transition: opacity 0.6s ease, transform 0.6s ease;
     }
 
-    .fade-in.visible {
+    .js .fade-in.visible {
       opacity: 1;
       transform: translateY(0);
     }
@@ -1522,12 +1527,12 @@
       <img src="don3txt_logo.png" alt="don3txt logo" class="hero-logo fade-in" data-delay="80">
 
       <h1 class="fade-in" data-delay="160">
-        todo.txt app for Android.<br>
+        todo.txt app for Android and Linux.<br>
         <span class="name">No cloud. No accounts.</span>
       </h1>
 
       <p class="hero-tagline fade-in" data-delay="240">
-        <strong>don3txt</strong> is a free, open source task manager for Android based on the
+        <strong>don3txt</strong> is a free, open source task manager for Android and Linux based on the
         <a href="http://todotxt.org/" class="format-link" target="_blank" rel="noopener">todo.txt</a>
         open standard. Plain text, 100% local, no external dependencies. Your data is yours.
       </p>
@@ -1539,7 +1544,7 @@
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          Download APK
+          Download
         </a>
         <a href="https://github.com/quiqueporta/don3txt" class="btn-secondary" target="_blank" rel="noopener">
           <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -1686,7 +1691,7 @@
         <div class="feature-card fade-in" data-delay="0">
           <div class="feature-icon">&#127763;</div>
           <h3>Light, dark and system theme</h3>
-          <p>Three theme options applied instantly. System mode follows your Android configuration automatically.</p>
+          <p>Three theme options applied instantly. System mode follows your system configuration automatically.</p>
         </div>
 
         <div class="feature-card fade-in" data-delay="80">
@@ -1823,7 +1828,7 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
         <details class="faq-item">
           <summary>How do I sync my tasks across devices?</summary>
           <div class="faq-answer">
-            <p>don3txt does not include built-in sync, by design. You can sync your todo.txt file using any folder-sync service such as <a href="https://syncthing.net/" target="_blank" rel="noopener">Syncthing</a>, <a href="https://www.dropbox.com/" target="_blank" rel="noopener">Dropbox</a>, Google Drive or Nextcloud. Just point don3txt to the synced file and pull-to-refresh to reload changes.</p>
+            <p>don3txt does not include built-in sync, by design. You can sync your todo.txt file using any folder-sync service such as <a href="https://syncthing.net/" target="_blank" rel="noopener">Syncthing</a>, <a href="https://www.dropbox.com/" target="_blank" rel="noopener">Dropbox</a>, Google Drive or Nextcloud. Just point don3txt to the synced file: the list refreshes on its own when the file changes, and tasks changed on another device are never overwritten.</p>
           </div>
         </details>
 
@@ -1835,9 +1840,9 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
         </details>
 
         <details class="faq-item">
-          <summary>Where can I download the don3txt APK?</summary>
+          <summary>Where can I download don3txt?</summary>
           <div class="faq-answer">
-            <p>The latest don3txt APK is published on <a href="https://github.com/quiqueporta/don3txt/releases" target="_blank" rel="noopener">GitHub Releases</a>. Download the APK and install it directly on your Android device.</p>
+            <p>Every release is published on <a href="https://github.com/quiqueporta/don3txt/releases" target="_blank" rel="noopener">GitHub Releases</a>. On Android, download the APK and install it. On Linux, download the AppImage, make it executable and run it: the first time it offers to add don3txt to your applications menu. A tarball with an install script is also available.</p>
           </div>
         </details>
 
@@ -1849,7 +1854,7 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
     <div class="container">
       <div class="cta-box fade-in" data-delay="0">
         <h2>Get started today</h2>
-        <p>Download the APK, pick your todo.txt file and start managing your tasks with no strings attached.</p>
+        <p>Download don3txt for Android or Linux, pick your todo.txt file and start managing your tasks with no strings attached.</p>
         <p class="cta-version">Current version: v1.12.1</p>
         <div class="cta-actions">
           <a href="https://github.com/quiqueporta/don3txt/releases" class="btn-primary" target="_blank" rel="noopener">
@@ -1858,7 +1863,7 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            Download APK
+            Download
           </a>
           <a href="https://github.com/quiqueporta/don3txt" class="btn-secondary" target="_blank" rel="noopener">
             <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">

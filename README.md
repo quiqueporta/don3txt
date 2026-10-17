@@ -4,7 +4,30 @@
 
 https://quiqueporta.com/don3txt/
 
-A mobile application for managing tasks based on the [todo.txt](http://todotxt.org/) format, designed for users who prefer plain text, full data ownership, and simple workflows.
+A task manager for **Android** and **Linux** based on the [todo.txt](http://todotxt.org/) format, designed for users who prefer plain text, full data ownership, and simple workflows.
+
+## Download
+
+All downloads are on the [latest release](https://github.com/quiqueporta/don3txt/releases/latest).
+
+### Android
+
+Download the `.apk` file and install it on your device.
+
+### Linux
+
+- **AppImage** (recommended): download `don3txt-vX.Y.Z-x86_64.AppImage`, make it executable and run it:
+
+  ```bash
+  chmod +x don3txt-*-x86_64.AppImage
+  ./don3txt-*-x86_64.AppImage
+  ```
+
+  The first time it asks whether to add don3txt to your applications menu. You can remove the menu entry later with `./don3txt-*-x86_64.AppImage --remove-desktop-entry`. If you manage AppImages with [Gear Lever](https://flathub.org/apps/it.mijorus.gearlever) or AppImageLauncher, the AppImage leaves the menu entry to them.
+
+- **Tarball**: extract `don3txt-vX.Y.Z-linux-x86_64.tar.gz` wherever you want to keep the app and run `./install.sh` inside it to add it to your applications menu (`./uninstall.sh` removes it).
+
+Choosing a folder in Settings uses `zenity`, which most desktops already include.
 
 ## Features
 
@@ -32,7 +55,8 @@ A mobile application for managing tasks based on the [todo.txt](http://todotxt.o
 ### Views and filters
 
 - **Inbox**: shows all pending tasks
-- **Today** (default view): shows tasks due today or earlier (overdue), with count badges in the sidebar
+- **Past**: shows tasks whose reference date is before today, with a red count badge in the sidebar
+- **Today** (default view): shows tasks whose reference date is today, with a count badge in the sidebar. The reference date is `due:`, or `t:` when there is no `due:`
 - **Upcoming**: shows tasks due from tomorrow up to N days ahead, with a count badge and period indicator (e.g. "Upcoming · 7d"). The period is configurable in settings (3, 7, 14 or 30 days)
 - **My Projects**: filters by project (`+name`), generated dynamically from pending tasks. Collapsible section in sidebar
 - **My Contexts**: filters by context (`@name`), generated dynamically from pending tasks. Collapsible section in sidebar
@@ -47,6 +71,17 @@ A mobile application for managing tasks based on the [todo.txt](http://todotxt.o
 - **Create a new file** in a custom location
 - **Restore** to the default file at any time
 - Compatible with synchronisation tools such as **Syncthing**, **Dropbox**, etc.
+
+### Using the same file on several devices
+
+don3txt is designed to share `todo.txt` between your phone and your computer through a synchronisation tool:
+
+- Every change rereads the file just before saving, so tasks added or changed on another device are never overwritten
+- The list refreshes on its own when the file changes on disk and when the app returns to the foreground
+- If a task you act on was changed on another device in the meantime, nothing is overwritten and the app tells you so
+- Files are saved atomically, so the synchronisation tool never picks up a half-written `todo.txt`
+
+If both devices change the file while they cannot see each other (for example, one of them offline), your synchronisation tool decides what to do. Syncthing, for instance, keeps one version and saves the other as `todo.sync-conflict-….txt` in the same folder.
 
 ### Settings
 
@@ -83,8 +118,9 @@ Review report due:2024-03-01 t:2024-02-25 rec:+1m
 
 ## Requirements
 
-- [Flutter](https://docs.flutter.dev/get-started/install) >= 3.9.2
-- Android SDK (Android only for now)
+- [Flutter](https://docs.flutter.dev/get-started/install) 3.47.7 (the exact version is set in `pubspec.yaml`)
+- **Android**: Android SDK with platform 37 and Java 17
+- **Linux**: `clang`, `cmake`, `ninja-build`, `pkg-config` and `libgtk-3-dev`
 
 ## Install dependencies
 
@@ -116,6 +152,15 @@ flutter build apk --release
 
 The APK is generated at `build/app/outputs/flutter-apk/app-release.apk`.
 
+### Linux
+
+```bash
+flutter build linux --release
+linux/packaging/package.sh X.Y.Z
+```
+
+The app is generated at `build/linux/x64/release/bundle/`, and the AppImage and tarball at `build/linux/dist/`.
+
 ## Run on emulator or device
 
 ```bash
@@ -125,14 +170,10 @@ flutter run
 ## Install on a connected device
 
 ```bash
-flutter install
+adb install -r build/app/outputs/flutter-apk/app-release.apk
 ```
 
-Or directly with `adb`:
-
-```bash
-adb install build/app/outputs/flutter-apk/app-release.apk
-```
+Avoid `flutter install`: it uninstalls the previous version first, which deletes the app settings.
 
 ## Project structure
 
