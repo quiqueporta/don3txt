@@ -53,14 +53,7 @@ class _EditTaskFieldState extends State<EditTaskField> {
   }
 
   String _buildEditableText(TodoItem item) {
-    final parts = <String>[item.description];
-
-    for (final entry in item.metadata.entries) {
-      if (entry.key == 'due' || entry.key == 't' || entry.key == 'rec') {
-        continue;
-      }
-      parts.add('${entry.key}:${entry.value}');
-    }
+    final parts = [item.description, ...item.tags.map((tag) => tag.label)];
 
     return parts.join(' ');
   }

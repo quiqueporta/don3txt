@@ -215,6 +215,31 @@ void main() {
       expect(find.text('2w'), findsOneWidget);
     });
 
+    testWidgets('shows each free tag with a label icon', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TaskTile(
+              item: TodoItem(
+                description: 'Send invoice',
+                metadata: {
+                  'waiting': 'quique',
+                  'next': 'yes',
+                  'due': '2026-10-30',
+                },
+              ),
+              onToggle: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.label_outline), findsNWidgets(2));
+      expect(find.text('waiting:quique'), findsOneWidget);
+      expect(find.text('next:yes'), findsOneWidget);
+      expect(find.text('due:2026-10-30'), findsNothing);
+    });
+
     testWidgets('does not show repeat icon when no rec:', (tester) async {
       await tester.pumpWidget(
         MaterialApp(

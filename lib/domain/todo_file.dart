@@ -109,8 +109,8 @@ class TodoFile {
   Map<String, Set<String>> _valuesByFreeKey() {
     final valuesByKey = <String, Set<String>>{};
 
-    for (final entry in _freeMetadataOfPendingTasks) {
-      valuesByKey.putIfAbsent(entry.key, () => {}).add(entry.value);
+    for (final tag in pendingTasks.expand((item) => item.tags)) {
+      valuesByKey.putIfAbsent(tag.key, () => {}).add(tag.value!);
     }
 
     return valuesByKey;
@@ -126,11 +126,6 @@ class TodoFile {
         for (final value in sortedValues) Tag(key, value),
     ];
   }
-
-  Iterable<MapEntry<String, String>> get _freeMetadataOfPendingTasks =>
-      pendingTasks
-          .expand((item) => item.metadata.entries)
-          .where((entry) => !Tag.isReserved(entry.key));
 
   List<TodoItem> tasksByTag(Tag tag) {
     return pendingTasks.where((item) => tag.isIn(item.metadata)).toList();

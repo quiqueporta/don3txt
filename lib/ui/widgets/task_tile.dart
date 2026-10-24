@@ -34,8 +34,10 @@ class TaskTile extends StatelessWidget {
     final startDate = item.metadata['t'];
     final recurrence = item.metadata['rec'];
     final priority = item.priority;
+    final freeTags = item.tags;
     final hasMetadata = priority != null ||
         tags.isNotEmpty ||
+        freeTags.isNotEmpty ||
         dueDate != null ||
         startDate != null ||
         recurrence != null;
@@ -114,6 +116,12 @@ class TaskTile extends StatelessWidget {
                             icon: Icons.alternate_email,
                             label: context.replaceFirst('@', ''),
                             color: Colors.deepPurple,
+                          ),
+                        for (final tag in freeTags)
+                          _TagChip(
+                            icon: Icons.label_outline,
+                            label: tag.label,
+                            color: Colors.orange,
                           ),
                       ],
                     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:don3txt/domain/tag.dart';
 
 const _sentinel = Object();
 
@@ -22,6 +23,11 @@ class TodoItem {
     this.contexts = const [],
     this.metadata = const {},
   });
+
+  List<Tag> get tags => [
+        for (final MapEntry(:key, :value) in metadata.entries)
+          if (!Tag.isReserved(key)) Tag(key, value),
+      ];
 
   TodoItem copyWith({
     bool? isCompleted,
