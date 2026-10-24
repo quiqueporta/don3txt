@@ -79,7 +79,7 @@ Pay rent due:2024-02-01 rec:1m
 Review report due:2024-03-01 t:2024-02-25 rec:+1m
 ```
 
-Components: completion (`x`), priority (`(A)`-`(Z)`), dates (`YYYY-MM-DD`), projects (`+name`), contexts (`@name`), metadata (`key:value`), recurrence (`rec:[+]Nu`), threshold date (`t:YYYY-MM-DD`).
+Components: completion (`x`), priority (`(A)`-`(Z)`), dates (`YYYY-MM-DD`), projects (`+name`), contexts (`@name`), metadata (`key:value`, where the key must be a name starting with a letter, so times like `10:30` stay in the description), recurrence (`rec:[+]Nu`), threshold date (`t:YYYY-MM-DD`).
 
 ## Release process
 

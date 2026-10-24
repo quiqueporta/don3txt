@@ -98,6 +98,27 @@ void main() {
       expect(item.metadata['t'], '2026-03-10');
     });
 
+    for (final word in ['10:30', '2:1', '-x:y', '_x:y']) {
+      test('keeps $word in the description because its key is not a name', () {
+        final item = parseLine('Meeting $word with Ana');
+
+        expect(item!.description, 'Meeting $word with Ana');
+        expect(item.metadata, isEmpty);
+      });
+    }
+
+    test('parses metadata whose key is a name with accents, digits, dashes or underscores', () {
+      final item = parseLine('Task waiting2:ana follow-up:yes my_key:1 año:2026');
+
+      expect(item!.metadata, {
+        'waiting2': 'ana',
+        'follow-up': 'yes',
+        'my_key': '1',
+        'año': '2026',
+      });
+      expect(item.description, 'Task');
+    });
+
     test('returns null for empty line', () {
       expect(parseLine(''), isNull);
       expect(parseLine('   '), isNull);

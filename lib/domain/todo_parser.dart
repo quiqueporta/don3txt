@@ -4,7 +4,8 @@ final _dateRegex = RegExp(r'^\d{4}-\d{2}-\d{2}$');
 final _priorityRegex = RegExp(r'^\(([A-Z])\)$');
 final _projectRegex = RegExp(r'^\+\S+$');
 final _contextRegex = RegExp(r'^@\S+$');
-final _metadataRegex = RegExp(r'^(\S+):(\S+)$');
+// Only a name can be a key, so times and ratios such as 10:30 stay in the description.
+final _metadataRegex = RegExp(r'^(\p{L}[\p{L}\p{N}_-]*):(\S+)$', unicode: true);
 final _urlRegex = RegExp(r'^https?://', caseSensitive: false);
 
 DateTime? _tryParseDate(String s) {
@@ -82,7 +83,7 @@ TodoItem? parseLine(String line) {
       contexts.add(token);
     } else {
       final metaMatch = _metadataRegex.firstMatch(token);
-      if (metaMatch != null && !token.startsWith('//') && !_urlRegex.hasMatch(token) && metaMatch.group(1) != token) {
+      if (metaMatch != null && !_urlRegex.hasMatch(token)) {
         metadata[metaMatch.group(1)!] = metaMatch.group(2)!;
       } else {
         descriptionParts.add(token);
