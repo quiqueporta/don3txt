@@ -19,6 +19,7 @@
 /// )
 /// ```
 import 'package:material_ui/material_ui.dart';
+import 'package:don3txt/domain/tag.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
 
 class TaskInputBar extends StatelessWidget {
@@ -36,6 +37,7 @@ class TaskInputBar extends StatelessWidget {
   final Color? priorityColor;
   final Set<String> selectedProjects;
   final Set<String> selectedContexts;
+  final Set<Tag> selectedTags;
 
   final VoidCallback onClearDate;
   final VoidCallback onClearStartDate;
@@ -43,6 +45,7 @@ class TaskInputBar extends StatelessWidget {
   final VoidCallback onClearPriority;
   final ValueChanged<String> onRemoveProject;
   final ValueChanged<String> onRemoveContext;
+  final ValueChanged<Tag>? onRemoveTag;
 
   const TaskInputBar({
     super.key,
@@ -59,12 +62,14 @@ class TaskInputBar extends StatelessWidget {
     this.priorityColor,
     this.selectedProjects = const {},
     this.selectedContexts = const {},
+    this.selectedTags = const {},
     required this.onClearDate,
     required this.onClearStartDate,
     required this.onClearRecurrence,
     required this.onClearPriority,
     required this.onRemoveProject,
     required this.onRemoveContext,
+    this.onRemoveTag,
   });
 
   /// Convierte una cadena de recurrencia en formato todo.txt a texto legible
@@ -193,6 +198,12 @@ class TaskInputBar extends StatelessWidget {
                 label: Text(ctx),
                 deleteIcon: const Icon(Icons.close, size: 18),
                 onDeleted: () => onRemoveContext(ctx),
+              ),
+            for (final tag in selectedTags)
+              Chip(
+                label: Text(tag.label),
+                deleteIcon: const Icon(Icons.close, size: 18),
+                onDeleted: () => onRemoveTag?.call(tag),
               ),
           ],
         ),

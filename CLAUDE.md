@@ -14,7 +14,7 @@ Task manager based on the open standard [todo.txt](http://todotxt.org/) format, 
 
 Clean Architecture with layer separation:
 
-- `lib/domain/` — Value Objects (`TodoItem`, `AppThemeMode`, `StartOfWeek`), Aggregates (`TodoFile`), pure parsing functions (`todo_parser.dart`), recurrence logic (`recurrence.dart`)
+- `lib/domain/` — Value Objects (`TodoItem`, `Tag`, `AppThemeMode`, `StartOfWeek`), Aggregates (`TodoFile`), pure parsing functions (`todo_parser.dart`), recurrence logic (`recurrence.dart`)
 - `lib/infrastructure/` — Repositories (`FileTodoRepository`, `SharedPreferencesSettingsRepository`) and platform services (`AndroidStoragePermission`, `UnrestrictedStoragePermission`). Also contains domain interfaces (abstractions only, no concrete implementations): `TodoRepository`, `SettingsRepository`, `StoragePermission`
 - `lib/application/` — Reactive state (`TodoListNotifier`, `SettingsNotifier` with `ChangeNotifier`)
 - `lib/ui/` — Theme, screens (`TaskListScreen`, `SettingsScreen`) and widgets (`SidebarDrawer`, `TaskTile`, `AddTaskField`, `EditTaskField`, `TaskInputBar`, `TagPickerSheet`)
@@ -24,10 +24,11 @@ Clean Architecture with layer separation:
 - CRUD task management with standard todo.txt format
 - Priorities `(A)`-`(Z)`, projects (`+name`), contexts (`@name`), metadata (`key:value`)
 - Due dates (`due:`) with calendar picker
-- Threshold dates (`t:`) with calendar picker — marks tasks as "deferred until" a date. Tasks with future `t:` are hidden only from the action views Past and Today. They remain visible (with reduced opacity) in Inbox, Project, Context, and Recurring views. In Past, Today and Upcoming, `t:` acts as a fallback reference date when the task has no `due:`
+- Threshold dates (`t:`) with calendar picker — marks tasks as "deferred until" a date. Tasks with future `t:` are hidden only from the action views Past and Today. They remain visible (with reduced opacity) in Inbox, Project, Context, Tag, and Recurring views. In Past, Today and Upcoming, `t:` acts as a fallback reference date when the task has no `due:`
 - Recurring tasks (`rec:`) with flexible and strict (`+`) modes. Strict requires `t:` to calculate from original date; without `t:` falls back to flexible
 - Visual project and context pickers: `@` and `+` buttons in the editor icon bar open a `ModalBottomSheet` (`TagPickerSheet`) with existing tags as selectable chips and a field to create new ones. Selected tags are shown as removable chips before saving. Compatible with manual typing: if the user types `@context` directly in the text, it merges without duplicates with those selected via UI
-- Views: Today (default, tasks with reference date equal to today, grey badge), Past (tasks with reference date before today, red badge), Inbox, Upcoming (tasks from tomorrow to N days, configurable period), filter by Project (collapsible), filter by Context (collapsible), Recurring (tasks with `rec:`, no threshold filter), Completed (completed tasks, sorted by completion date descending). The reference date is `due:`, falling back to `t:` when there is no `due:`
+- Views: Today (default, tasks with reference date equal to today, grey badge), Past (tasks with reference date before today, red badge), Inbox, Upcoming (tasks from tomorrow to N days, configurable period), filter by Project (collapsible), filter by Context (collapsible), filter by Tag (collapsible), Recurring (tasks with `rec:`, no threshold filter), Completed (completed tasks, sorted by completion date descending). The reference date is `due:`, falling back to `t:` when there is no `due:`
+- Free tags: any `key:value` metadata whose key the app does not give meaning to (`due`, `t`, `rec` are reserved), e.g. `waiting:quique` or `next:yes`. The sidebar lists each key (all tasks with that key) and, when a key has several values, each value nested below it; the entry being shown is highlighted. A task added from a tag view gets that tag as a removable chip (from a key-only view, only when all its tasks share a single value, e.g. `next` → `next:yes`). Tasks with future `t:` stay visible with reduced opacity, as in Project and Context. The filter sheet offers the same tags as chips (`next`, `waiting`, `waiting:ana`…), matching tasks with any of the chosen tags
 - Task deletion from three-dot menu with Snackbar and Undo
 - Snackbar with Undo when completing a task
 - Free-text search across task descriptions, available in all views

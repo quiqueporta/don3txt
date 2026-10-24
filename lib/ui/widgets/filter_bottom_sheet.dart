@@ -13,6 +13,7 @@ class FilterBottomSheet extends StatelessWidget {
     final projects = notifier.availableProjectsForView;
     final contexts = notifier.availableContextsForView;
     final priorities = notifier.availablePrioritiesForView;
+    final tags = notifier.availableTagsForView;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -64,6 +65,22 @@ class FilterBottomSheet extends StatelessWidget {
                     label: Text('($p)'),
                     selected: selected,
                     onSelected: (_) => notifier.toggleFilterPriority(p),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (tags.isNotEmpty) ...[
+              _SectionHeader(title: loc.filterTag),
+              Wrap(
+                spacing: 8,
+                children: tags.map((tag) {
+                  final selected = notifier.filterTags.contains(tag);
+
+                  return FilterChip(
+                    label: Text(tag.label),
+                    selected: selected,
+                    onSelected: (_) => notifier.toggleFilterTag(tag),
                   );
                 }).toList(),
               ),

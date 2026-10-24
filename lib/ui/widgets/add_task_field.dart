@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/domain/priority_colors.dart';
+import 'package:don3txt/domain/tag.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/widgets/recurrence_dialog.dart';
 import 'package:don3txt/ui/widgets/tag_picker_sheet.dart';
@@ -17,6 +18,7 @@ class AddTaskField extends StatefulWidget {
   final DateTime? initialDueDate;
   final Set<String> initialProjects;
   final Set<String> initialContexts;
+  final Set<Tag> initialTags;
 
   const AddTaskField({
     super.key,
@@ -24,6 +26,7 @@ class AddTaskField extends StatefulWidget {
     this.initialDueDate,
     this.initialProjects = const {},
     this.initialContexts = const {},
+    this.initialTags = const {},
   });
 
   @override
@@ -38,6 +41,7 @@ class _AddTaskFieldState extends State<AddTaskField> {
   String? _priority;
   Set<String> _selectedProjects = {};
   Set<String> _selectedContexts = {};
+  Set<Tag> _selectedTags = {};
 
   @override
   void initState() {
@@ -45,6 +49,7 @@ class _AddTaskFieldState extends State<AddTaskField> {
     _selectedDate = widget.initialDueDate;
     _selectedProjects = Set.of(widget.initialProjects);
     _selectedContexts = Set.of(widget.initialContexts);
+    _selectedTags = Set.of(widget.initialTags);
   }
 
   // Compara por token completo (split por espacios) en vez de subcadena para
@@ -66,8 +71,13 @@ class _AddTaskFieldState extends State<AddTaskField> {
     final contextTokens = _selectedContexts
         .where((c) => !_containsToken(text, c))
         .toList();
+    final tagTokens = _selectedTags
+        .map((tag) => tag.label)
+        .where((label) => !_containsToken(text, label))
+        .toList();
 
-    final fullText = [text, ...projectTokens, ...contextTokens].join(' ');
+    final fullText =
+        [text, ...projectTokens, ...contextTokens, ...tagTokens].join(' ');
 
     widget.onSubmit(fullText,
         dueDate: _selectedDate,
@@ -83,6 +93,7 @@ class _AddTaskFieldState extends State<AddTaskField> {
       _priority = null;
       _selectedProjects = {};
       _selectedContexts = {};
+      _selectedTags = {};
     });
   }
 
@@ -259,6 +270,7 @@ class _AddTaskFieldState extends State<AddTaskField> {
             priorityColor: _priorityChipColor(priorityColors),
             selectedProjects: _selectedProjects,
             selectedContexts: _selectedContexts,
+            selectedTags: _selectedTags,
             onClearDate: () => setState(() => _selectedDate = null),
             onClearStartDate: () => setState(() => _selectedStartDate = null),
             onClearRecurrence: () => setState(() => _recurrence = null),
@@ -267,6 +279,8 @@ class _AddTaskFieldState extends State<AddTaskField> {
                 setState(() => _selectedProjects.remove(p)),
             onRemoveContext: (c) =>
                 setState(() => _selectedContexts.remove(c)),
+            onRemoveTag: (tag) =>
+                setState(() => _selectedTags.remove(tag)),
           ),
         ],
       ),

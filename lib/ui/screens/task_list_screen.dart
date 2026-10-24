@@ -82,6 +82,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       UpcomingView() => loc.upcoming,
       ProjectView(:final project) => project.replaceFirst('+', ''),
       ContextView(:final context) => context.replaceFirst('@', ''),
+      TagView(:final tag) => tag.label,
       RecurringView() => loc.recurring,
       CompletedView() => loc.completed,
     };
@@ -114,6 +115,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           initialDueDate: notifier.dueDateForNewTasks,
           initialProjects: notifier.projectsForNewTasks,
           initialContexts: notifier.contextsForNewTasks,
+          initialTags: notifier.tagsForNewTasks,
           onSubmit: (text, {dueDate, startDate, recurrence, priority}) {
             notifier.addTask(text,
                 dueDate: dueDate,

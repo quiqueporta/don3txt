@@ -120,5 +120,40 @@ void main() {
         expect(notifier.filterContexts.contains('@phone'), isTrue);
       },
     );
+
+    testWidgets(
+      'tag chips narrow the view to tasks with any of the chosen tags',
+      (tester) async {
+        final notifier = TodoListNotifier(
+          InMemoryTodoRepository(TodoFile([
+            TodoItem(description: 'Ask Quique', metadata: {'waiting': 'quique'}),
+            TodoItem(description: 'Ask Ana', metadata: {'waiting': 'ana'}),
+            TodoItem(description: 'Next', metadata: {'next': 'yes'}),
+            TodoItem(description: 'Plain'),
+          ])),
+          InMemoryTodoRepository(),
+        );
+        await notifier.loadTasks();
+        notifier.showView(const InboxView());
+
+        await tester.pumpWidget(_buildConstrainedSheet(notifier, height: 600));
+        await tester.pumpAndSettle();
+
+        final chipLabels = tester
+            .widgetList<FilterChip>(find.byType(FilterChip))
+            .map((chip) => (chip.label as Text).data);
+        expect(find.text('Tag'), findsOneWidget);
+        expect(chipLabels, containsAllInOrder(['next', 'waiting', 'waiting:ana', 'waiting:quique']));
+
+        await tester.tap(find.widgetWithText(FilterChip, 'next'));
+        await tester.tap(find.widgetWithText(FilterChip, 'waiting:ana'));
+        await tester.pumpAndSettle();
+
+        expect(
+          notifier.filteredTasks.map((t) => t.description),
+          unorderedEquals(['Next', 'Ask Ana']),
+        );
+      },
+    );
   });
 }

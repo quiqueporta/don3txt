@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:don3txt/domain/tag.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
@@ -996,6 +997,76 @@ void main() {
       });
     });
 
+    group('tag filter', () {
+      test('shows pending tasks with the tag key whatever its value', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Ask Quique', metadata: {'waiting': 'quique'}),
+            TodoItem(description: 'Ask Ana', metadata: {'waiting': 'ana'}),
+            TodoItem(description: 'Next', metadata: {'next': 'yes'}),
+            TodoItem(
+              description: 'Done waiting',
+              isCompleted: true,
+              metadata: {'waiting': 'quique'},
+            ),
+            TodoItem(
+              description: 'Deferred waiting',
+              metadata: {'waiting': 'ana', 't': '2999-01-01'},
+            ),
+          ]),
+        );
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.showView(TagView(Tag('waiting')));
+
+        final result = notifier.filteredTasks.map((t) => t.description);
+
+        expect(result, unorderedEquals(['Ask Quique', 'Ask Ana', 'Deferred waiting']));
+      });
+
+      test('shows only pending tasks with the tag key and value', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Ask Quique', metadata: {'waiting': 'quique'}),
+            TodoItem(description: 'Ask Ana', metadata: {'waiting': 'ana'}),
+          ]),
+        );
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.showView(TagView(Tag('waiting', 'quique')));
+
+        final result = notifier.filteredTasks.map((t) => t.description);
+
+        expect(result, ['Ask Quique']);
+      });
+
+      test('switches from one tag view to another', () async {
+        repository = InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Ask Quique', metadata: {'waiting': 'quique'}),
+            TodoItem(description: 'Ask Ana', metadata: {'waiting': 'ana'}),
+          ]),
+        );
+        notifier = TodoListNotifier(repository, InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.showView(TagView(Tag('waiting', 'quique')));
+        notifier.showView(TagView(Tag('waiting', 'ana')));
+
+        final result = notifier.filteredTasks.map((t) => t.description);
+
+        expect(result, ['Ask Ana']);
+      });
+
+      test('rejects a tag view on a key the app gives meaning to', () {
+        for (final key in ['due', 't', 'rec']) {
+          expect(
+            () => notifier.showView(TagView(Tag(key))),
+            throwsArgumentError,
+          );
+        }
+      });
+    });
+
     group('view filters (project/context/priority)', () {
       late TodoListNotifier notifier;
 
@@ -1122,6 +1193,15 @@ void main() {
 
       test('changing view clears filters', () {
         notifier.toggleFilterProject('+Work');
+        expect(notifier.hasActiveFilters, true);
+
+        notifier.showView(const TodayView());
+
+        expect(notifier.hasActiveFilters, false);
+      });
+
+      test('changing view clears tag filters', () {
+        notifier.toggleFilterTag(Tag('waiting'));
         expect(notifier.hasActiveFilters, true);
 
         notifier.showView(const TodayView());

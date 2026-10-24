@@ -1,3 +1,4 @@
+import 'package:don3txt/domain/tag.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
@@ -22,6 +23,8 @@ sealed class TaskView {
   Set<String> get projectsForNewTasks => const {};
 
   Set<String> get contextsForNewTasks => const {};
+
+  Set<Tag> tagsForNewTasks(TodoFile pending) => const {};
 
   @override
   bool operator ==(Object other) => other.runtimeType == runtimeType;
@@ -121,6 +124,33 @@ class ContextView extends TaskView {
 
   @override
   int get hashCode => Object.hash(ContextView, context);
+}
+
+class TagView extends TaskView {
+  final Tag tag;
+
+  const TagView(this.tag);
+
+  @override
+  List<TodoItem> tasksFrom(TodoFile pending, TodoFile done,
+          {required DateTime today, required int upcomingDays}) =>
+      pending.tasksByTag(tag);
+
+  @override
+  Set<Tag> tagsForNewTasks(TodoFile pending) {
+    if (tag.value != null) return {tag};
+
+    final values = pending.valuesOf(tag.key);
+    if (values.length != 1) return const {};
+
+    return {Tag(tag.key, values.single)};
+  }
+
+  @override
+  bool operator ==(Object other) => other is TagView && other.tag == tag;
+
+  @override
+  int get hashCode => Object.hash(TagView, tag);
 }
 
 class RecurringView extends TaskView {

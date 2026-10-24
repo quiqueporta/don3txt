@@ -1,4 +1,5 @@
 import 'package:don3txt/domain/recurrence.dart';
+import 'package:don3txt/domain/tag.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/domain/todo_parser.dart';
 
@@ -92,6 +93,47 @@ class TodoFile {
       return referenceDate.compareTo(tomorrowString) >= 0 &&
           referenceDate.compareTo(limitString) <= 0;
     }).toList();
+  }
+
+  List<Tag> allTags() {
+    final valuesByKey = _valuesByFreeKey();
+    final keys = valuesByKey.keys.toList()..sort();
+
+    return [
+      for (final key in keys) ..._tagsOfKey(key, valuesByKey[key]!),
+    ];
+  }
+
+  Set<String> valuesOf(String key) => _valuesByFreeKey()[key] ?? const {};
+
+  Map<String, Set<String>> _valuesByFreeKey() {
+    final valuesByKey = <String, Set<String>>{};
+
+    for (final entry in _freeMetadataOfPendingTasks) {
+      valuesByKey.putIfAbsent(entry.key, () => {}).add(entry.value);
+    }
+
+    return valuesByKey;
+  }
+
+  // A single value adds nothing the key alone does not already show.
+  static List<Tag> _tagsOfKey(String key, Set<String> values) {
+    final sortedValues = values.toList()..sort();
+
+    return [
+      Tag(key),
+      if (sortedValues.length > 1)
+        for (final value in sortedValues) Tag(key, value),
+    ];
+  }
+
+  Iterable<MapEntry<String, String>> get _freeMetadataOfPendingTasks =>
+      pendingTasks
+          .expand((item) => item.metadata.entries)
+          .where((entry) => !Tag.isReserved(entry.key));
+
+  List<TodoItem> tasksByTag(Tag tag) {
+    return pendingTasks.where((item) => tag.isIn(item.metadata)).toList();
   }
 
   List<TodoItem> get recurringTasks =>

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:don3txt/application/task_view.dart';
+import 'package:don3txt/domain/tag.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
@@ -26,6 +27,7 @@ class TodoListNotifier extends ChangeNotifier {
   Set<String> _filterProjects = {};
   Set<String> _filterContexts = {};
   Set<String> _filterPriorities = {};
+  Set<Tag> _filterTags = {};
 
   StreamSubscription<void>? _todoChanges;
   StreamSubscription<void>? _doneChanges;
@@ -86,9 +88,16 @@ class TodoListNotifier extends ChangeNotifier {
 
   Set<String> get contextsForNewTasks => _activeView.contextsForNewTasks;
 
+  Set<Tag> get tagsForNewTasks {
+    if (_todoFile == null) return const {};
+
+    return _activeView.tagsForNewTasks(_todoFile!);
+  }
+
   Set<String> get filterProjects => Set.unmodifiable(_filterProjects);
   Set<String> get filterContexts => Set.unmodifiable(_filterContexts);
   Set<String> get filterPriorities => Set.unmodifiable(_filterPriorities);
+  Set<Tag> get filterTags => Set.unmodifiable(_filterTags);
 
   String get searchQuery => _searchQuery;
   bool get hasActiveSearch => _searchQuery.isNotEmpty;
@@ -96,7 +105,8 @@ class TodoListNotifier extends ChangeNotifier {
   bool get hasActiveFilters =>
       _filterProjects.isNotEmpty ||
       _filterContexts.isNotEmpty ||
-      _filterPriorities.isNotEmpty;
+      _filterPriorities.isNotEmpty ||
+      _filterTags.isNotEmpty;
 
   void showView(TaskView view) {
     if (isShowing(view)) return;
@@ -123,6 +133,12 @@ class TodoListNotifier extends ChangeNotifier {
     if (_todoFile == null) return [];
 
     return _todoFile!.allContexts(_today);
+  }
+
+  List<Tag> get allTags {
+    if (_todoFile == null) return [];
+
+    return _todoFile!.allTags();
   }
 
   set upcomingDays(int value) {
@@ -207,6 +223,11 @@ class TodoListNotifier extends ChangeNotifier {
         return false;
       }
 
+      if (_filterTags.isNotEmpty &&
+          !_filterTags.any((tag) => tag.isIn(task.metadata))) {
+        return false;
+      }
+
       if (hasActiveSearch &&
           !task.description.toLowerCase().contains(queryLower)) {
         return false;
@@ -251,6 +272,8 @@ class TodoListNotifier extends ChangeNotifier {
     return priorities.toList()..sort();
   }
 
+  List<Tag> get availableTagsForView => TodoFile(_unfilteredViewTasks).allTags();
+
   void toggleFilterProject(String project) {
     if (_filterProjects.contains(project)) {
       _filterProjects = Set.from(_filterProjects)..remove(project);
@@ -281,6 +304,16 @@ class TodoListNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleFilterTag(Tag tag) {
+    if (_filterTags.contains(tag)) {
+      _filterTags = Set.from(_filterTags)..remove(tag);
+    } else {
+      _filterTags = Set.from(_filterTags)..add(tag);
+    }
+
+    notifyListeners();
+  }
+
   void setSearchQuery(String query) {
     _searchQuery = query;
 
@@ -302,6 +335,7 @@ class TodoListNotifier extends ChangeNotifier {
     _filterProjects = {};
     _filterContexts = {};
     _filterPriorities = {};
+    _filterTags = {};
   }
 
   Future<void> switchRepository(

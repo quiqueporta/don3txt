@@ -151,6 +151,32 @@ class SidebarDrawer extends StatelessWidget {
                   ),
               ],
             ),
+          if (notifier.allTags.isNotEmpty)
+            ExpansionTile(
+              leading: Icon(Icons.label_outline, color: Colors.orange.shade400),
+              title: Text(
+                loc.myTags,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              initiallyExpanded: false,
+              children: [
+                for (final tag in notifier.allTags)
+                  ListTile(
+                    contentPadding:
+                        EdgeInsets.only(left: tag.value == null ? 56 : 72),
+                    title: Text(tag.value ?? tag.key),
+                    selected: notifier.isShowing(TagView(tag)),
+                    onTap: () {
+                      notifier.showView(TagView(tag));
+                      Navigator.of(context).pop();
+                    },
+                  ),
+              ],
+            ),
           if (notifier.hasRecurringTasks || notifier.hasCompletedTasks) ...[
             if (notifier.allProjects.isEmpty && notifier.allContexts.isEmpty)
               const Divider(),

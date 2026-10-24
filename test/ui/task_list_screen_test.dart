@@ -5,6 +5,7 @@ import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
+import 'package:don3txt/domain/tag.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
@@ -218,6 +219,113 @@ void main() {
       expect(find.widgetWithText(Chip, '+Casa'), findsOneWidget);
     });
 
+    testWidgets('FAB preloads the tag of the tag view and the new task gets it',
+        (tester) async {
+      final repo = InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Ask Quique', metadata: {'waiting': 'quique'}),
+          TodoItem(description: 'Ask Ana', metadata: {'waiting': 'ana'}),
+        ]),
+      );
+      final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+      await notifier.loadTasks();
+      notifier.showView(TagView(Tag('waiting', 'quique')));
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.pump();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(Chip, 'waiting:quique'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), 'Send invoice');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      final created = notifier.todoFile!.items
+          .firstWhere((item) => item.description == 'Send invoice');
+      expect(created.metadata['waiting'], 'quique');
+    });
+
+    testWidgets('FAB preloads the only value of the key shown by a tag view',
+        (tester) async {
+      final repo = InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'First', metadata: {'next': 'yes'}),
+          TodoItem(description: 'Second', metadata: {'next': 'yes'}),
+        ]),
+      );
+      final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+      await notifier.loadTasks();
+      notifier.showView(TagView(Tag('next')));
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.pump();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(Chip, 'next:yes'), findsOneWidget);
+    });
+
+    testWidgets('FAB preloads no tag when the key shown has several values',
+        (tester) async {
+      final repo = InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Ask Quique', metadata: {'waiting': 'quique'}),
+          TodoItem(description: 'Ask Ana', metadata: {'waiting': 'ana'}),
+        ]),
+      );
+      final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+      await notifier.loadTasks();
+      notifier.showView(TagView(Tag('waiting')));
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.pump();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Chip), findsNothing);
+    });
+
+    testWidgets('removing the preloaded tag chip creates the task without it',
+        (tester) async {
+      final repo = InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Ask Quique', metadata: {'waiting': 'quique'}),
+        ]),
+      );
+      final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
+      await notifier.loadTasks();
+      notifier.showView(TagView(Tag('waiting', 'quique')));
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.pump();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      final removeTag = find.descendant(
+        of: find.widgetWithText(Chip, 'waiting:quique'),
+        matching: find.byIcon(Icons.close),
+      );
+      expect(removeTag, findsOneWidget);
+      await tester.tap(removeTag);
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(Chip, 'waiting:quique'), findsNothing);
+
+      await tester.enterText(find.byType(TextField), 'Send invoice');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      final created = notifier.todoFile!.items
+          .firstWhere((item) => item.description == 'Send invoice');
+      expect(created.metadata.containsKey('waiting'), isFalse);
+    });
+
     testWidgets('FAB preloads context chip when viewing a context',
         (tester) async {
       final repo = InMemoryTodoRepository(
@@ -256,6 +364,22 @@ void main() {
 
       expect(find.text('Today'), findsOneWidget);
     });
+
+    for (final (tag, title) in [
+      (Tag('waiting'), 'waiting'),
+      (Tag('waiting', 'quique'), 'waiting:quique'),
+    ]) {
+      testWidgets('shows $title as title when viewing that tag', (tester) async {
+        final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
+        await notifier.loadTasks();
+        notifier.showView(TagView(tag));
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.pump();
+
+        expect(find.text(title), findsOneWidget);
+      });
+    }
 
     testWidgets('has a drawer', (tester) async {
       final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());

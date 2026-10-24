@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:don3txt/domain/tag.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/domain/app_language.dart';
@@ -382,6 +383,94 @@ void main() {
           .toList();
 
       expect(projectTexts, ['Alpha', 'Middle', 'Zebra']);
+    });
+
+    testWidgets('shows tag keys and the values of keys with several values',
+        (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Ask Quique', metadata: {'waiting': 'quique'}),
+          TodoItem(description: 'Ask Ana', metadata: {'waiting': 'ana'}),
+          TodoItem(
+            description: 'Next',
+            metadata: {'next': 'yes', 'due': '2026-10-24', 't': '2026-10-20'},
+          ),
+        ]),
+      ), InMemoryTodoRepository());
+      await notifier.loadTasks();
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      expect(find.text('My Tags'), findsOneWidget);
+      await tester.tap(find.text('My Tags'));
+      await tester.pumpAndSettle();
+
+      final tagTexts = tester
+          .widgetList<Text>(find.descendant(
+            of: find.byType(ListTile),
+            matching: find.byType(Text),
+          ))
+          .map((t) => t.data)
+          .skipWhile((t) => t != 'My Tags')
+          .skip(1)
+          .takeWhile((t) => t != 'Settings')
+          .toList();
+
+      expect(tagTexts, ['next', 'waiting', 'ana', 'quique']);
+    });
+
+    for (final (label, expectedTag) in [
+      ('waiting', Tag('waiting')),
+      ('quique', Tag('waiting', 'quique')),
+    ]) {
+      testWidgets('tapping tag entry $label shows its tag view', (tester) async {
+        notifier = TodoListNotifier(InMemoryTodoRepository(
+          TodoFile([
+            TodoItem(description: 'Ask Quique', metadata: {'waiting': 'quique'}),
+            TodoItem(description: 'Ask Ana', metadata: {'waiting': 'ana'}),
+          ]),
+        ), InMemoryTodoRepository());
+        await notifier.loadTasks();
+
+        await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+        await tester.tap(find.byIcon(Icons.menu));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('My Tags'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+
+        expect(notifier.activeView, TagView(expectedTag));
+      });
+    }
+
+    testWidgets('highlights only the tag entry being shown', (tester) async {
+      notifier = TodoListNotifier(InMemoryTodoRepository(
+        TodoFile([
+          TodoItem(description: 'Ask Quique', metadata: {'waiting': 'quique'}),
+          TodoItem(description: 'Ask Ana', metadata: {'waiting': 'ana'}),
+        ]),
+      ), InMemoryTodoRepository());
+      await notifier.loadTasks();
+      notifier.showView(TagView(Tag('waiting', 'quique')));
+
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('My Tags'));
+      await tester.pumpAndSettle();
+
+      bool isSelected(String text) =>
+          tester.widget<ListTile>(find.widgetWithText(ListTile, text)).selected;
+
+      expect(isSelected('quique'), isTrue);
+      expect(isSelected('waiting'), isFalse);
+      expect(isSelected('ana'), isFalse);
     });
 
     testWidgets('tapping project selects project filter', (tester) async {
