@@ -996,6 +996,27 @@ void main() {
         expect(result.length, 1);
         expect(result[0].description, 'Same day');
       });
+
+      test('includes task at limit when the period crosses the autumn clock change', () {
+        final file = TodoFile([
+          TodoItem(description: 'In 3 days', metadata: {'due': '2026-10-27'}),
+        ]);
+
+        final result = file.upcomingTasks(DateTime(2026, 10, 24), 3);
+
+        expect(result.length, 1);
+        expect(result[0].description, 'In 3 days');
+      });
+
+      test('excludes task due today on the day of the autumn clock change', () {
+        final file = TodoFile([
+          TodoItem(description: 'Today', metadata: {'due': '2026-10-25'}),
+        ]);
+
+        final result = file.upcomingTasks(DateTime(2026, 10, 25), 7);
+
+        expect(result, isEmpty);
+      });
     });
     group('deleteTask', () {
       test('removes item from the middle', () {

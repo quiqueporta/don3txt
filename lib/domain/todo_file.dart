@@ -80,8 +80,8 @@ class TodoFile {
   }
 
   List<TodoItem> upcomingTasks(DateTime today, int days) {
-    final tomorrowString = _formatDate(today.add(const Duration(days: 1)));
-    final limitString = _formatDate(today.add(Duration(days: days)));
+    final tomorrowString = _formatDate(_addDays(today, 1));
+    final limitString = _formatDate(_addDays(today, days));
 
     return items.where((item) {
       if (item.isCompleted) return false;
@@ -110,6 +110,11 @@ class TodoFile {
 
   static String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  // Adding a Duration counts 24-hour blocks, which lands on the previous day across a clock change.
+  static DateTime _addDays(DateTime date, int days) {
+    return DateTime(date.year, date.month, date.day + days);
   }
 
   TodoFile addTask(String description,
