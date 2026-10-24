@@ -8,6 +8,7 @@ import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/application/settings_notifier.dart';
+import 'package:don3txt/application/task_view.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/storage_permission.dart';
@@ -165,7 +166,7 @@ class SettingsScreen extends StatelessWidget {
     final todoList = context.read<TodoListNotifier>();
     final navigator = Navigator.of(context);
 
-    todoList.activeFilter = TaskFilter.inbox;
+    todoList.showView(const InboxView());
     if (navigator.canPop()) navigator.pop();
 
     await settings.setTodoFilePath(savePath == _sentinel ? path : savePath as String?);

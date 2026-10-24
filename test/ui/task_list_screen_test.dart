@@ -9,7 +9,8 @@ import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
-import 'package:don3txt/application/todo_list_notifier.dart' show TodoListNotifier, TaskFilter;
+import 'package:don3txt/application/task_view.dart';
+import 'package:don3txt/application/todo_list_notifier.dart' show TodoListNotifier;
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/screens/task_list_screen.dart';
@@ -109,7 +110,7 @@ void main() {
       );
       final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
       await notifier.loadTasks();
-      notifier.activeFilter = TaskFilter.inbox;
+      notifier.showView(const InboxView());
 
       await tester.pumpWidget(buildTestApp(notifier));
       await tester.pump();
@@ -128,7 +129,7 @@ void main() {
       );
       final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
       await notifier.loadTasks();
-      notifier.activeFilter = TaskFilter.inbox;
+      notifier.showView(const InboxView());
 
       await tester.pumpWidget(buildTestApp(notifier));
       await tester.pump();
@@ -145,7 +146,7 @@ void main() {
       );
       final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
       await notifier.loadTasks();
-      notifier.activeFilter = TaskFilter.inbox;
+      notifier.showView(const InboxView());
 
       await tester.pumpWidget(buildTestApp(notifier));
       await tester.pump();
@@ -168,7 +169,7 @@ void main() {
       final notifier = TodoListNotifier(
           InMemoryTodoRepository(), InMemoryTodoRepository());
       await notifier.loadTasks();
-      notifier.activeFilter = TaskFilter.today;
+      notifier.showView(const TodayView());
 
       await tester.pumpWidget(buildTestApp(notifier));
       await tester.pump();
@@ -188,7 +189,7 @@ void main() {
       final notifier = TodoListNotifier(
           InMemoryTodoRepository(), InMemoryTodoRepository());
       await notifier.loadTasks();
-      notifier.activeFilter = TaskFilter.inbox;
+      notifier.showView(const InboxView());
 
       await tester.pumpWidget(buildTestApp(notifier));
       await tester.pump();
@@ -206,7 +207,7 @@ void main() {
       );
       final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
       await notifier.loadTasks();
-      notifier.selectProject('+Casa');
+      notifier.showView(ProjectView('+Casa'));
 
       await tester.pumpWidget(buildTestApp(notifier));
       await tester.pump();
@@ -224,7 +225,7 @@ void main() {
       );
       final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
       await notifier.loadTasks();
-      notifier.selectContext('@oficina');
+      notifier.showView(ContextView('@oficina'));
 
       await tester.pumpWidget(buildTestApp(notifier));
       await tester.pump();
@@ -248,7 +249,7 @@ void main() {
     testWidgets('shows Today title when filter is today', (tester) async {
       final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
       await notifier.loadTasks();
-      notifier.activeFilter = TaskFilter.today;
+      notifier.showView(const TodayView());
 
       await tester.pumpWidget(buildTestApp(notifier));
       await tester.pump();
@@ -281,7 +282,7 @@ void main() {
       );
       final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
       await notifier.loadTasks();
-      notifier.activeFilter = TaskFilter.today;
+      notifier.showView(const TodayView());
 
       await tester.pumpWidget(buildTestApp(notifier));
       await tester.pump();
@@ -313,7 +314,7 @@ void main() {
           ]),
         ), InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.today;
+        notifier.showView(const TodayView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -324,7 +325,7 @@ void main() {
       testWidgets('shows filter icon in Upcoming view', (tester) async {
         final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.upcoming;
+        notifier.showView(const UpcomingView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -337,7 +338,7 @@ void main() {
           TodoFile([TodoItem(description: 'Task', projects: ['+Work'])]),
         ), InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.selectProject('+Work');
+        notifier.showView(ProjectView('+Work'));
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -351,7 +352,7 @@ void main() {
           TodoFile([TodoItem(description: 'Task', contexts: ['@home'])]),
         ), InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.selectContext('@home');
+        notifier.showView(ContextView('@home'));
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -363,7 +364,7 @@ void main() {
       testWidgets('does NOT show filter icon in Recurring view', (tester) async {
         final notifier = TodoListNotifier(InMemoryTodoRepository(), InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.recurring;
+        notifier.showView(const RecurringView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -426,7 +427,7 @@ void main() {
           ]),
         ), InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -450,7 +451,7 @@ void main() {
           ]),
         ), InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -475,7 +476,7 @@ void main() {
           TodoFile([TodoItem(description: 'Task', projects: ['+Work'])]),
         ), InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.selectProject('+Work');
+        notifier.showView(ProjectView('+Work'));
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -492,7 +493,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -522,7 +523,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -545,7 +546,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -569,7 +570,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -598,7 +599,7 @@ void main() {
         final doneRepo = InMemoryTodoRepository(TodoFile([doneTask]));
         final notifier = TodoListNotifier(InMemoryTodoRepository(), doneRepo);
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.completed;
+        notifier.showView(const CompletedView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -621,7 +622,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -645,7 +646,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -664,7 +665,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -689,7 +690,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -708,7 +709,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -740,7 +741,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.completed;
+        notifier.showView(const CompletedView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -759,7 +760,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();
@@ -793,7 +794,7 @@ void main() {
         );
         final notifier = TodoListNotifier(repo, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(buildTestApp(notifier));
         await tester.pump();

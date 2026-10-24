@@ -1,14 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:don3txt/application/task_view.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/domain/todo_parser.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
-
-enum TaskFilter { inbox, past, today, upcoming, project, context, recurring, completed }
 
 class TodoListNotifier extends ChangeNotifier {
   TodoRepository _todoRepository;
@@ -18,9 +17,7 @@ class TodoListNotifier extends ChangeNotifier {
   TodoFile? _doneFile;
   bool _isLoading = false;
   String? _error;
-  TaskFilter _activeFilter = TaskFilter.today;
-  String? _selectedProject;
-  String? _selectedContext;
+  TaskView _activeView = const TodayView();
   int _upcomingDays = 7;
   List<TaskSortCriterion> _sortCriteria = defaultSortCriteria;
 
@@ -77,9 +74,17 @@ class TodoListNotifier extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  TaskFilter get activeFilter => _activeFilter;
-  String? get selectedProject => _selectedProject;
-  String? get selectedContext => _selectedContext;
+  TaskView get activeView => _activeView;
+
+  bool isShowing(TaskView view) => _activeView == view;
+
+  bool get activeViewAcceptsFilters => _activeView.acceptsFilters;
+
+  DateTime? get dueDateForNewTasks => _activeView.dueDateForNewTasks(_today);
+
+  Set<String> get projectsForNewTasks => _activeView.projectsForNewTasks;
+
+  Set<String> get contextsForNewTasks => _activeView.contextsForNewTasks;
 
   Set<String> get filterProjects => Set.unmodifiable(_filterProjects);
   Set<String> get filterContexts => Set.unmodifiable(_filterContexts);
@@ -93,30 +98,12 @@ class TodoListNotifier extends ChangeNotifier {
       _filterContexts.isNotEmpty ||
       _filterPriorities.isNotEmpty;
 
-  set activeFilter(TaskFilter value) {
-    if (_activeFilter == value) return;
+  void showView(TaskView view) {
+    if (isShowing(view)) return;
 
-    _activeFilter = value;
-    _selectedProject = null;
-    _selectedContext = null;
+    _activeView = view;
     _searchQuery = '';
     _clearFiltersInternal();
-    notifyListeners();
-  }
-
-  void selectProject(String project) {
-    _activeFilter = TaskFilter.project;
-    _selectedProject = project;
-    _selectedContext = null;
-    _searchQuery = '';
-    notifyListeners();
-  }
-
-  void selectContext(String context) {
-    _activeFilter = TaskFilter.context;
-    _selectedContext = context;
-    _selectedProject = null;
-    _searchQuery = '';
     notifyListeners();
   }
 
@@ -187,45 +174,16 @@ class TodoListNotifier extends ChangeNotifier {
   List<TodoItem> get _unfilteredViewTasks {
     if (_todoFile == null) return [];
 
-    final today = _today;
-
-    switch (_activeFilter) {
-      case TaskFilter.inbox:
-        return _todoFile!.visiblePendingTasks(today);
-      case TaskFilter.past:
-        return _todoFile!.pastTasks(today);
-      case TaskFilter.today:
-        return _todoFile!.todayTasks(today);
-      case TaskFilter.upcoming:
-        return _todoFile!.upcomingTasks(today, _upcomingDays);
-      case TaskFilter.project:
-        if (_selectedProject == null) return [];
-        return _todoFile!.tasksByProject(_selectedProject!, today);
-      case TaskFilter.context:
-        if (_selectedContext == null) return [];
-        return _todoFile!.tasksByContext(_selectedContext!, today);
-      case TaskFilter.recurring:
-        return _todoFile!.recurringTasks;
-      case TaskFilter.completed:
-        return _doneFile?.items ?? [];
-    }
-  }
-
-  static int _compareCompletedTasks(TodoItem a, TodoItem b) {
-    final aDate = a.completionDate;
-    final bDate = b.completionDate;
-
-    if (aDate != null && bDate != null) return bDate.compareTo(aDate);
-    if (aDate != null && bDate == null) return -1;
-    if (aDate == null && bDate != null) return 1;
-
-    return 0;
+    return _activeView.tasksFrom(
+      _todoFile!,
+      _doneFile ?? TodoFile([]),
+      today: _today,
+      upcomingDays: _upcomingDays,
+    );
   }
 
   List<TodoItem> get filteredTasks {
-    final comparator = _activeFilter == TaskFilter.completed
-        ? _compareCompletedTasks
-        : compareTasksBy(_sortCriteria);
+    final comparator = _activeView.comparatorFor(_sortCriteria);
     final tasks = List<TodoItem>.from(_unfilteredViewTasks)
       ..sort(comparator);
 

@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
+import 'package:don3txt/application/task_view.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
@@ -48,9 +49,9 @@ class SidebarDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.inbox, color: Colors.blue),
             title: Text(loc.inbox),
-            selected: notifier.activeFilter == TaskFilter.inbox,
+            selected: notifier.isShowing(const InboxView()),
             onTap: () {
-              notifier.activeFilter = TaskFilter.inbox;
+              notifier.showView(const InboxView());
               Navigator.of(context).pop();
             },
           ),
@@ -63,9 +64,9 @@ class SidebarDrawer extends StatelessWidget {
                     label: Text('$pastCount'),
                   )
                 : null,
-            selected: notifier.activeFilter == TaskFilter.past,
+            selected: notifier.isShowing(const PastView()),
             onTap: () {
-              notifier.activeFilter = TaskFilter.past;
+              notifier.showView(const PastView());
               Navigator.of(context).pop();
             },
           ),
@@ -78,9 +79,9 @@ class SidebarDrawer extends StatelessWidget {
                     label: Text('$todayCount'),
                   )
                 : null,
-            selected: notifier.activeFilter == TaskFilter.today,
+            selected: notifier.isShowing(const TodayView()),
             onTap: () {
-              notifier.activeFilter = TaskFilter.today;
+              notifier.showView(const TodayView());
               Navigator.of(context).pop();
             },
           ),
@@ -93,9 +94,9 @@ class SidebarDrawer extends StatelessWidget {
                     label: Text('$upcomingCount'),
                   )
                 : null,
-            selected: notifier.activeFilter == TaskFilter.upcoming,
+            selected: notifier.isShowing(const UpcomingView()),
             onTap: () {
-              notifier.activeFilter = TaskFilter.upcoming;
+              notifier.showView(const UpcomingView());
               Navigator.of(context).pop();
             },
           ),
@@ -116,10 +117,9 @@ class SidebarDrawer extends StatelessWidget {
                   ListTile(
                     contentPadding: const EdgeInsets.only(left: 56),
                     title: Text(project.replaceFirst('+', '')),
-                    selected: notifier.activeFilter == TaskFilter.project &&
-                        notifier.selectedProject == project,
+                    selected: notifier.isShowing(ProjectView(project)),
                     onTap: () {
-                      notifier.selectProject(project);
+                      notifier.showView(ProjectView(project));
                       Navigator.of(context).pop();
                     },
                   ),
@@ -143,10 +143,9 @@ class SidebarDrawer extends StatelessWidget {
                   ListTile(
                     contentPadding: const EdgeInsets.only(left: 56),
                     title: Text(ctx.replaceFirst('@', '')),
-                    selected: notifier.activeFilter == TaskFilter.context &&
-                        notifier.selectedContext == ctx,
+                    selected: notifier.isShowing(ContextView(ctx)),
                     onTap: () {
-                      notifier.selectContext(ctx);
+                      notifier.showView(ContextView(ctx));
                       Navigator.of(context).pop();
                     },
                   ),
@@ -159,9 +158,9 @@ class SidebarDrawer extends StatelessWidget {
               ListTile(
                 leading: Icon(Icons.repeat, color: Colors.green.shade400),
                 title: Text(loc.recurring),
-                selected: notifier.activeFilter == TaskFilter.recurring,
+                selected: notifier.isShowing(const RecurringView()),
                 onTap: () {
-                  notifier.activeFilter = TaskFilter.recurring;
+                  notifier.showView(const RecurringView());
                   Navigator.of(context).pop();
                 },
               ),
@@ -170,9 +169,9 @@ class SidebarDrawer extends StatelessWidget {
                 leading: Icon(Icons.check_circle_outline,
                     color: Colors.grey.shade500),
                 title: Text(loc.completed),
-                selected: notifier.activeFilter == TaskFilter.completed,
+                selected: notifier.isShowing(const CompletedView()),
                 onTap: () {
-                  notifier.activeFilter = TaskFilter.completed;
+                  notifier.showView(const CompletedView());
                   Navigator.of(context).pop();
                 },
               ),

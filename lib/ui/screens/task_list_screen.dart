@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
+import 'package:don3txt/application/task_view.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/domain/todo_item.dart';
@@ -74,31 +75,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   String _titleFor(TodoListNotifier notifier, AppLocalizations loc) {
-    switch (notifier.activeFilter) {
-      case TaskFilter.inbox:
-        return loc.inbox;
-      case TaskFilter.past:
-        return loc.past;
-      case TaskFilter.today:
-        return loc.today;
-      case TaskFilter.upcoming:
-        return loc.upcoming;
-      case TaskFilter.project:
-        return notifier.selectedProject?.replaceFirst('+', '') ?? '';
-      case TaskFilter.context:
-        return notifier.selectedContext?.replaceFirst('@', '') ?? '';
-      case TaskFilter.recurring:
-        return loc.recurring;
-      case TaskFilter.completed:
-        return loc.completed;
-    }
-  }
-
-  bool _supportsFiltering(TaskFilter filter) {
-    return filter == TaskFilter.inbox ||
-        filter == TaskFilter.past ||
-        filter == TaskFilter.today ||
-        filter == TaskFilter.upcoming;
+    return switch (notifier.activeView) {
+      InboxView() => loc.inbox,
+      PastView() => loc.past,
+      TodayView() => loc.today,
+      UpcomingView() => loc.upcoming,
+      ProjectView(:final project) => project.replaceFirst('+', ''),
+      ContextView(:final context) => context.replaceFirst('@', ''),
+      RecurringView() => loc.recurring,
+      CompletedView() => loc.completed,
+    };
   }
 
   void _showFilterSheet(BuildContext context) {
@@ -125,9 +111,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ChangeNotifierProvider.value(value: settings),
         ],
         child: AddTaskField(
-          initialDueDate: _defaultDueDateFor(notifier.activeFilter),
-          initialProjects: _defaultProjectsFor(notifier),
-          initialContexts: _defaultContextsFor(notifier),
+          initialDueDate: notifier.dueDateForNewTasks,
+          initialProjects: notifier.projectsForNewTasks,
+          initialContexts: notifier.contextsForNewTasks,
           onSubmit: (text, {dueDate, startDate, recurrence, priority}) {
             notifier.addTask(text,
                 dueDate: dueDate,
@@ -139,30 +125,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
         ),
       ),
     );
-  }
-
-  DateTime? _defaultDueDateFor(TaskFilter filter) {
-    if (filter != TaskFilter.today) return null;
-
-    final now = DateTime.now();
-
-    return DateTime(now.year, now.month, now.day);
-  }
-
-  Set<String> _defaultProjectsFor(TodoListNotifier notifier) {
-    if (notifier.activeFilter != TaskFilter.project) return const {};
-
-    final project = notifier.selectedProject;
-
-    return project == null ? const {} : {project};
-  }
-
-  Set<String> _defaultContextsFor(TodoListNotifier notifier) {
-    if (notifier.activeFilter != TaskFilter.context) return const {};
-
-    final ctx = notifier.selectedContext;
-
-    return ctx == null ? const {} : {ctx};
   }
 
   Future<void> _completeTask(
@@ -289,7 +251,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       _searchController.clear();
     }
 
-    final showFilter = _supportsFiltering(notifier.activeFilter);
+    final showFilter = notifier.activeViewAcceptsFilters;
 
     return Scaffold(
       appBar: AppBar(
@@ -430,7 +392,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     itemBuilder: (context, index) {
                       final item = tasks[index];
                       final isCompletedView =
-                          notifier.activeFilter == TaskFilter.completed;
+                          notifier.isShowing(const CompletedView());
 
                       return TaskTile(
                         item: item,

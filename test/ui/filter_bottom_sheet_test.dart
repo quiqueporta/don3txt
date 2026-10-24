@@ -9,6 +9,7 @@ import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
+import 'package:don3txt/application/task_view.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
 import 'package:don3txt/ui/widgets/filter_bottom_sheet.dart';
@@ -102,7 +103,7 @@ void main() {
           InMemoryTodoRepository(),
         );
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         await tester.pumpWidget(_buildConstrainedSheet(notifier));
         await tester.pumpAndSettle();

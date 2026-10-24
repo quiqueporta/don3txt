@@ -9,6 +9,7 @@ import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
+import 'package:don3txt/application/task_view.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/l10n/generated/app_localizations.dart';
@@ -141,7 +142,7 @@ void main() {
       await tester.tap(find.text('Past'));
       await tester.pumpAndSettle();
 
-      expect(notifier.activeFilter, TaskFilter.past);
+      expect(notifier.activeView, const PastView());
     });
 
     testWidgets('selecting Today changes active filter', (tester) async {
@@ -152,11 +153,11 @@ void main() {
       await tester.tap(find.text('Today'));
       await tester.pumpAndSettle();
 
-      expect(notifier.activeFilter, TaskFilter.today);
+      expect(notifier.activeView, const TodayView());
     });
 
     testWidgets('selecting Inbox changes active filter', (tester) async {
-      notifier.activeFilter = TaskFilter.today;
+      notifier.showView(const TodayView());
 
       await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
       await tester.tap(find.byIcon(Icons.menu));
@@ -165,7 +166,7 @@ void main() {
       await tester.tap(find.text('Inbox'));
       await tester.pumpAndSettle();
 
-      expect(notifier.activeFilter, TaskFilter.inbox);
+      expect(notifier.activeView, const InboxView());
     });
 
     testWidgets('closes drawer after selection', (tester) async {
@@ -401,8 +402,7 @@ void main() {
       await tester.tap(find.text('Work'));
       await tester.pumpAndSettle();
 
-      expect(notifier.activeFilter, TaskFilter.project);
-      expect(notifier.selectedProject, '+Work');
+      expect(notifier.activeView, const ProjectView('+Work'));
     });
 
     testWidgets('does not show My Projects when no projects', (tester) async {
@@ -507,8 +507,7 @@ void main() {
       await tester.tap(find.text('phone'));
       await tester.pumpAndSettle();
 
-      expect(notifier.activeFilter, TaskFilter.context);
-      expect(notifier.selectedContext, '@phone');
+      expect(notifier.activeView, const ContextView('@phone'));
     });
 
     testWidgets('shows Recurring section when recurring tasks exist',
@@ -543,7 +542,7 @@ void main() {
       await tester.tap(find.text('Recurring'));
       await tester.pumpAndSettle();
 
-      expect(notifier.activeFilter, TaskFilter.recurring);
+      expect(notifier.activeView, const RecurringView());
     });
 
     testWidgets('does not show Recurring when no recurring tasks',

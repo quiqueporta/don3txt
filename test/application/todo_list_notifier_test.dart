@@ -6,6 +6,7 @@ import 'package:don3txt/domain/task_sort_criterion.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/domain/todo_item.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
+import 'package:don3txt/application/task_view.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 
 class InMemoryTodoRepository implements TodoRepository {
@@ -227,22 +228,22 @@ void main() {
       });
     });
 
-    group('activeFilter', () {
+    group('activeView', () {
       test('defaults to today', () {
-        expect(notifier.activeFilter, TaskFilter.today);
+        expect(notifier.activeView, const TodayView());
       });
 
       test('can be changed to inbox', () {
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
-        expect(notifier.activeFilter, TaskFilter.inbox);
+        expect(notifier.activeView, const InboxView());
       });
 
       test('notifies listeners when changed', () {
         var notified = false;
         notifier.addListener(() => notified = true);
 
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         expect(notified, true);
       });
@@ -251,7 +252,7 @@ void main() {
         var notifyCount = 0;
         notifier.addListener(() => notifyCount++);
 
-        notifier.activeFilter = TaskFilter.today;
+        notifier.showView(const TodayView());
 
         expect(notifyCount, 0);
       });
@@ -267,7 +268,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         final result = notifier.filteredTasks;
 
@@ -292,7 +293,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.today;
+        notifier.showView(const TodayView());
 
         final result = notifier.filteredTasks;
 
@@ -321,7 +322,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.today;
+        notifier.showView(const TodayView());
 
         final result = notifier.filteredTasks;
 
@@ -343,7 +344,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.past;
+        notifier.showView(const PastView());
 
         final result = notifier.filteredTasks;
 
@@ -434,13 +435,12 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.selectProject('+Work');
+        notifier.showView(ProjectView('+Work'));
 
         final result = notifier.filteredTasks;
 
         expect(result.length, 2);
-        expect(notifier.activeFilter, TaskFilter.project);
-        expect(notifier.selectedProject, '+Work');
+        expect(notifier.activeView, const ProjectView('+Work'));
       });
 
       test('title returns project name without prefix', () async {
@@ -451,9 +451,9 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.selectProject('+Work');
+        notifier.showView(ProjectView('+Work'));
 
-        expect(notifier.selectedProject, '+Work');
+        expect(notifier.activeView, const ProjectView('+Work'));
       });
     });
 
@@ -491,7 +491,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.recurring;
+        notifier.showView(const RecurringView());
 
         final result = notifier.filteredTasks;
 
@@ -924,7 +924,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.upcoming;
+        notifier.showView(const UpcomingView());
 
         final result = notifier.filteredTasks;
 
@@ -967,7 +967,7 @@ void main() {
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
         notifier.upcomingDays = 3;
-        notifier.activeFilter = TaskFilter.upcoming;
+        notifier.showView(const UpcomingView());
 
         final result = notifier.filteredTasks;
 
@@ -987,13 +987,12 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.selectContext('@phone');
+        notifier.showView(ContextView('@phone'));
 
         final result = notifier.filteredTasks;
 
         expect(result.length, 2);
-        expect(notifier.activeFilter, TaskFilter.context);
-        expect(notifier.selectedContext, '@phone');
+        expect(notifier.activeView, const ContextView('@phone'));
       });
     });
 
@@ -1045,7 +1044,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
       });
 
       test('empty filters do not alter results', () {
@@ -1125,7 +1124,7 @@ void main() {
         notifier.toggleFilterProject('+Work');
         expect(notifier.hasActiveFilters, true);
 
-        notifier.activeFilter = TaskFilter.today;
+        notifier.showView(const TodayView());
 
         expect(notifier.hasActiveFilters, false);
       });
@@ -1167,7 +1166,7 @@ void main() {
       });
 
       test('availableProjectsForView scoped to today view', () {
-        notifier.activeFilter = TaskFilter.today;
+        notifier.showView(const TodayView());
 
         final projects = notifier.availableProjectsForView;
 
@@ -1175,7 +1174,7 @@ void main() {
       });
 
       test('availablePrioritiesForView scoped to today view', () {
-        notifier.activeFilter = TaskFilter.today;
+        notifier.showView(const TodayView());
 
         final priorities = notifier.availablePrioritiesForView;
 
@@ -1183,7 +1182,7 @@ void main() {
       });
 
       test('filters apply on today view', () {
-        notifier.activeFilter = TaskFilter.today;
+        notifier.showView(const TodayView());
         notifier.toggleFilterPriority('C');
 
         final result = notifier.filteredTasks;
@@ -1193,7 +1192,7 @@ void main() {
       });
 
       test('filters apply on upcoming view', () {
-        notifier.activeFilter = TaskFilter.upcoming;
+        notifier.showView(const UpcomingView());
         notifier.toggleFilterProject('+Home');
 
         final result = notifier.filteredTasks;
@@ -1261,7 +1260,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         notifier.setSearchQuery('buy');
 
@@ -1282,7 +1281,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         notifier.toggleFilterProject('+Home');
         notifier.setSearchQuery('buy');
@@ -1294,11 +1293,11 @@ void main() {
       });
 
       test('changing view clears search', () {
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
         notifier.setSearchQuery('milk');
         expect(notifier.hasActiveSearch, true);
 
-        notifier.activeFilter = TaskFilter.today;
+        notifier.showView(const TodayView());
 
         expect(notifier.hasActiveSearch, false);
         expect(notifier.searchQuery, '');
@@ -1327,7 +1326,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, doneRepository);
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.completed;
+        notifier.showView(const CompletedView());
 
         final result = notifier.filteredTasks;
 
@@ -1357,7 +1356,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, doneRepository);
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.completed;
+        notifier.showView(const CompletedView());
 
         final result = notifier.filteredTasks;
 
@@ -1431,7 +1430,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         final result = notifier.filteredTasks;
 
@@ -1448,7 +1447,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         final result = notifier.filteredTasks;
 
@@ -1473,7 +1472,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         final result = notifier.filteredTasks;
 
@@ -1494,7 +1493,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         final result = notifier.filteredTasks;
 
@@ -1521,7 +1520,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         final result = notifier.filteredTasks;
 
@@ -1541,7 +1540,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         final result = notifier.filteredTasks;
 
@@ -1577,7 +1576,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         final descriptions = notifier.filteredTasks
             .map((t) => t.description)
@@ -1612,7 +1611,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.today;
+        notifier.showView(const TodayView());
 
         final result = notifier.filteredTasks;
 
@@ -1639,7 +1638,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.upcoming;
+        notifier.showView(const UpcomingView());
 
         final result = notifier.filteredTasks;
 
@@ -1693,7 +1692,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         notifier.setSortCriteria([
           TaskSortCriterion.due,
@@ -1723,7 +1722,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, InMemoryTodoRepository());
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.inbox;
+        notifier.showView(const InboxView());
 
         final result = notifier.filteredTasks;
 
@@ -1760,7 +1759,7 @@ void main() {
         );
         notifier = TodoListNotifier(repository, done);
         await notifier.loadTasks();
-        notifier.activeFilter = TaskFilter.completed;
+        notifier.showView(const CompletedView());
 
         notifier.setSortCriteria([TaskSortCriterion.due]);
 
