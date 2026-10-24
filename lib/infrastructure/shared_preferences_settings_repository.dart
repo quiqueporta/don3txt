@@ -5,6 +5,7 @@ import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
+import 'package:don3txt/domain/text_size.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 
 class SharedPreferencesSettingsRepository implements SettingsRepository {
@@ -14,6 +15,7 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
   static const _languageKey = 'language';
   static const _priorityColorsKey = 'priority_colors';
   static const _sortCriteriaKey = 'sort_criteria';
+  static const _textSizeKey = 'text_size';
 
   @override
   Future<String?> loadTodoFilePath() async {
@@ -137,5 +139,23 @@ class SharedPreferencesSettingsRepository implements SettingsRepository {
     } catch (_) {
       return PriorityColors.defaults();
     }
+  }
+
+  @override
+  Future<TextSize> loadTextSize() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getString(_textSizeKey);
+
+    return TextSize.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => TextSize.normal,
+    );
+  }
+
+  @override
+  Future<void> saveTextSize(TextSize value) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString(_textSizeKey, value.name);
   }
 }

@@ -2,6 +2,7 @@ import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
+import 'package:don3txt/domain/text_size.dart';
 
 abstract class SettingsRepository {
   Future<String?> loadTodoFilePath();
@@ -16,6 +17,8 @@ abstract class SettingsRepository {
   Future<void> savePriorityColors(PriorityColors value);
   Future<List<TaskSortCriterion>> loadSortCriteria();
   Future<void> saveSortCriteria(List<TaskSortCriterion> value);
+  Future<TextSize> loadTextSize();
+  Future<void> saveTextSize(TextSize value);
 }
 
 const defaultSortCriteria = <TaskSortCriterion>[

@@ -7,6 +7,7 @@ import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
+import 'package:don3txt/domain/text_size.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/application/task_view.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
@@ -59,6 +60,15 @@ class SettingsScreen extends StatelessWidget {
             groupValue: settings.themeMode,
             onChanged: (value) => settings.setThemeMode(value!),
           ),
+          const Divider(),
+          _SectionHeader(title: loc.sectionTextSize),
+          for (final textSize in TextSize.values)
+            RadioListTile<TextSize>(
+              title: Text(_textSizeLabel(textSize, loc)),
+              value: textSize,
+              groupValue: settings.textSize,
+              onChanged: (value) => settings.setTextSize(value!),
+            ),
           const Divider(),
           _SectionHeader(title: loc.sectionLanguage),
           RadioListTile<AppLanguage>(
@@ -125,6 +135,15 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _textSizeLabel(TextSize textSize, AppLocalizations loc) {
+    return switch (textSize) {
+      TextSize.small => loc.textSizeSmall,
+      TextSize.normal => loc.textSizeNormal,
+      TextSize.large => loc.textSizeLarge,
+      TextSize.extraLarge => loc.textSizeExtraLarge,
+    };
   }
 
   Future<void> _selectFolder(BuildContext context) async {

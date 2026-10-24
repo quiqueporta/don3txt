@@ -14,7 +14,7 @@ Task manager based on the open standard [todo.txt](http://todotxt.org/) format, 
 
 Clean Architecture with layer separation:
 
-- `lib/domain/` — Value Objects (`TodoItem`, `Tag`, `AppThemeMode`, `StartOfWeek`), Aggregates (`TodoFile`), pure parsing functions (`todo_parser.dart`), recurrence logic (`recurrence.dart`)
+- `lib/domain/` — Value Objects (`TodoItem`, `Tag`, `AppThemeMode`, `TextSize`, `StartOfWeek`), Aggregates (`TodoFile`), pure parsing functions (`todo_parser.dart`), recurrence logic (`recurrence.dart`)
 - `lib/infrastructure/` — Repositories (`FileTodoRepository`, `SharedPreferencesSettingsRepository`) and platform services (`AndroidStoragePermission`, `UnrestrictedStoragePermission`). Also contains domain interfaces (abstractions only, no concrete implementations): `TodoRepository`, `SettingsRepository`, `StoragePermission`
 - `lib/application/` — Reactive state (`TodoListNotifier`, `SettingsNotifier` with `ChangeNotifier`)
 - `lib/ui/` — Theme, screens (`TaskListScreen`, `SettingsScreen`) and widgets (`SidebarDrawer`, `TaskTile`, `AddTaskField`, `EditTaskField`, `TaskInputBar`, `TagPickerSheet`)
@@ -33,7 +33,7 @@ Clean Architecture with layer separation:
 - Snackbar with Undo when completing a task
 - Free-text search across task descriptions, available in all views
 - Select todo.txt file from any location on the device
-- Light/dark/system theme, configurable upcoming period, configurable task sort order (multi-level chain), configurable priority colors (A–F)
+- Light/dark/system theme, configurable text size (small, normal, large, extra large; multiplies the system text scale), configurable upcoming period, configurable task sort order (multi-level chain), configurable priority colors (A–F)
 - Multi-language UI: English, Spanish, French, Italian, Portuguese (selector in Settings with "System default" option)
 - Safe to share the same `todo.txt` between devices through a sync tool: every operation rereads the file before changing it and identifies tasks by content (not position), saves are atomic (temporary file `.syncthing.don3txt-<name>.tmp` renamed over the original), the list reloads when the file changes on disk (`TodoRepository.changes`) and when the app returns to the foreground, and the user is warned when a task or the raw file was changed on another device
 - Linux desktop build distributed as AppImage and tarball (`linux/packaging/`). The AppImage `AppRun` asks once (with `zenity`) whether to add a menu entry and supports `--remove-desktop-entry`

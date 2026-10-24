@@ -5,6 +5,7 @@ import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
+import 'package:don3txt/domain/text_size.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
@@ -29,8 +30,9 @@ class InMemoryTodoRepository implements TodoRepository {
 
 class InMemorySettingsRepository implements SettingsRepository {
   final AppLanguage language;
+  final TextSize textSize;
 
-  InMemorySettingsRepository(this.language);
+  InMemorySettingsRepository(this.language, {this.textSize = TextSize.normal});
 
   @override
   Future<String?> loadTodoFilePath() async => null;
@@ -59,6 +61,12 @@ class InMemorySettingsRepository implements SettingsRepository {
 
   @override
   Future<void> saveSortCriteria(List<TaskSortCriterion> value) async {}
+
+  @override
+  Future<TextSize> loadTextSize() async => textSize;
+
+  @override
+  Future<void> saveTextSize(TextSize value) async {}
 }
 
 class FakeStoragePermission implements StoragePermission {
@@ -97,5 +105,23 @@ void main() {
     final context = tester.element(find.byType(TaskListScreen));
 
     expect(context.read<StoragePermission>(), same(storagePermission));
+  });
+
+  testWidgets('scales all the text to the chosen text size', (tester) async {
+    await tester.pumpWidget(Don3txtApp(
+      repository: InMemoryTodoRepository(),
+      doneRepository: InMemoryTodoRepository(),
+      settingsRepository: InMemorySettingsRepository(
+        AppLanguage.english,
+        textSize: TextSize.large,
+      ),
+      storagePermission: FakeStoragePermission(),
+      defaultFilePath: '/tmp/todo.txt',
+    ));
+    await tester.pumpAndSettle();
+
+    final context = tester.element(find.byType(TaskListScreen));
+
+    expect(MediaQuery.textScalerOf(context).scale(10), closeTo(11.5, 0.001));
   });
 }

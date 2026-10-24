@@ -26,6 +26,11 @@
   "themeSystem": "System",
   "themeLight": "Light",
   "themeDark": "Dark",
+  "sectionTextSize": "Text size",
+  "textSizeSmall": "Small",
+  "textSizeNormal": "Normal",
+  "textSizeLarge": "Large",
+  "textSizeExtraLarge": "Extra large",
   "sectionUpcomingDays": "Upcoming days",
   "daysCount": "{count} days",
   "@daysCount": {

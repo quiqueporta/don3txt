@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
+import 'package:don3txt/domain/text_size.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
 import 'package:don3txt/application/settings_notifier.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
@@ -53,6 +54,8 @@ class Don3txtApp extends StatelessWidget {
               ...GlobalMaterialLocalizations.delegates,
             ],
             supportedLocales: AppLocalizations.supportedLocales,
+            builder: (context, child) =>
+                _withTextSize(context, settings.textSize, child!),
             home: const TaskListScreen(),
           );
         },
@@ -70,4 +73,16 @@ ThemeMode _toThemeMode(AppThemeMode mode) {
     case AppThemeMode.system:
       return ThemeMode.system;
   }
+}
+
+Widget _withTextSize(BuildContext context, TextSize textSize, Widget child) {
+  final media = MediaQuery.of(context);
+  final systemScale = media.textScaler.scale(1);
+
+  return MediaQuery(
+    data: media.copyWith(
+      textScaler: TextScaler.linear(systemScale * textSize.scale),
+    ),
+    child: child,
+  );
 }

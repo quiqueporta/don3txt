@@ -3,6 +3,7 @@ import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
+import 'package:don3txt/domain/text_size.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 
 class SettingsNotifier extends ChangeNotifier {
@@ -13,6 +14,7 @@ class SettingsNotifier extends ChangeNotifier {
   AppLanguage _language = AppLanguage.system;
   PriorityColors _priorityColors = PriorityColors.defaults();
   List<TaskSortCriterion> _sortCriteria = defaultSortCriteria;
+  TextSize _textSize = TextSize.normal;
 
   SettingsNotifier(this._repository);
 
@@ -22,6 +24,7 @@ class SettingsNotifier extends ChangeNotifier {
   AppLanguage get language => _language;
   PriorityColors get priorityColors => _priorityColors;
   List<TaskSortCriterion> get sortCriteria => List.unmodifiable(_sortCriteria);
+  TextSize get textSize => _textSize;
 
   Future<void> load() async {
     _todoFilePath = await _repository.loadTodoFilePath();
@@ -30,6 +33,7 @@ class SettingsNotifier extends ChangeNotifier {
     _language = await _repository.loadLanguage();
     _priorityColors = await _repository.loadPriorityColors();
     _sortCriteria = await _repository.loadSortCriteria();
+    _textSize = await _repository.loadTextSize();
 
     notifyListeners();
   }
@@ -74,6 +78,13 @@ class SettingsNotifier extends ChangeNotifier {
     notifyListeners();
 
     await _repository.savePriorityColors(_priorityColors);
+  }
+
+  Future<void> setTextSize(TextSize value) async {
+    _textSize = value;
+    notifyListeners();
+
+    await _repository.saveTextSize(value);
   }
 
   Future<void> setSortCriteria(List<TaskSortCriterion> value) async {

@@ -8,6 +8,7 @@ import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
+import 'package:don3txt/domain/text_size.dart';
 import 'package:don3txt/domain/todo_file.dart';
 import 'package:don3txt/application/task_view.dart';
 import 'package:don3txt/application/todo_list_notifier.dart';
@@ -75,6 +76,16 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> saveSortCriteria(List<TaskSortCriterion> value) async {
     _sortCriteria = value;
+  }
+
+  TextSize _textSize = TextSize.normal;
+
+  @override
+  Future<TextSize> loadTextSize() async => _textSize;
+
+  @override
+  Future<void> saveTextSize(TextSize value) async {
+    _textSize = value;
   }
 }
 
@@ -233,6 +244,31 @@ void main() {
       expect(notifier.themeMode, AppThemeMode.dark);
     });
 
+    testWidgets('tapping a text size selects it and keeps it for the next launch',
+        (tester) async {
+      final repo = InMemorySettingsRepository();
+      notifier = SettingsNotifier(repo);
+      await notifier.load();
+
+      await tester.pumpWidget(buildTestApp(notifier));
+      await tester.scrollUntilVisible(find.text('Language'), 200,
+          scrollable: find.byType(Scrollable).first);
+
+      expect(find.text('Text size'), findsOneWidget);
+      for (final option in ['Small', 'Normal', 'Large', 'Extra large']) {
+        expect(find.text(option), findsOneWidget);
+      }
+
+      await tester.tap(find.text('Extra large'));
+      await tester.pumpAndSettle();
+
+      final nextLaunch = SettingsNotifier(repo);
+      await nextLaunch.load();
+
+      expect(notifier.textSize, TextSize.extraLarge);
+      expect(nextLaunch.textSize, TextSize.extraLarge);
+    });
+
     testWidgets('does not contain file selection options in UI', (tester) async {
       await tester.pumpWidget(buildTestApp(notifier));
 
@@ -256,6 +292,8 @@ void main() {
 
     testWidgets('System language is selected by default', (tester) async {
       await tester.pumpWidget(buildTestApp(notifier));
+      await tester.scrollUntilVisible(find.text('System default'), 200,
+          scrollable: find.byType(Scrollable).first);
 
       final systemRadio = tester.widget<RadioListTile<AppLanguage>>(
         find.byWidgetPredicate(
@@ -460,6 +498,8 @@ void main() {
 
         final removeButtons = find.byKey(
             const ValueKey('remove_sort_criterion_due'));
+        await tester.ensureVisible(removeButtons);
+        await tester.pumpAndSettle();
 
         expect(removeButtons, findsOneWidget);
 

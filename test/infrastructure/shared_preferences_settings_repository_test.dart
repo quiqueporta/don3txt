@@ -4,6 +4,7 @@ import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
+import 'package:don3txt/domain/text_size.dart';
 import 'package:don3txt/infrastructure/shared_preferences_settings_repository.dart';
 
 void main() {
@@ -93,6 +94,28 @@ void main() {
       final result = await repository.loadLanguage();
 
       expect(result, AppLanguage.portuguese);
+    });
+
+    test('loadTextSize returns normal by default', () async {
+      final result = await repository.loadTextSize();
+
+      expect(result, TextSize.normal);
+    });
+
+    test('saveTextSize persists extra large', () async {
+      await repository.saveTextSize(TextSize.extraLarge);
+
+      final result = await repository.loadTextSize();
+
+      expect(result, TextSize.extraLarge);
+    });
+
+    test('loadTextSize returns normal when the stored value is unknown', () async {
+      SharedPreferences.setMockInitialValues({'text_size': 'gigantic'});
+
+      final result = await repository.loadTextSize();
+
+      expect(result, TextSize.normal);
     });
 
     test('loadPriorityColors returns defaults when nothing is stored',

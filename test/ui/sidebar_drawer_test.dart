@@ -8,6 +8,7 @@ import 'package:don3txt/domain/app_language.dart';
 import 'package:don3txt/domain/app_theme_mode.dart';
 import 'package:don3txt/domain/priority_colors.dart';
 import 'package:don3txt/domain/task_sort_criterion.dart';
+import 'package:don3txt/domain/text_size.dart';
 import 'package:don3txt/infrastructure/file_todo_repository.dart';
 import 'package:don3txt/infrastructure/settings_repository.dart';
 import 'package:don3txt/application/task_view.dart';
@@ -92,6 +93,16 @@ class InMemorySettingsRepository implements SettingsRepository {
   @override
   Future<void> saveSortCriteria(List<TaskSortCriterion> value) async {
     _sortCriteria = value;
+  }
+
+  TextSize _textSize = TextSize.normal;
+
+  @override
+  Future<TextSize> loadTextSize() async => _textSize;
+
+  @override
+  Future<void> saveTextSize(TextSize value) async {
+    _textSize = value;
   }
 }
 
