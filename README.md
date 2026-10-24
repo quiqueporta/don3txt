@@ -60,6 +60,7 @@ Choosing a folder in Settings uses `zenity`, which most desktops already include
 - **Upcoming**: shows tasks due from tomorrow up to N days ahead, with a count badge and period indicator (e.g. "Upcoming · 7d"). The period is configurable in settings (3, 7, 14 or 30 days)
 - **My Projects**: filters by project (`+name`), generated dynamically from pending tasks. Collapsible section in sidebar
 - **My Contexts**: filters by context (`@name`), generated dynamically from pending tasks. Collapsible section in sidebar
+- **My Tags**: filters by free tag, that is, any `key:value` whose key the app does not use itself (such as `waiting:ana` or `next:yes`). Each key shows all its tasks, and keys with several values list each value below. A task created from a tag view gets that tag. Tags are also shown under each task and offered as chips in the filter sheet
 - **Recurring**: shows all recurring tasks (with `rec:`), including those with a future threshold date
 - **Completed**: shows all completed tasks sorted by completion date (newest first)
 - **Search**: free-text search across tasks in any view, accessible from the AppBar search icon
@@ -86,6 +87,7 @@ If both devices change the file while they cannot see each other (for example, o
 ### Settings
 
 - **Theme**: System (default), Light or Dark — Material Design 3
+- **Text size**: Small, Normal, Large or Extra large, on top of the text size set on the device
 - **First day of the week**: Monday or Sunday (affects the date picker)
 - **Upcoming days**: period for the Upcoming view (3, 7, 14 or 30 days)
 - **todo.txt file path**: configurable from settings
@@ -114,7 +116,7 @@ Review report due:2024-03-01 t:2024-02-25 rec:+1m
 | Due date | `due:YYYY-MM-DD` | `due:2024-01-20` |
 | Threshold date | `t:YYYY-MM-DD` | `t:2024-01-18` |
 | Recurrence | `rec:[+]Nu` | `rec:2w`, `rec:+1m` |
-| Generic metadata | `key:value` | `effort:high` |
+| Generic metadata (free tag) | `key:value`, the key starts with a letter | `effort:high`, `waiting:ana` |
 
 ## Requirements
 

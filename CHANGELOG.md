@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.14.0] - 2026-10-24
+
+### Added
+
+- Free tags: any `key:value` whose key the app does not use itself, such as `waiting:ana` or `next:yes`. A new "My Tags" section in the sidebar lists each key and, when a key has several values, each value below it. Tasks with a future `t:` stay visible with reduced opacity, as in Project and Context
+- Tags shown under each task in the list, next to projects and contexts, and offered as chips in the filter sheet
+- A task added from a tag view gets that tag as a removable chip
+- Text size setting (small, normal, large, extra large), applied on top of the text size set on the device
+
+### Changed
+
+- Only words whose key is a name starting with a letter count as metadata, so times and ratios such as `10:30` stay in the task description where you wrote them
+
+### Fixed
+
+- The Upcoming view no longer drops its last day, nor shows today's tasks, around the autumn clock change
+
 ## [1.13.0] - 2026-10-17
 
 ### Added

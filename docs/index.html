@@ -49,7 +49,7 @@
     "description": "don3txt is a free, open source todo.txt task manager for Android and Linux. Manage your tasks in plain text with full support for the todo.txt open standard: priorities, projects, contexts, due dates, threshold dates and recurring tasks. No cloud, no accounts, no telemetry.",
     "url": "https://quiqueporta.com/don3txt/",
     "downloadUrl": "https://github.com/quiqueporta/don3txt/releases",
-    "softwareVersion": "1.13.0",
+    "softwareVersion": "1.14.0",
     "author": {
       "@type": "Person",
       "name": "Quique Porta",
@@ -73,11 +73,13 @@
       "Projects (+name) and contexts (@name) with visual pickers",
       "Due dates and threshold dates",
       "Recurring tasks (flexible and strict)",
-      "Today, Inbox, Upcoming, Recurring and Completed views",
+      "Today, Past, Inbox, Upcoming, Recurring and Completed views",
+      "Free tags such as waiting:name or next:yes as sidebar views and filters",
       "Full-text search across any view",
       "Configurable multi-level task sort order",
       "Multi-language: English, Spanish, French, Italian, Portuguese",
       "Light, dark and system theme",
+      "Adjustable text size",
       "Pull-to-refresh and done.txt archive",
       "Compatible with Syncthing and Dropbox sync",
       "Safe to share the same todo.txt between phone and computer",
@@ -1646,7 +1648,7 @@
             <strong>Today</strong> (default) with badges for overdue and due-today tasks.
             <strong>Inbox</strong> with all your active tasks.
             <strong>Upcoming</strong> with tasks for the next few days (configurable period: 3, 7, 14 or 30 days).
-            Collapsible filters by <strong>Project</strong> and <strong>Context</strong>.
+            Collapsible filters by <strong>Project</strong>, <strong>Context</strong> and <strong>Tag</strong>: any <code style="color:var(--accent);font-family:var(--font-mono);">key:value</code> such as <code style="color:var(--accent);font-family:var(--font-mono);">waiting:ana</code> or <code style="color:var(--accent);font-family:var(--font-mono);">next:yes</code>, shown under each task and available as quick filters.
             Dedicated <strong>Recurring</strong> and <strong>Completed</strong> task views.
             <strong>Search</strong> by text across any view.
           </p>
@@ -1667,7 +1669,7 @@
         <div class="feature-card fade-in" data-delay="0">
           <div class="feature-icon">&#128336;</div>
           <h3>Threshold date</h3>
-          <p>With <code style="color:var(--accent);font-family:var(--font-mono);">t:2024-02-25</code> the task is deferred until that date. Hidden from <strong>Today</strong> so action views stay focused, but still visible (with reduced opacity) in <strong>Inbox</strong>, <strong>Project</strong>, <strong>Context</strong>, <strong>Upcoming</strong> and <strong>Recurring</strong>.</p>
+          <p>With <code style="color:var(--accent);font-family:var(--font-mono);">t:2024-02-25</code> the task is deferred until that date. Hidden from <strong>Today</strong> so action views stay focused, but still visible (with reduced opacity) in <strong>Inbox</strong>, <strong>Project</strong>, <strong>Context</strong>, <strong>Tag</strong>, <strong>Upcoming</strong> and <strong>Recurring</strong>.</p>
         </div>
 
         <div class="feature-card fade-in" data-delay="80">
@@ -1697,7 +1699,7 @@
         <div class="feature-card fade-in" data-delay="80">
           <div class="feature-icon">&#9881;</div>
           <h3>Fully configurable</h3>
-          <p>Custom <strong>task sort order</strong> (multi-level chain by priority, due date, threshold date and creation date), Upcoming period (3, 7, 14 or 30 days), theme and file path. All from Settings.</p>
+          <p>Custom <strong>task sort order</strong> (multi-level chain by priority, due date, threshold date and creation date), Upcoming period (3, 7, 14 or 30 days), <strong>text size</strong>, theme and file path. All from Settings.</p>
         </div>
 
         <div class="feature-card fade-in" data-delay="160">
@@ -1855,7 +1857,7 @@ Review report <span class="todo-meta">due:2024-03-01 t:2024-02-25 rec:+1m</span>
       <div class="cta-box fade-in" data-delay="0">
         <h2>Get started today</h2>
         <p>Download don3txt for Android or Linux, pick your todo.txt file and start managing your tasks with no strings attached.</p>
-        <p class="cta-version">Current version: v1.13.0</p>
+        <p class="cta-version">Current version: v1.14.0</p>
         <div class="cta-actions">
           <a href="https://github.com/quiqueporta/don3txt/releases" class="btn-primary" target="_blank" rel="noopener">
             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
