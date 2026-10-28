@@ -152,6 +152,34 @@ Widget buildTestApp(
   );
 }
 
+Future<void> tapAndWaitUntil(
+  WidgetTester tester,
+  Finder target,
+  bool Function() condition,
+) async {
+  await tester.runAsync(() => tester.tap(target));
+
+  final deadline = DateTime.now().add(const Duration(seconds: 5));
+  while (!condition() && DateTime.now().isBefore(deadline)) {
+    await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester.pump();
+  }
+
+  await tester.pumpAndSettle();
+}
+
+bool dialogIsShown() => find.byType(AlertDialog).evaluate().isNotEmpty;
+
+bool Function() switchedToNewFile(WidgetTester tester, SettingsNotifier notifier) {
+  return () {
+    final todoList =
+        tester.element(find.byType(SettingsScreen)).read<TodoListNotifier>();
+
+    return notifier.todoFilePath != null && !todoList.isLoading;
+  };
+}
+
 Widget buildTestAppPushedFromHome(
   SettingsNotifier notifier,
   TodoListNotifier todoListNotifier, {
@@ -389,18 +417,10 @@ void main() {
           storagePermission: const FakeStoragePermission(granted: true),
         ));
 
-        await tester.runAsync(() async {
-          await tester.tap(find.text('Default'));
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-        });
-        await tester.pumpAndSettle();
+        await tapAndWaitUntil(tester, find.text('Default'), dialogIsShown);
 
         expect(find.text('${folder.path}/todo.txt'), findsOneWidget);
-        await tester.runAsync(() async {
-          await tester.tap(find.text('OK'));
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-        });
-        await tester.pumpAndSettle();
+        await tapAndWaitUntil(tester, find.text('OK'), switchedToNewFile(tester, notifier));
 
         expect(notifier.todoFilePath, '${folder.path}/todo.txt');
         expect(File('${folder.path}/todo.txt').existsSync(), isTrue);
@@ -418,20 +438,12 @@ void main() {
         FilePickerPlatform.instance = FakeFilePicker(folder.path);
 
         await tester.pumpWidget(buildTestApp(notifier));
-        await tester.runAsync(() async {
-          await tester.tap(find.text('Default'));
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-        });
-        await tester.pumpAndSettle();
+        await tapAndWaitUntil(tester, find.text('Default'), dialogIsShown);
         await tester.enterText(find.byType(TextFormField), '_TODO.todotxt');
         await tester.pumpAndSettle();
         expect(find.text(file.path), findsOneWidget);
 
-        await tester.runAsync(() async {
-          await tester.tap(find.text('OK'));
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-        });
-        await tester.pumpAndSettle();
+        await tapAndWaitUntil(tester, find.text('OK'), switchedToNewFile(tester, notifier));
 
         expect(notifier.todoFilePath, file.path);
         expect(file.readAsStringSync(), content);
@@ -447,11 +459,7 @@ void main() {
         addTearDown(() => folder.deleteSync(recursive: true));
         FilePickerPlatform.instance = FakeFilePicker(folder.path);
         await tester.pumpWidget(buildTestApp(notifier));
-        await tester.runAsync(() async {
-          await tester.tap(find.text('Default'));
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-        });
-        await tester.pumpAndSettle();
+        await tapAndWaitUntil(tester, find.text('Default'), dialogIsShown);
         await tester.tap(find.text('Cancel'));
         await tester.pumpAndSettle();
 
@@ -466,16 +474,8 @@ void main() {
         Directory('${folder.path}/todo.txt').createSync();
         FilePickerPlatform.instance = FakeFilePicker(folder.path);
         await tester.pumpWidget(buildTestApp(notifier));
-        await tester.runAsync(() async {
-          await tester.tap(find.text('Default'));
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-        });
-        await tester.pumpAndSettle();
-        await tester.runAsync(() async {
-          await tester.tap(find.text('OK'));
-          await Future<void>.delayed(const Duration(milliseconds: 200));
-        });
-        await tester.pumpAndSettle();
+        await tapAndWaitUntil(tester, find.text('Default'), dialogIsShown);
+        await tapAndWaitUntil(tester, find.text('OK'), () => find.byType(SnackBar).evaluate().isNotEmpty);
 
         expect(notifier.todoFilePath, isNull);
         expect(find.text('Unable to open this file for writing. '
