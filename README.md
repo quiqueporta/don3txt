@@ -36,12 +36,12 @@ Choosing a folder in Settings uses `zenity`, which most desktops already include
 - **Create tasks** with automatic parsing of projects (`+name`), contexts (`@name`) and metadata (`key:value`)
 - **Complete/uncomplete** tasks with a single tap. The completion date is assigned automatically. A snackbar with **Undo** appears after completing a task
 - **Delete tasks** from the three-dot menu on each task, with a snackbar and **Undo** to restore
-- **Archive completed tasks** to `done.txt` in the same directory as the active `todo.txt`
+- **Archive completed tasks** to `done.txt` in the same directory as the active todo file
 - **Pull-to-refresh** to reload tasks from disk by swiping down
 - **Priorities** from `(A)` to `(Z)` following the todo.txt standard
 - **Creation dates** assigned automatically when a task is created
 - **Due dates** (`due:YYYY-MM-DD`) with a built-in calendar picker
-- **Threshold dates** (`t:YYYY-MM-DD`) with a calendar picker — tasks with a future threshold date are hidden from action views (Today, Inbox) but remain visible in Upcoming and Recurring
+- **Threshold dates** (`t:YYYY-MM-DD`) with a calendar picker — tasks with a future threshold date are hidden from Past and Today, and shown with reduced opacity in Inbox, Project, Context and Tag views. When a task has no `due:`, its `t:` date decides whether it appears in Past, Today or Upcoming
 - **Visual tag pickers** for projects (`+name`) and contexts (`@name`) — tap `+` or `@` in the editor to browse existing tags as selectable chips, or create new ones. Compatible with manual typing: tags entered in the text field merge with those selected via UI without duplicates
 
 ### Recurring tasks
@@ -57,7 +57,7 @@ Choosing a folder in Settings uses `zenity`, which most desktops already include
 - **Inbox**: shows all pending tasks
 - **Past**: shows tasks whose reference date is before today, with a red count badge in the sidebar
 - **Today** (default view): shows tasks whose reference date is today, with a count badge in the sidebar. The reference date is `due:`, or `t:` when there is no `due:`
-- **Upcoming**: shows tasks due from tomorrow up to N days ahead, with a count badge and period indicator (e.g. "Upcoming · 7d"). The period is configurable in settings (3, 7, 14 or 30 days)
+- **Upcoming**: shows tasks whose reference date is from tomorrow up to N days ahead, with a count badge and period indicator (e.g. "Upcoming · 7d"). The period is configurable in settings (3, 7, 14 or 30 days)
 - **My Projects**: filters by project (`+name`), generated dynamically from pending tasks. Collapsible section in sidebar
 - **My Contexts**: filters by context (`@name`), generated dynamically from pending tasks. Collapsible section in sidebar
 - **My Tags**: filters by free tag, that is, any `key:value` whose key the app does not use itself (such as `waiting:ana` or `next:yes`). Each key shows all its tasks, and keys with several values list each value below. A task created from a tag view gets that tag. Tags are also shown under each task and offered as chips in the filter sheet
@@ -67,10 +67,10 @@ Choosing a folder in Settings uses `zenity`, which most desktops already include
 
 ### File management
 
-- Works with standard plain-text `todo.txt` files
-- **Select an existing file** from any location on the device
-- **Create a new file** in a custom location
+- Works with standard plain-text todo.txt files
+- **Choose a folder and a file name** anywhere on the device: pick an existing file with any name, such as `_TODO.todotxt` from the Obsidian TodoTxt plugin, or type a new name to create an empty file. Completed tasks are archived to `done.txt` next to it
 - **Restore** to the default file at any time
+- **Edit the raw file** from the Debug screen in the sidebar. It refuses to overwrite the file if it was changed on another device and keeps your text
 - Compatible with synchronisation tools such as **Syncthing**, **Dropbox**, etc.
 
 ### Using the same file on several devices
@@ -88,9 +88,11 @@ If both devices change the file while they cannot see each other (for example, o
 
 - **Theme**: System (default), Light or Dark — Material Design 3
 - **Text size**: Small, Normal, Large or Extra large, on top of the text size set on the device
-- **First day of the week**: Monday or Sunday (affects the date picker)
+- **Language**: English, Spanish, French, Italian or Portuguese, or the device language
 - **Upcoming days**: period for the Upcoming view (3, 7, 14 or 30 days)
-- **todo.txt file path**: configurable from settings
+- **Priority colors**: color for each priority from `(A)` to `(F)`
+- **Task order**: chain of sort criteria applied to every list
+- **Todo file**: folder and file name, or the default file
 
 ## todo.txt format
 
@@ -188,3 +190,7 @@ lib/
 └── ui/                  # Theme, screens and widgets
 ```
 
+
+## Contributing
+
+Issues and pull requests are welcome. Everyone who has contributed is listed in [CONTRIBUTORS.md](CONTRIBUTORS.md).

@@ -14,10 +14,10 @@ Task manager based on the open standard [todo.txt](http://todotxt.org/) format, 
 
 Clean Architecture with layer separation:
 
-- `lib/domain/` — Value Objects (`TodoItem`, `Tag`, `AppThemeMode`, `TextSize`, `StartOfWeek`), Aggregates (`TodoFile`), pure parsing functions (`todo_parser.dart`), recurrence logic (`recurrence.dart`)
+- `lib/domain/` — Value Objects (`TodoItem`, `Tag`, `AppThemeMode`, `TextSize`, `AppLanguage`, `PriorityColors`, `TaskSortCriterion`), Aggregates (`TodoFile`), pure parsing functions (`todo_parser.dart`), recurrence logic (`recurrence.dart`)
 - `lib/infrastructure/` — Repositories (`FileTodoRepository`, `SharedPreferencesSettingsRepository`) and platform services (`AndroidStoragePermission`, `UnrestrictedStoragePermission`). Also contains domain interfaces (abstractions only, no concrete implementations): `TodoRepository`, `SettingsRepository`, `StoragePermission`
-- `lib/application/` — Reactive state (`TodoListNotifier`, `SettingsNotifier` with `ChangeNotifier`)
-- `lib/ui/` — Theme, screens (`TaskListScreen`, `SettingsScreen`) and widgets (`SidebarDrawer`, `TaskTile`, `AddTaskField`, `EditTaskField`, `TaskInputBar`, `TagPickerSheet`)
+- `lib/application/` — Reactive state (`TodoListNotifier`, `SettingsNotifier` with `ChangeNotifier`) and the views (`TaskView`, a sealed class with one subclass per view that decides which tasks it shows and what new tasks get)
+- `lib/ui/` — Theme, screens (`TaskListScreen`, `SettingsScreen`, `DebugScreen` to edit the raw file) and widgets (`SidebarDrawer`, `TaskTile`, `AddTaskField`, `EditTaskField`, `TaskInputBar`, `TagPickerSheet`, `FilterBottomSheet`, `RecurrenceDialog`)
 
 ## Main features
 
@@ -32,7 +32,8 @@ Clean Architecture with layer separation:
 - Task deletion from three-dot menu with Snackbar and Undo
 - Snackbar with Undo when completing a task
 - Free-text search across task descriptions, available in all views
-- Select todo.txt file from any location on the device
+- Select the todo file by choosing a folder anywhere on the device and then a file name: any existing file (e.g. `_TODO.todotxt`, used by the Obsidian TodoTxt plugin) or a new name, which creates an empty file. `done.txt` always lives next to it, so it is rejected as the todo file name
+- Raw file editor (`DebugScreen`, "Debug" in the sidebar) that refuses to save over a file changed on another device
 - Light/dark/system theme, configurable text size (small, normal, large, extra large; multiplies the system text scale), configurable upcoming period, configurable task sort order (multi-level chain), configurable priority colors (A–F)
 - Multi-language UI: English, Spanish, French, Italian, Portuguese (selector in Settings with "System default" option)
 - Safe to share the same `todo.txt` between devices through a sync tool: every operation rereads the file before changing it and identifies tasks by content (not position), saves are atomic (temporary file `.syncthing.don3txt-<name>.tmp` renamed over the original), the list reloads when the file changes on disk (`TodoRepository.changes`) and when the app returns to the foreground, and the user is warned when a task or the raw file was changed on another device
@@ -90,7 +91,7 @@ When it's time to bump the version, follow these steps in order:
    - `lib/ui/widgets/sidebar_drawer.dart` → `applicationVersion:` field
    - `docs/index.html` → `"softwareVersion"` field in the JSON-LD block
    - `docs/index.html` → `<p class="cta-version">Current version: vX.Y.Z</p>`
-2. **Update `CHANGELOG.md`** — add a new entry at the top with date and changes (Added/Changed/Fixed sections as appropriate)
+2. **Update `CHANGELOG.md`** — add a new entry at the top with date and changes (Added/Changed/Fixed sections as appropriate). For changes from an outside pull request, thank the author with a link to the PR, and add them to `CONTRIBUTORS.md` if they are not there yet
 3. **Run tests** — `flutter test` and confirm all pass
 4. **Commit** with message `Bump version to X.Y.Z`
 5. **Create tag** — `git tag vX.Y.Z`
