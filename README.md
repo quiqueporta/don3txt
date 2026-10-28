@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml/badge.svg)](https://github.com/quiqueporta/don3txt/actions/workflows/tests.yml)
 
-https://quiqueporta.com/don3txt/
+[Website](https://quiqueporta.com/don3txt/) · [X (Twitter)](https://x.com/don3txt)
 
 A task manager for **Android** and **Linux** based on the [todo.txt](http://todotxt.org/) format, designed for users who prefer plain text, full data ownership, and simple workflows.
 
