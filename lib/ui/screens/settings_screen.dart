@@ -158,11 +158,26 @@ class SettingsScreen extends StatelessWidget {
 
     if (!context.mounted) return;
 
-    final path = '$directoryPath/todo.txt';
-    final file = File(path);
+    final currentPath = context.read<SettingsNotifier>().todoFilePath;
+    final path = await showDialog<String>(
+      context: context,
+      builder: (_) => _TodoFileDialog(
+        directoryPath: directoryPath,
+        initialName: currentPath?.split('/').last ?? 'todo.txt',
+      ),
+    );
+    if (path == null || !context.mounted) return;
 
-    if (!await file.exists()) {
-      await file.writeAsString('');
+    try {
+      final handle = await File(path).open(mode: FileMode.append);
+      await handle.close();
+    } on FileSystemException {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context).errorTodoFile)),
+        );
+      }
+      return;
     }
 
     if (!context.mounted) return;
@@ -195,6 +210,79 @@ class SettingsScreen extends StatelessWidget {
         FileTodoRepository.donePathFor(path));
 
     await todoList.switchRepository(newRepository, newDoneRepository);
+  }
+}
+
+class _TodoFileDialog extends StatefulWidget {
+  final String directoryPath;
+  final String initialName;
+
+  const _TodoFileDialog({required this.directoryPath, required this.initialName});
+
+  @override
+  State<_TodoFileDialog> createState() => _TodoFileDialogState();
+}
+
+class _TodoFileDialogState extends State<_TodoFileDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late String _name = widget.initialName;
+
+  String get _path {
+    final directory = widget.directoryPath;
+    final separator = directory.endsWith('/') ? '' : '/';
+    return '$directory$separator${_name.trim()}';
+  }
+
+  void _submit() {
+    if (_formKey.currentState!.validate()) Navigator.pop(context, _path);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
+    return AlertDialog(
+      title: Text(loc.sectionTodoFile),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(loc.todoFileHelp),
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: _name,
+                autofocus: true,
+                decoration: InputDecoration(labelText: loc.todoFileName),
+                onChanged: (value) => setState(() => _name = value),
+                onFieldSubmitted: (_) => _submit(),
+                validator: (value) {
+                  final name = value?.trim() ?? '';
+                  return name.isEmpty ||
+                          name == '.' ||
+                          name == '..' ||
+                          name.toLowerCase() == 'done.txt' ||
+                          RegExp(r'[/\\\x00-\x1f\x7f]').hasMatch(name)
+                      ? loc.errorTodoFileName
+                      : null;
+                },
+              ),
+              const SizedBox(height: 16),
+              Text(_path),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(loc.cancel),
+        ),
+        TextButton(onPressed: _submit, child: Text(loc.ok)),
+      ],
+    );
   }
 }
 

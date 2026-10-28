@@ -395,8 +395,125 @@ void main() {
         });
         await tester.pumpAndSettle();
 
+        expect(find.text('${folder.path}/todo.txt'), findsOneWidget);
+        await tester.runAsync(() async {
+          await tester.tap(find.text('OK'));
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        });
+        await tester.pumpAndSettle();
+
         expect(notifier.todoFilePath, '${folder.path}/todo.txt');
+        expect(File('${folder.path}/todo.txt').existsSync(), isTrue);
       });
+
+      testWidgets('uses an existing .todotxt file without changing its content',
+          (tester) async {
+        final folder = Directory.systemTemp.createTempSync('don3txt_custom_');
+        addTearDown(() => folder.deleteSync(recursive: true));
+        final file = File('${folder.path}/_TODO.todotxt');
+        final settingsRepository = InMemorySettingsRepository();
+        notifier = SettingsNotifier(settingsRepository);
+        const content = '(A) Keep my Obsidian task +Vault\n';
+        file.writeAsStringSync(content);
+        FilePickerPlatform.instance = FakeFilePicker(folder.path);
+
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.runAsync(() async {
+          await tester.tap(find.text('Default'));
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        });
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextFormField), '_TODO.todotxt');
+        await tester.pumpAndSettle();
+        expect(find.text(file.path), findsOneWidget);
+
+        await tester.runAsync(() async {
+          await tester.tap(find.text('OK'));
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        });
+        await tester.pumpAndSettle();
+
+        expect(notifier.todoFilePath, file.path);
+        expect(file.readAsStringSync(), content);
+        expect(File('${folder.path}/todo.txt').existsSync(), isFalse);
+        final nextLaunch = SettingsNotifier(settingsRepository);
+        await nextLaunch.load();
+        expect(nextLaunch.todoFilePath, file.path);
+      });
+
+      testWidgets('cancelling the filename dialog leaves the folder untouched',
+          (tester) async {
+        final folder = Directory.systemTemp.createTempSync('don3txt_cancel_');
+        addTearDown(() => folder.deleteSync(recursive: true));
+        FilePickerPlatform.instance = FakeFilePicker(folder.path);
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.runAsync(() async {
+          await tester.tap(find.text('Default'));
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        });
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+
+        expect(notifier.todoFilePath, isNull);
+        expect(folder.listSync(), isEmpty);
+      });
+
+      testWidgets('an inaccessible file leaves the selected path unchanged',
+          (tester) async {
+        final folder = Directory.systemTemp.createTempSync('don3txt_error_');
+        addTearDown(() => folder.deleteSync(recursive: true));
+        Directory('${folder.path}/todo.txt').createSync();
+        FilePickerPlatform.instance = FakeFilePicker(folder.path);
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.runAsync(() async {
+          await tester.tap(find.text('Default'));
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        });
+        await tester.pumpAndSettle();
+        await tester.runAsync(() async {
+          await tester.tap(find.text('OK'));
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        });
+        await tester.pumpAndSettle();
+
+        expect(notifier.todoFilePath, isNull);
+        expect(find.text('Unable to open this file for writing. '
+            'Check the folder and storage permissions.'), findsOneWidget);
+      });
+
+      testWidgets('cancelling the folder picker does not ask for a filename',
+          (tester) async {
+        FilePickerPlatform.instance = FakeFilePicker(null);
+        await tester.pumpWidget(buildTestApp(notifier));
+        await tester.runAsync(() async {
+          await tester.tap(find.text('Default'));
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        });
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AlertDialog), findsNothing);
+        expect(notifier.todoFilePath, isNull);
+      });
+
+      for (final name in [
+        '', '.', '..', '../other.txt', 'sub/file.txt', r'sub\file.txt', 'done.txt',
+      ]) {
+        testWidgets('rejects invalid or reserved filename "$name"', (tester) async {
+          FilePickerPlatform.instance = FakeFilePicker('/somewhere');
+          await tester.pumpWidget(buildTestApp(notifier));
+          await tester.tap(find.text('Default'));
+          await tester.pumpAndSettle();
+          await tester.enterText(find.byType(TextFormField), name);
+          await tester.tap(find.text('OK'));
+          await tester.pumpAndSettle();
+
+          expect(find.byType(AlertDialog), findsOneWidget);
+          expect(notifier.todoFilePath, isNull);
+          expect(find.text('Enter a valid file name other than done.txt.'),
+              findsOneWidget);
+        });
+      }
 
       testWidgets(
           'selecting a folder does not open the folder picker when storage permission is denied',
@@ -409,7 +526,10 @@ void main() {
           storagePermission: const FakeStoragePermission(granted: false),
         ));
 
-        await tester.tap(find.text('Default'));
+        await tester.runAsync(() async {
+          await tester.tap(find.text('Default'));
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        });
         await tester.pumpAndSettle();
 
         expect(filePicker.directoryPickerOpened, false);
