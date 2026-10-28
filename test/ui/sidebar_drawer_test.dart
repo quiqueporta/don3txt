@@ -710,6 +710,22 @@ void main() {
       expect(inkWell, findsOneWidget);
     });
 
+    testWidgets('about dialog links to the contributors list', (tester) async {
+      await tester.pumpWidget(buildTestApp(notifier, settingsNotifier));
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('About'));
+      await tester.pumpAndSettle();
+
+      final contributorsLink = find.text('Contributors');
+      expect(contributorsLink, findsOneWidget);
+      expect(
+        find.ancestor(of: contributorsLink, matching: find.byType(InkWell)),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('shows upcoming days in Upcoming title', (tester) async {
       await settingsNotifier.load();
 

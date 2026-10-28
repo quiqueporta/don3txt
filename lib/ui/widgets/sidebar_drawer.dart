@@ -236,18 +236,15 @@ class SidebarDrawer extends StatelessWidget {
                 children: [
                   Text(loc.aboutAuthor),
                   const SizedBox(height: 8),
-                  InkWell(
-                    onTap: () => launchUrl(
-                      Uri.parse('https://github.com/quiqueporta/don3txt'),
-                      mode: LaunchMode.externalApplication,
-                    ),
-                    child: const Text(
-                      'https://github.com/quiqueporta/don3txt',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
+                  const _ExternalLink(
+                    url: 'https://github.com/quiqueporta/don3txt',
+                    label: 'https://github.com/quiqueporta/don3txt',
+                  ),
+                  const SizedBox(height: 8),
+                  _ExternalLink(
+                    url:
+                        'https://github.com/quiqueporta/don3txt/blob/main/CONTRIBUTORS.md',
+                    label: loc.aboutContributors,
                   ),
                   const SizedBox(height: 8),
                   Text(loc.aboutLicense),
@@ -256,6 +253,30 @@ class SidebarDrawer extends StatelessWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ExternalLink extends StatelessWidget {
+  final String url;
+  final String label;
+
+  const _ExternalLink({required this.url, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
+        ),
       ),
     );
   }

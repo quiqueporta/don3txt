@@ -20,6 +20,7 @@
   "myTags": "My Tags",
   "aboutAuthor": "Author: Quique Porta",
   "aboutLicense": "License: MIT",
+  "aboutContributors": "Contributors",
   "sectionTodoFile": "Todo file",
   "defaultFile": "Default",
   "todoFileName": "File name",

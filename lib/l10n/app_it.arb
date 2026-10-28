@@ -15,6 +15,7 @@
   "myTags": "Le mie etichette",
   "aboutAuthor": "Autore: Quique Porta",
   "aboutLicense": "Licenza: MIT",
+  "aboutContributors": "Collaboratori",
   "sectionTodoFile": "File todo",
   "defaultFile": "Predefinito",
   "todoFileName": "Nome del file",
