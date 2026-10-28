@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.0] - 2026-10-28
+
+### Added
+
+- Custom file name when selecting a folder: choose an existing file such as `_TODO.todotxt` or type a new name to create an empty one. An existing file keeps its content, and a file that cannot be opened for writing shows a warning instead of being selected (thanks [@nicobroii](https://github.com/nicobroii), [#23](https://github.com/quiqueporta/don3txt/pull/23))
+- Link to the list of contributors in the About dialog
+
 ## [1.14.0] - 2026-10-24
 
 ### Added
