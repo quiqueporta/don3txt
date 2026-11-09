@@ -17,6 +17,7 @@ class TodoListNotifier extends ChangeNotifier {
   TodoFile? _todoFile;
   TodoFile? _doneFile;
   bool _isLoading = false;
+  bool _isSaving = false;
   String? _error;
   TaskView _activeView = const TodayView();
   int _upcomingDays = 7;
@@ -57,7 +58,7 @@ class TodoListNotifier extends ChangeNotifier {
   }
 
   void _reloadAfterChange() {
-    if (_isLoading) {
+    if (_isLoading || _isSaving) {
       _reloadPending = true;
 
       return;
@@ -367,10 +368,14 @@ class TodoListNotifier extends ChangeNotifier {
       notifyListeners();
     }
 
-    if (_reloadPending) {
-      _reloadPending = false;
-      await loadTasks();
-    }
+    await _reloadIfPending();
+  }
+
+  Future<void> _reloadIfPending() async {
+    if (!_reloadPending) return;
+
+    _reloadPending = false;
+    await loadTasks();
   }
 
   Future<void> addTask(String description,
@@ -489,11 +494,11 @@ class TodoListNotifier extends ChangeNotifier {
     final completedItems = result.items.where((i) => i.isCompleted).toList();
     final pendingItems = result.items.where((i) => !i.isCompleted).toList();
 
-    _todoFile = TodoFile(pendingItems);
-    _doneFile = TodoFile([...doneFile.items, ...completedItems]);
-    notifyListeners();
+    final pendingFile = TodoFile(pendingItems);
+    final updatedDoneFile = TodoFile([...doneFile.items, ...completedItems]);
+    _showCurrentFiles(pendingFile, updatedDoneFile);
 
-    await _saveDoneThenTodo();
+    await _saveDoneThenTodo(pendingFile, updatedDoneFile);
 
     return completedItems.isEmpty ? null : completedItems.first;
   }
@@ -505,9 +510,31 @@ class TodoListNotifier extends ChangeNotifier {
   }
 
   // done.txt goes first: if the second write fails the task ends up in both files instead of in neither.
-  Future<void> _saveDoneThenTodo() async {
-    await _doneRepository.save(_doneFile!);
-    await _todoRepository.save(_todoFile!);
+  Future<void> _saveDoneThenTodo(TodoFile todoFile, TodoFile doneFile) {
+    return _holdingReloads(() async {
+      await _doneRepository.save(doneFile);
+      await _todoRepository.save(todoFile);
+    });
+  }
+
+  Future<void> _saveTodoThenDone(TodoFile todoFile, TodoFile doneFile) {
+    return _holdingReloads(() async {
+      await _todoRepository.save(todoFile);
+      await _doneRepository.save(doneFile);
+    });
+  }
+
+  // Reloading between the two saves would read the file not written yet and show the change half done.
+  Future<void> _holdingReloads(Future<void> Function() save) async {
+    _isSaving = true;
+
+    try {
+      await save();
+    } finally {
+      _isSaving = false;
+    }
+
+    await _reloadIfPending();
   }
 
   Future<bool> uncompleteTask(TodoItem doneItem) async {
@@ -527,12 +554,11 @@ class TodoListNotifier extends ChangeNotifier {
       completionDate: null,
     );
 
-    _doneFile = doneFile.deleteTask(doneItem);
-    _todoFile = TodoFile([...todoFile.items, restoredItem]);
-    notifyListeners();
+    final restoredTodoFile = TodoFile([...todoFile.items, restoredItem]);
+    final remainingDoneFile = doneFile.deleteTask(doneItem);
+    _showCurrentFiles(restoredTodoFile, remainingDoneFile);
 
-    await _todoRepository.save(_todoFile!);
-    await _doneRepository.save(_doneFile!);
+    await _saveTodoThenDone(restoredTodoFile, remainingDoneFile);
 
     return true;
   }

@@ -645,6 +645,110 @@ void main() {
       });
     });
 
+    group('saving while the files are being watched', () {
+      test(
+          'completing a task removes it from the todo file even when the done file change is noticed first',
+          () async {
+        final milk = TodoItem(description: 'Buy milk');
+        repository = InMemoryTodoRepository(TodoFile([milk]));
+        doneRepository = _AnnouncingRepository();
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+
+        await notifier.toggleTask(milk);
+
+        final stored = await repository.load();
+        expect(stored.items, isEmpty);
+      });
+
+      test(
+          'undoing a completion removes the task from the done file even when the todo file change is noticed first',
+          () async {
+        final milk = TodoItem(
+            description: 'Buy milk',
+            isCompleted: true,
+            completionDate: DateTime(2026, 11, 9));
+        repository = _AnnouncingRepository();
+        doneRepository = InMemoryTodoRepository(TodoFile([milk]));
+        notifier = TodoListNotifier(repository, doneRepository);
+        await notifier.loadTasks();
+
+        await notifier.uncompleteTask(milk);
+
+        final stored = await doneRepository.load();
+        expect(stored.items, isEmpty);
+      });
+
+      test('keeps the completed task out of the list while it is being saved',
+          () async {
+        final milk = TodoItem(description: 'Buy milk');
+        final announcingDone = _AnnouncingRepository();
+        repository = InMemoryTodoRepository(TodoFile([milk]));
+        notifier = TodoListNotifier(repository, announcingDone);
+        await notifier.loadTasks();
+        List<TodoItem>? shownWhileSaving;
+        announcingDone.afterAnnouncing =
+            () => shownWhileSaving ??= notifier.todoFile!.items;
+
+        await notifier.toggleTask(milk);
+
+        expect(shownWhileSaving, isEmpty);
+      });
+
+      test('does not miss a change announced while saving', () async {
+        final milk = TodoItem(description: 'Buy milk');
+        final bread = TodoItem(
+            description: 'Buy bread',
+            isCompleted: true,
+            completionDate: DateTime(2026, 11, 9));
+        final announcingTodo = _AnnouncingRepository(TodoFile([milk]));
+        notifier = TodoListNotifier(announcingTodo, doneRepository);
+        await notifier.loadTasks();
+        announcingTodo.afterAnnouncing =
+            () => doneRepository.save(TodoFile([bread]));
+
+        await notifier.toggleTask(milk);
+        await pumpEventQueue();
+
+        expect(notifier.doneFile!.items, [bread]);
+      });
+
+      test('keeps the restored task out of the completed list while it is being saved',
+          () async {
+        final milk = TodoItem(
+            description: 'Buy milk',
+            isCompleted: true,
+            completionDate: DateTime(2026, 11, 9));
+        final announcingTodo = _AnnouncingRepository();
+        doneRepository = InMemoryTodoRepository(TodoFile([milk]));
+        notifier = TodoListNotifier(announcingTodo, doneRepository);
+        await notifier.loadTasks();
+        List<TodoItem>? shownWhileSaving;
+        announcingTodo.afterAnnouncing =
+            () => shownWhileSaving ??= notifier.doneFile!.items;
+
+        await notifier.uncompleteTask(milk);
+
+        expect(shownWhileSaving, isEmpty);
+      });
+
+      test('keeps following changes on disk after a save fails', () async {
+        final milk = TodoItem(description: 'Buy milk');
+        final bread = TodoItem(description: 'Buy bread');
+        repository = InMemoryTodoRepository(TodoFile([milk]));
+        notifier = TodoListNotifier(repository, _FailingSaveRepository());
+        await notifier.loadTasks();
+        await expectLater(
+            notifier.toggleTask(milk), throwsA(isA<FileSystemException>()));
+
+        await repository.save(TodoFile([milk, bread]));
+        repository.announceChange();
+        await pumpEventQueue();
+
+        expect(notifier.todoFile!.items, [milk, bread]);
+      });
+    });
+
     group('changes made by another device', () {
       test('completing a task keeps the tasks another device added meanwhile',
           () async {
@@ -1913,5 +2017,26 @@ class _PausedLoadRepository implements TodoRepository {
   void resumeLoads() {
     _loadsPaused.complete();
     _loadsPaused = Completer<void>()..complete();
+  }
+}
+
+class _AnnouncingRepository extends InMemoryTodoRepository {
+  void Function() afterAnnouncing = () {};
+
+  _AnnouncingRepository([super.initial]);
+
+  @override
+  Future<void> save(TodoFile todoFile) async {
+    await super.save(todoFile);
+    announceChange();
+    await pumpEventQueue();
+    afterAnnouncing();
+  }
+}
+
+class _FailingSaveRepository extends InMemoryTodoRepository {
+  @override
+  Future<void> save(TodoFile todoFile) async {
+    throw const FileSystemException('save failed');
   }
 }
