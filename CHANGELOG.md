@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.15.1] - 2026-11-09
+
+### Fixed
+
+- Completing a task could leave it in `todo.txt` as well as in `done.txt`, so it stayed in the list, a second tap added it to `done.txt` twice and it came back on the other devices. It happened when the app noticed the change to `done.txt` and reloaded before saving `todo.txt`. Undoing a completion had the same problem the other way round
+
 ## [1.15.0] - 2026-10-28
 
 ### Added
